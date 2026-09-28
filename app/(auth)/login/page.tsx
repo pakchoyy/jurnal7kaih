@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { getRoleRedirect } from '@/lib/utils'
+import { getRoleRedirect, toAuthPassword } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthShell } from '@/components/ui/AuthShell'
@@ -31,7 +31,10 @@ function LoginForm() {
 
   async function signIn(email: string, password: string) {
     const supabase = createClient()
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: tab === 'parent' ? toAuthPassword(password) : password,
+    })
     if (signInError || !data.user) {
       setError(
         tab === 'parent'

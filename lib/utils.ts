@@ -30,6 +30,12 @@ export function isValidNIS(nis: string): boolean {
   return /^[A-Za-z0-9.-]{1,30}$/.test(nis)
 }
 
+// Supabase mewajibkan password ≥ 6 karakter, padahal password awal ortu = NIS
+// yang bisa lebih pendek. Password ≥ 6 tidak diubah, jadi password pilihan user aman.
+export function toAuthPassword(password: string): string {
+  return password.length >= 6 ? password : `${password}#7kaih`
+}
+
 /** Tanggal lokal dalam format YYYY-MM-DD. */
 export function todayISO(date = new Date()): string {
   const y = date.getFullYear()

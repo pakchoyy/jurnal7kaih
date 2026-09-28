@@ -1,5 +1,6 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { toAuthPassword } from '@/lib/utils'
 
 // NIS hanya unik per sekolah, jadi kode sekolah wajib ikut di email login.
 export function parentEmail(nis: string, schoolCode: string): string {
@@ -18,13 +19,10 @@ export async function ensureParentAccount(
   if (!uid) {
     const { data, error } = await admin.auth.admin.createUser({
       email,
-      password: p.nis,
+      password: toAuthPassword(p.nis),
       email_confirm: true,
     })
     if (error) {
-      if (error.message.toLowerCase().includes('password')) {
-        return `Akun ortu ${p.studentName} gagal dibuat: NIS terlalu pendek untuk jadi password (atur "Minimum password length" di Supabase)`
-      }
       return `Akun ortu ${p.studentName} gagal dibuat: ${error.message}`
     }
     uid = data.user.id
