@@ -89,6 +89,17 @@ export function formatDateID(iso: string): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+/** Redirect URL berdasarkan role setelah login. */
+export function getRoleRedirect(role?: string | null): string {
+  switch (role) {
+    case 'parent': return '/beranda'
+    case 'teacher': return '/teacher-dashboard'
+    case 'school_admin': return '/admin-dashboard'
+    case 'super_admin': return '/sekolah'
+    default: return '/login'
+  }
+}
+
 /** Sisa hari menuju tanggal (bisa negatif bila lewat). */
 export function daysUntil(iso: string): number {
   const d = new Date(iso)

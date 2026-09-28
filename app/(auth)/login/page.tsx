@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/schemas/auth'
+import { getRoleRedirect } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthShell } from '@/components/ui/AuthShell'
@@ -32,14 +33,21 @@ function LoginForm() {
 
     setLoading(true)
     const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword(parsed.data)
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword(parsed.data)
     setLoading(false)
 
-    if (signInError) {
+    if (signInError || !signInData.user) {
       setError('Email atau password salah')
       return
     }
-    router.push('/beranda')
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', signInData.user.id)
+      .single()
+
+    router.push(getRoleRedirect(profile?.role))
     router.refresh()
   }
 
