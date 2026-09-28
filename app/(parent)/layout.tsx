@@ -32,7 +32,7 @@ export default async function ParentLayout({ children }: { children: React.React
     <div className="min-h-dvh bg-bg pb-24" style={themeVars(school?.theme_color)}>
       <AppHeader
         title={school?.name ?? 'SiHebat'}
-        subtitle="SiHebat · Jurnal 7 Kebiasaan"
+        subtitle="SiHebat · Jurnal Digital 7 Kebiasaan Anak"
         logoUrl={school?.logo_url}
         homeHref="/beranda"
         menu={[

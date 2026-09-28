@@ -5,6 +5,7 @@ import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ChildSwitcher } from '@/components/parent/ChildSwitcher'
 import { getChildren } from '@/lib/activeChild'
 import { PushToggle } from '@/components/push/PushToggle'
+import { FloatingHabits } from '@/components/ui/FloatingHabits'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -83,12 +84,13 @@ export default async function BerandaPage() {
       <header className="relative overflow-hidden bg-grad-blue px-5 pb-7 pt-6 text-white">
         <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/[.07]" />
         <div className="pointer-events-none absolute -bottom-6 left-8 h-20 w-20 rounded-full bg-white/[.05]" />
+        <FloatingHabits opacity="opacity-20" />
 
         <div className="relative">
           {active && children.length > 1 ? (
             <ChildSwitcher items={children.map((c) => ({ id: c.id, name: c.name }))} activeId={active.id} />
           ) : null}
-          <p className="text-sm font-medium opacity-85">Jurnal anak:</p>
+          <p className="text-sm font-medium opacity-85"><span className="wave">👋</span> Jurnal anak:</p>
           <h1 className="mb-4 text-xl font-black">
             {active?.name ?? profile?.name ?? 'Orang Tua Hebat'}
             {active?.className ? <span className="ml-2 text-sm font-semibold opacity-80">Kelas {active.className}</span> : null}
@@ -111,7 +113,7 @@ export default async function BerandaPage() {
             </div>
             <div className="text-right">
               <p className="text-xs font-medium opacity-80">Berturut</p>
-              <p className="font-display text-lg font-black text-brand-yellow">🔥 {streak}</p>
+              <p className="font-display text-lg font-black text-brand-yellow"><span className="flicker">🔥</span> {streak}</p>
             </div>
           </div>
         </div>
@@ -140,8 +142,8 @@ export default async function BerandaPage() {
             {/* Tombol isi jurnal */}
             <Link
               href="/jurnal/isi"
-              className={`mb-5 flex items-center justify-between rounded-card p-4 shadow-soft transition active:scale-[.99] ${
-                todayDone ? 'bg-brand-green text-white' : 'bg-brand-yellow text-brand-dark'
+              className={`pressable mb-5 flex items-center justify-between rounded-card p-4 shadow-soft ${
+                todayDone ? 'bg-brand-green text-white' : 'pulse-ring bg-brand-yellow text-brand-dark'
               }`}
             >
               <div>
@@ -152,7 +154,7 @@ export default async function BerandaPage() {
                   {todayDone ? 'Ketuk untuk melihat / ubah' : 'Yuk lengkapi 7 kebiasaan anak'}
                 </p>
               </div>
-              <span className="text-3xl">{todayDone ? '✅' : '📝'}</span>
+              <span className={`text-3xl ${todayDone ? '' : 'float-y'}`}>{todayDone ? '✅' : '📝'}</span>
             </Link>
 
             <div className="mb-5">

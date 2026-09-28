@@ -89,7 +89,7 @@ function LoginForm() {
   return (
     <AuthShell
       title="Masuk"
-      subtitle="7 Kebiasaan Anak Indonesia Hebat"
+      subtitle="Aplikasi Jurnal Digital 7 Kebiasaan Anak Indonesia Hebat"
       footer={
         tab === 'teacher' ? (
           <p className="text-sm text-ink-2">

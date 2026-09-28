@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { usePwaInstall } from './usePwaInstall'
 
-const DISMISS_KEY = 'pwa-install-dismissed-at'
-const DISMISS_DAYS = 7
-const PARENT_PATHS = ['/beranda', '/jurnal', '/riwayat', '/profil']
+// Muncul lagi setiap kali browser dibuka sampai aplikasi terpasang,
+// tapi cukup sekali per sesi agar tidak mengganggu.
+const DISMISS_KEY = 'pwa-install-dismissed'
+const NO_NAV_PATHS = ['/login', '/daftar-trial', '/rapor', '/kepsek']
 
-function recentlyDismissed() {
+function dismissedThisSession() {
   try {
-    const at = Number(localStorage.getItem(DISMISS_KEY) ?? 0)
-    return Date.now() - at < DISMISS_DAYS * 86400000
+    return sessionStorage.getItem(DISMISS_KEY) === '1'
   } catch {
     return false
   }
@@ -31,43 +31,43 @@ export function InstallBanner() {
   const { installed, canPrompt, ios, install } = usePwaInstall()
   const [hidden, setHidden] = useState(true)
 
-  useEffect(() => setHidden(recentlyDismissed()), [])
+  useEffect(() => setHidden(dismissedThisSession()), [])
 
   if (installed || hidden || (!canPrompt && !ios)) return null
 
   function dismiss() {
     try {
-      localStorage.setItem(DISMISS_KEY, String(Date.now()))
+      sessionStorage.setItem(DISMISS_KEY, '1')
     } catch {}
     setHidden(true)
   }
 
-  const aboveNav = PARENT_PATHS.some((p) => pathname.startsWith(p))
+  const aboveNav = !NO_NAV_PATHS.some((p) => pathname.startsWith(p)) && pathname !== '/'
 
   return (
     <div
       className={`fixed inset-x-0 z-50 mx-auto max-w-lg px-3 ${aboveNav ? 'bottom-20' : 'bottom-3'}`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex items-center gap-3 rounded-card bg-brand-dark p-3 text-white shadow-lift">
+      <div className="install-in flex items-center gap-3 rounded-card bg-brand-dark p-3 text-white shadow-lift">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-192.png" alt="" className="h-11 w-11 flex-shrink-0 rounded-xl" />
+        <img src="/icons/icon-192.png" alt="" className="float-y h-11 w-11 flex-shrink-0 rounded-xl" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold">Pasang SiHebat</p>
           <p className="text-xs text-white/75">
-            {ios ? 'Ketuk tombol Bagikan ⎋ lalu “Tambah ke Layar Utama”' : 'Buka lebih cepat dari layar HP, seperti aplikasi'}
+            {ios ? 'Ketuk tombol Bagikan ⎋ lalu “Tambah ke Layar Utama”' : 'Gratis & ringan. Buka langsung dari layar HP seperti aplikasi.'}
           </p>
         </div>
         {!ios && (
           <button
             type="button"
             onClick={install}
-            className="rounded-btn bg-brand-yellow px-3.5 py-2 text-sm font-bold text-brand-dark"
+            className="pulse-ring rounded-btn bg-brand-yellow px-3.5 py-2 text-sm font-bold text-brand-dark"
           >
             Pasang
           </button>
         )}
-        <button type="button" onClick={dismiss} aria-label="Tutup" className="px-1 text-lg text-white/70">
+        <button type="button" onClick={dismiss} aria-label="Nanti saja" className="px-1 text-lg text-white/70">
           ✕
         </button>
       </div>
