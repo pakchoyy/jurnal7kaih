@@ -80,3 +80,8 @@ h1, h2, h3, h4 {
   body { background: #fff; }
   @page { size: A4; margin: 14mm; }
 }
+
+/* Mode huruf besar (ortu lansia) */
+html.big-text body {
+  zoom: 1.15;
+}

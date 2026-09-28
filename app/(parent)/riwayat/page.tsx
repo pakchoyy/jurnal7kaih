@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, formatDateID, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
+import { getChildren } from '@/lib/activeChild'
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Belum dikirim',
@@ -15,14 +16,9 @@ export default async function RiwayatPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: links } = await supabase
-    .from('student_parents')
-    .select('student_id, students(name)')
-    .eq('user_id', user!.id)
-    .limit(1)
-
-  const studentId = links?.[0]?.student_id
-  const studentName = (links?.[0]?.students as unknown as { name: string } | null)?.name ?? 'Siswa'
+  const { active } = await getChildren(supabase, user!.id)
+  const studentId = active?.id
+  const studentName = active?.name ?? 'Siswa'
 
   if (!studentId) {
     return <div className="px-5 py-10 text-center text-base text-ink-2">Akun belum terhubung ke data anak.</div>

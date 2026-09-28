@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/ui/LogoutButton'
 import { initials } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
+import { BigTextToggle } from '@/components/ui/BigTextToggle'
 
 export default async function ProfilPage() {
   const supabase = createServerClient()
@@ -79,9 +80,16 @@ export default async function ProfilPage() {
               })}
             </ul>
           )}
-          <p className="mt-4 text-sm text-ink-3">
-            Punya anak lain di sekolah ini? Login terpisah pakai NIS anak tersebut.
-          </p>
+          <Link
+            href="/profil/tambah-anak"
+            className="mt-4 block rounded-btn border-2 border-brand-blue/30 py-3 text-center text-base font-bold text-brand-blue"
+          >
+            + Tambah Kakak / Adik
+          </Link>
+        </div>
+
+        <div className="mt-4">
+          <BigTextToggle />
         </div>
 
         <div className="mt-4">

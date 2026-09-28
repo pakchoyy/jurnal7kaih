@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { todayISO } from '@/lib/utils'
 import { itemsForHabit } from '@/lib/habitItems'
+import { getChildren } from '@/lib/activeChild'
 import { JurnalForm, type HabitRow, type ExistingEntry } from './JurnalForm'
 
 export default async function IsiJurnalPage() {
@@ -11,14 +12,8 @@ export default async function IsiJurnalPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: links } = await supabase
-    .from('student_parents')
-    .select('student_id, students(name, school_id)')
-    .eq('user_id', user.id)
-    .limit(1)
-
-  const first = links?.[0]
-  if (!first) {
+  const { active } = await getChildren(supabase, user.id)
+  if (!active) {
     return (
       <div className="px-5 py-10 text-center">
         <p className="text-base text-ink-2">Akun belum terhubung ke data anak.</p>
@@ -27,15 +22,15 @@ export default async function IsiJurnalPage() {
     )
   }
 
-  const studentId = first.student_id
-  const student = first.students as unknown as { name: string; school_id: string } | null
+  const studentId = active.id
+  const { data: me } = await supabase.from('users').select('school_id').eq('id', user.id).single()
 
   const [{ data: habits }, { data: schoolItems }, { data: journal }] = await Promise.all([
     supabase.from('habits').select('id, slug, name, icon, color').eq('is_active', true).order('sort_order'),
     supabase
       .from('school_habit_items')
       .select('habit_id, label, sort_order')
-      .eq('school_id', student?.school_id ?? ''),
+      .eq('school_id', me?.school_id ?? ''),
     supabase
       .from('journals')
       .select('id, parent_note')
@@ -61,7 +56,7 @@ export default async function IsiJurnalPage() {
   return (
     <JurnalForm
       studentId={studentId}
-      studentName={student?.name ?? 'Siswa'}
+      studentName={active.name}
       habits={habitRows}
       habitItems={habitItems}
       existingEntries={entries}
