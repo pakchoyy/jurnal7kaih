@@ -4,6 +4,7 @@ import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normaliz
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ChildSwitcher } from '@/components/parent/ChildSwitcher'
 import { getChildren } from '@/lib/activeChild'
+import { PushToggle } from '@/components/push/PushToggle'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -167,6 +168,10 @@ export default async function BerandaPage() {
 
             <div className="mb-5">
               <BadgeShelf best={best} current={streak} compact />
+            </div>
+
+            <div className="mb-5 empty:hidden">
+              <PushToggle hideWhenOn />
             </div>
 
             {/* Preview kebiasaan hari ini */}

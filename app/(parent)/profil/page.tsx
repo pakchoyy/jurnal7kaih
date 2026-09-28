@@ -4,6 +4,7 @@ import LogoutButton from '@/components/ui/LogoutButton'
 import { initials } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
 import { BigTextToggle } from '@/components/ui/BigTextToggle'
+import { PushToggle } from '@/components/push/PushToggle'
 
 export default async function ProfilPage() {
   const supabase = createServerClient()
@@ -86,6 +87,10 @@ export default async function ProfilPage() {
           >
             + Tambah Kakak / Adik
           </Link>
+        </div>
+
+        <div className="mt-4">
+          <PushToggle />
         </div>
 
         <div className="mt-4">
