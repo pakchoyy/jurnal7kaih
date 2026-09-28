@@ -1,6 +1,6 @@
-// Service worker Jurnal 7KAIH: aset statis di-cache, halaman selalu dari jaringan
+// Service worker SiHebat: aset statis di-cache, halaman selalu dari jaringan
 // (data jurnal harus selalu terbaru), fallback ke halaman offline.
-const VERSION = 'v2'
+const VERSION = 'v3'
 const STATIC_CACHE = `static-${VERSION}`
 const OFFLINE_URL = '/offline.html'
 const PRECACHE = [OFFLINE_URL, '/icons/icon-192.png', '/icons/icon-512.png']
@@ -59,7 +59,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data && event.data.text() }
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Jurnal 7KAIH', {
+    self.registration.showNotification(data.title || 'SiHebat', {
       body: data.body || '',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',

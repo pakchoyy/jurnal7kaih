@@ -42,7 +42,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   return (
     <div className="min-h-dvh bg-bg pb-24" style={themeVars(school?.theme_color)}>
       <AppHeader
-        title={school?.name ?? 'Jurnal 7KAIH'}
+        title={school?.name ?? 'SiHebat'}
         subtitle={profile?.name ? `Guru · ${profile.name}` : 'Panel Guru'}
         logoUrl={school?.logo_url}
         badge={badge}

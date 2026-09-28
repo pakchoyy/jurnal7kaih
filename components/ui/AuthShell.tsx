@@ -24,8 +24,10 @@ export function AuthShell({
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[.08]" />
         <div className="pointer-events-none absolute -bottom-12 left-6 h-28 w-28 rounded-full bg-white/[.06]" />
         <div className="relative">
-          <Link href="/" className="font-display text-lg font-black tracking-tight">
-            Jurnal 7Kaih
+          <Link href="/" className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icons/icon-192.png" alt="" className="h-10 w-10 rounded-xl shadow-soft" />
+            SiHebat
           </Link>
           {badge && <div className="mt-3">{badge}</div>}
           <h1 className="mt-3 font-display text-2xl font-black">{title}</h1>

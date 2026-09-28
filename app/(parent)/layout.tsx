@@ -31,8 +31,8 @@ export default async function ParentLayout({ children }: { children: React.React
   return (
     <div className="min-h-dvh bg-bg pb-24" style={themeVars(school?.theme_color)}>
       <AppHeader
-        title={school?.name ?? 'Jurnal 7KAIH'}
-        subtitle="Jurnal 7 Kebiasaan Anak"
+        title={school?.name ?? 'SiHebat'}
+        subtitle="SiHebat · Jurnal 7 Kebiasaan"
         logoUrl={school?.logo_url}
         homeHref="/beranda"
         menu={[

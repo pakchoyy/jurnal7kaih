@@ -52,7 +52,7 @@ export default async function KartuLoginPage({ params }: { params: { id: string 
             <p className="mt-1 font-display text-lg font-black text-ink">{s.name}</p>
             <div className="mt-2 rounded-btn bg-bg p-3 text-sm">
               <p>
-                Buka: <b>{appUrl || 'aplikasi Jurnal 7KAIH'}</b>
+                Buka: <b>{appUrl || 'aplikasi SiHebat'}</b>
               </p>
               <p>
                 Pilih tab: <b>Orang Tua</b>

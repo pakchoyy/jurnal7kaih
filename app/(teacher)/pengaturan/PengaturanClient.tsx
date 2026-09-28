@@ -197,7 +197,7 @@ export default function PengaturanClient({
           <p className="mt-3 text-sm text-ink-2">
             Belum punya kode?{' '}
             <a
-              href={`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Halo, saya ingin membeli lisensi Pro Jurnal 7Kaih')}`}
+              href={`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Halo, saya ingin membeli lisensi Pro SiHebat')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold text-brand-teal underline"

@@ -53,7 +53,7 @@ export function InstallBanner() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icons/icon-192.png" alt="" className="h-11 w-11 flex-shrink-0 rounded-xl" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold">Pasang Jurnal 7KAIH</p>
+          <p className="text-sm font-bold">Pasang SiHebat</p>
           <p className="text-xs text-white/75">
             {ios ? 'Ketuk tombol Bagikan ⎋ lalu “Tambah ke Layar Utama”' : 'Buka lebih cepat dari layar HP, seperti aplikasi'}
           </p>

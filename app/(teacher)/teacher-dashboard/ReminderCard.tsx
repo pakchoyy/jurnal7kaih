@@ -18,7 +18,7 @@ export function ReminderCard({ className, names, total }: { className: string; n
 
   const text =
     `Yth. Bapak/Ibu orang tua kelas ${className} 🙏\n` +
-    `Pengingat jurnal 7 Kebiasaan hari ini.\n` +
+    `Pengingat jurnal 7 Kebiasaan di aplikasi SiHebat hari ini.\n` +
     `Yang belum mengisi:\n` +
     names.map((n, i) => `${i + 1}. ${n}`).join('\n') +
     `\n\nMohon diisi sebelum tidur ya. Terima kasih 😊`
