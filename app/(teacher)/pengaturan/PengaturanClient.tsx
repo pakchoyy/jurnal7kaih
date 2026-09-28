@@ -113,6 +113,18 @@ export default function PengaturanClient({
       {tampilan}
 
       <Link
+        href="/pengaturan/kalender"
+        className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
+      >
+        <span className="text-2xl">📅</span>
+        <span className="flex-1">
+          <span className="block text-base font-bold text-ink">Hari Sekolah & Libur</span>
+          <span className="block text-sm text-ink-3">Senin–Jumat / Senin–Sabtu, tanggal libur</span>
+        </span>
+        <span className="text-ink-3">›</span>
+      </Link>
+
+      <Link
         href="/pengaturan/tim"
         className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
       >

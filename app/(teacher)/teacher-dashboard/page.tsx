@@ -6,6 +6,7 @@ import { FloatingHabits } from '@/components/ui/FloatingHabits'
 
 import { getPeriod, type Range } from '@/lib/period'
 import { PeriodNav } from './PeriodNav'
+import { countSchoolDays, dayOffReason, getSchoolCalendar } from '@/lib/schoolCalendar'
 
 const RANGE_LABEL: Record<Range, string> = {
   today: 'Harian',
@@ -28,9 +29,10 @@ export default async function TeacherDashboard({
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name')
+    .select('name, school_id')
     .eq('id', user!.id)
     .single()
+  const cal = await getSchoolCalendar(supabase, profile?.school_id ?? '')
 
   // Semua kelas milik guru ini
   const { data: allClasses } = await supabase
@@ -63,6 +65,10 @@ export default async function TeacherDashboard({
   const studentIds = (students ?? []).map((s) => s.id)
   const offset = Math.min(520, Math.max(0, parseInt(searchParams.mundur ?? '0', 10) || 0))
   const period = getPeriod(range, offset)
+  const periodEnd = period.end < todayISO() ? period.end : todayISO()
+  const schoolDays = countSchoolDays(period.start, periodEnd, cal)
+  const periodOff = range === 'today' ? dayOffReason(period.start, cal) : null
+  const todayOff = dayOffReason(todayISO(), cal)
   const href = (o: { range?: Range; mundur?: number; kelas?: string | null }) => {
     const q = new URLSearchParams()
     q.set('range', o.range ?? range)
@@ -133,7 +139,9 @@ export default async function TeacherDashboard({
   const totalStudents = students?.length ?? 0
   const submittedJournals = journals?.length ?? 0
   const compliance =
-    totalStudents > 0 ? Math.round((submittedJournals / (totalStudents * period.days)) * 100) : 0
+    totalStudents > 0 && schoolDays > 0
+      ? Math.min(100, Math.round((submittedJournals / (totalStudents * schoolDays)) * 100))
+      : 0
 
   const habitTotal = habits?.length ?? 7
   const denom = Math.max(1, submittedJournals)
@@ -209,7 +217,12 @@ export default async function TeacherDashboard({
           </p>
         )}
 
-        {selectedClass && (
+        {selectedClass && todayOff && (
+          <div className="mb-4 rounded-card bg-sky-50 p-4 text-base font-semibold text-sky-900">
+            🏖️ Hari ini libur ({todayOff}). Orang tua tidak wajib mengisi.
+          </div>
+        )}
+        {selectedClass && !todayOff && (
           <ReminderCard className={selectedClass.name} names={notFilledToday} total={students?.length ?? 0} />
         )}
 
@@ -236,8 +249,13 @@ export default async function TeacherDashboard({
         >
         <div key={`${range}-${offset}`} className="page-enter">
         <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-2">
-          Rekap Per Siswa{range !== 'today' && ` · ${period.days} hari`}
+          Rekap Per Siswa{range !== 'today' && ` · ${schoolDays} hari sekolah`}
         </p>
+        {periodOff && (
+          <p className="mb-2 rounded-btn bg-sky-50 p-3 text-sm font-semibold text-sky-900">
+            🏖️ {periodOff} — hari libur, pengisian tidak wajib.
+          </p>
+        )}
 
         {!students || students.length === 0 ? (
           <div className="rounded-card bg-white p-5 text-center text-sm text-ink-3 shadow-soft">
@@ -248,7 +266,7 @@ export default async function TeacherDashboard({
             {students.map((s) => {
               const doneSet = studentHabits[s.id] ?? new Set<string>()
               const filled = daysFilled[s.id] ?? 0
-              const pct = Math.round((filled / period.days) * 100)
+              const pct = schoolDays ? Math.min(100, Math.round((filled / schoolDays) * 100)) : 0
               return (
                 <li key={s.id}>
                   <Link
@@ -261,8 +279,8 @@ export default async function TeacherDashboard({
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-display text-sm font-extrabold text-ink">{s.name}</p>
                       {range === 'today' ? (
-                        <p className={`text-xs ${filled ? 'text-ink-3' : 'font-semibold text-amber-700'}`}>
-                          {filled ? `${doneSet.size}/${habitTotal} kebiasaan ✓` : 'Belum mengisi'}
+                        <p className={`text-xs ${filled || periodOff ? 'text-ink-3' : 'font-semibold text-amber-700'}`}>
+                          {filled ? `${doneSet.size}/${habitTotal} kebiasaan ✓` : periodOff ? 'Libur' : 'Belum mengisi'}
                         </p>
                       ) : (
                         <div className="mt-1 flex items-center gap-2">
@@ -273,7 +291,7 @@ export default async function TeacherDashboard({
                             />
                           </span>
                           <span className="text-xs font-semibold text-ink-3">
-                            {filled}/{period.days} hari
+                            {filled}/{schoolDays} hari
                           </span>
                         </div>
                       )}

@@ -7,6 +7,7 @@ import { getChildren } from '@/lib/activeChild'
 import { PushToggle } from '@/components/push/PushToggle'
 import { FloatingHabits } from '@/components/ui/FloatingHabits'
 import { ProgressRing } from '@/components/ui/ProgressRing'
+import { dayOffReason, getSchoolCalendar, isSchoolDay } from '@/lib/schoolCalendar'
 
 export default async function BerandaPage() {
   const supabase = createServerClient()
@@ -16,9 +17,13 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name')
+    .select('name, school_id')
     .eq('id', user!.id)
     .single()
+
+  const cal = await getSchoolCalendar(supabase, profile?.school_id ?? '')
+  const offReason = dayOffReason(todayISO(), cal)
+  const schoolDay = (iso: string) => isSchoolDay(iso, cal)
 
   const { children, active } = await getChildren(supabase, user!.id)
   const teacherWA = active?.teacherWA ?? null
@@ -48,8 +53,8 @@ export default async function BerandaPage() {
       .limit(90)
 
     const dates = ((journals ?? []) as Array<{ journal_date: string }>).map((j) => j.journal_date)
-    streak = calculateStreak(dates)
-    best = bestStreak(dates)
+    streak = calculateStreak(dates, new Date(), schoolDay)
+    best = bestStreak(dates, schoolDay)
     todayDone = dates.includes(todayISO())
 
     // Ambil jurnal hari ini + entry untuk progress
@@ -128,6 +133,17 @@ export default async function BerandaPage() {
         ) : (
           <>
             {/* Tombol isi jurnal */}
+            {offReason && !todayDone ? (
+              <div className="mb-5 rounded-card bg-sky-50 p-4 shadow-soft">
+                <p className="font-display text-lg font-black text-sky-900">
+                  <span className="float-y inline-block">🏖️</span> Hari ini libur
+                </p>
+                <p className="text-sm text-sky-900/80">{offReason} · tidak wajib mengisi jurnal. Streak tetap aman.</p>
+                <Link href="/jurnal/isi" className="mt-2 inline-block text-sm font-bold text-sky-800 underline">
+                  Tetap isi jurnal (opsional)
+                </Link>
+              </div>
+            ) : (
             <Link
               href="/jurnal/isi"
               className={`pressable mb-5 flex items-center justify-between rounded-card p-4 shadow-soft ${
@@ -144,6 +160,7 @@ export default async function BerandaPage() {
               </div>
               <span className={`text-3xl ${todayDone ? '' : 'float-y'}`}>{todayDone ? '✅' : '📝'}</span>
             </Link>
+            )}
 
             <div className="mb-5">
               <BadgeShelf best={best} current={streak} compact />

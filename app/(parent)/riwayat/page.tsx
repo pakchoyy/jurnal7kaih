@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, formatDateID, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { getChildren } from '@/lib/activeChild'
+import { countSchoolDays, getSchoolCalendar, holidayOn, isSchoolDay } from '@/lib/schoolCalendar'
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Belum dikirim',
@@ -26,6 +27,10 @@ export default async function RiwayatPage() {
 
   const today = todayISO()
   const from30 = shiftISO(today, -29)
+  const { data: me } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
+  const cal = await getSchoolCalendar(supabase, me?.school_id ?? '')
+  const schoolDay = (iso: string) => isSchoolDay(iso, cal)
+  const schoolDays30 = Math.max(1, countSchoolDays(from30, today, cal))
 
   const [{ data: journals }, { data: habits }] = await Promise.all([
     supabase
@@ -38,8 +43,8 @@ export default async function RiwayatPage() {
   ])
 
   const submitted = (journals ?? []).filter((j) => j.status !== 'draft').map((j) => j.journal_date)
-  const streak = calculateStreak(submitted)
-  const best = bestStreak(submitted)
+  const streak = calculateStreak(submitted, new Date(), schoolDay)
+  const best = bestStreak(submitted, schoolDay)
 
   const recentIds = (journals ?? [])
     .filter((j) => j.status !== 'draft' && j.journal_date >= from30)
@@ -55,9 +60,9 @@ export default async function RiwayatPage() {
 
   const days = Array.from({ length: 30 }, (_, i) => {
     const date = shiftISO(from30, i)
-    return { date, done: submitted.includes(date) }
+    return { date, done: submitted.includes(date), off: !schoolDay(date), holiday: holidayOn(date, cal)?.name }
   })
-  const filledCount = days.filter((d) => d.done).length
+  const filledCount = days.filter((d) => d.done && !d.off).length
 
   return (
     <div>
@@ -73,8 +78,10 @@ export default async function RiwayatPage() {
             <p className="mt-0.5 text-sm text-ink-3">Hari berturut-turut</p>
           </div>
           <div className="rounded-card bg-white p-4 text-center shadow-soft">
-            <p className="font-display text-3xl font-black text-brand-green">{filledCount}/30</p>
-            <p className="mt-0.5 text-sm text-ink-3">Hari terisi</p>
+            <p className="font-display text-3xl font-black text-brand-green">
+              {filledCount}/{schoolDays30}
+            </p>
+            <p className="mt-0.5 text-sm text-ink-3">Hari sekolah terisi</p>
           </div>
         </div>
 
@@ -95,7 +102,7 @@ export default async function RiwayatPage() {
           <div className="flex flex-col gap-3">
             {(habits ?? []).map((h) => {
               const count = doneByHabit[h.id] ?? 0
-              const pct = Math.round((count / 30) * 100)
+              const pct = Math.min(100, Math.round((count / schoolDays30) * 100))
               return (
                 <div key={h.id}>
                   <div className="mb-1 flex items-center justify-between text-sm">
@@ -119,8 +126,8 @@ export default async function RiwayatPage() {
             {days.map((d) => (
               <div
                 key={d.date}
-                title={formatDateID(d.date)}
-                className={`aspect-square rounded-md ${d.done ? 'bg-brand-green' : 'bg-line'} ${d.date === today ? 'ring-2 ring-brand-blue ring-offset-1' : ''}`}
+                title={`${formatDateID(d.date)}${d.holiday ? ` · ${d.holiday}` : d.off ? ' · libur' : ''}`}
+                className={`aspect-square rounded-md ${d.done ? 'bg-brand-green' : d.off ? 'bg-sky-100' : 'bg-line'} ${d.date === today ? 'ring-2 ring-brand-blue ring-offset-1' : ''}`}
               />
             ))}
           </div>
@@ -130,6 +137,9 @@ export default async function RiwayatPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-3 w-3 rounded-sm bg-line" /> Kosong
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-sm bg-sky-100" /> Libur
             </span>
           </div>
         </div>
