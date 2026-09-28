@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import { calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
+import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
+import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -11,9 +12,11 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, password_changed')
+    .select('name, password_changed, schools(name, logo_url)')
     .eq('id', user!.id)
     .single()
+
+  const school = profile?.schools as unknown as { name: string; logo_url: string | null } | null
 
   const { data: links } = await supabase
     .from('student_parents')
@@ -33,6 +36,7 @@ export default async function BerandaPage() {
 
   const firstChild = children[0]?.id
   let streak = 0
+  let best = 0
   let todayDone = false
   let doneCount = 0
 
@@ -56,6 +60,7 @@ export default async function BerandaPage() {
 
     const dates = ((journals ?? []) as Array<{ journal_date: string }>).map((j) => j.journal_date)
     streak = calculateStreak(dates)
+    best = bestStreak(dates)
     todayDone = dates.includes(todayISO())
 
     // Ambil jurnal hari ini + entry untuk progress
@@ -92,7 +97,16 @@ export default async function BerandaPage() {
         <div className="pointer-events-none absolute -bottom-6 left-8 h-20 w-20 rounded-full bg-white/[.05]" />
 
         <div className="relative">
-          <p className="text-xs font-medium opacity-80">Selamat datang,</p>
+          {school?.name && (
+            <div className="mb-3 flex items-center gap-2">
+              {school.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={school.logo_url} alt="" className="h-8 w-8 rounded-lg bg-white object-contain p-0.5" />
+              )}
+              <span className="truncate text-sm font-semibold opacity-90">{school.name}</span>
+            </div>
+          )}
+          <p className="text-sm font-medium opacity-85">Selamat datang,</p>
           <h1 className="mb-4 text-xl font-black">{profile?.name ?? 'Orang Tua Hebat'}</h1>
 
           <div className="flex items-center gap-3 rounded-[14px] border border-white/20 bg-white/15 p-3 backdrop-blur-sm">
@@ -157,6 +171,10 @@ export default async function BerandaPage() {
               </div>
               <span className="text-2xl">{todayDone ? '✅' : '📝'}</span>
             </Link>
+
+            <div className="mb-5">
+              <BadgeShelf best={best} current={streak} compact />
+            </div>
 
             {/* Preview kebiasaan hari ini */}
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">

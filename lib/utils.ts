@@ -36,12 +36,22 @@ export function toAuthPassword(password: string): string {
   return password.length >= 6 ? password : `${password}#7kaih`
 }
 
-/** Tanggal lokal dalam format YYYY-MM-DD. */
+// Server Vercel berjalan di UTC; tanggal jurnal harus mengikuti waktu Indonesia.
+const jakartaDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Jakarta',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
 export function todayISO(date = new Date()): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return jakartaDate.format(date)
+}
+
+/** Geser tanggal YYYY-MM-DD sejumlah hari (bebas zona waktu). */
+export function shiftISO(iso: string, days: number): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10)
 }
 
 /**
@@ -50,20 +60,28 @@ export function todayISO(date = new Date()): string {
  */
 export function calculateStreak(submittedDates: string[], today = new Date()): number {
   const set = new Set(submittedDates)
+  let cursor = todayISO(today)
+  if (!set.has(cursor)) cursor = shiftISO(cursor, -1)
   let streak = 0
-  const cursor = new Date(today)
-  cursor.setHours(0, 0, 0, 0)
-
-  if (!set.has(todayISO(cursor))) {
-    cursor.setDate(cursor.getDate() - 1)
-  }
-
-  while (set.has(todayISO(cursor))) {
+  while (set.has(cursor)) {
     streak++
-    cursor.setDate(cursor.getDate() - 1)
+    cursor = shiftISO(cursor, -1)
   }
-
   return streak
+}
+
+/** Rekor hari berturut-turut terpanjang. */
+export function bestStreak(submittedDates: string[]): number {
+  const sorted = Array.from(new Set(submittedDates)).sort()
+  let best = 0
+  let run = 0
+  let prev = ''
+  for (const d of sorted) {
+    run = prev && shiftISO(prev, 1) === d ? run + 1 : 1
+    best = Math.max(best, run)
+    prev = d
+  }
+  return best
 }
 
 /** Warna latar tipis (light) untuk badge habit. */
@@ -104,7 +122,7 @@ export function initials(name: string): string {
 export function formatDateID(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 }
 
 /** Redirect URL berdasarkan role setelah login. */

@@ -25,26 +25,32 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const [newName, setNewName] = useState('')
   const [newPlan, setNewPlan] = useState<'trial' | 'semester' | 'annual'>('semester')
-  const [newPhone, setNewPhone] = useState('')
 
   const activeCount = schools.filter((s) => s.active_until && daysUntil(s.active_until) > 0).length
   const trialCount = schools.filter((s) => s.plan === 'trial').length
   const expiredCount = schools.filter((s) => !s.active_until || daysUntil(s.active_until) <= 0).length
 
-  async function handleAddSchool(e: React.FormEvent) {
+  async function handleAddSchool(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+    const form = new FormData(e.currentTarget)
     setLoading('add')
-    const res = await createSchoolManual(newName, newPlan, newPhone)
+    const res = await createSchoolManual(
+      {
+        schoolName: String(form.get('schoolName') ?? ''),
+        adminName: String(form.get('adminName') ?? ''),
+        email: String(form.get('email') ?? ''),
+        password: String(form.get('password') ?? ''),
+        phone: String(form.get('phone') ?? ''),
+      },
+      newPlan,
+    )
     setLoading(null)
     if (!res.ok) {
       setError(res.error ?? 'Gagal menambah sekolah')
       return
     }
-    setNewName('')
-    setNewPhone('')
     setShowAddModal(false)
     router.refresh()
   }
@@ -91,7 +97,7 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
         <div className="mb-5 rounded-card border border-brand-blue/30 bg-white p-5 shadow-lift">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-display text-sm font-black text-brand-blue">
-              Tambah Sekolah Manual (Cadangan)
+              Tambah Sekolah + Akun Guru
             </h3>
             <button
               onClick={() => setShowAddModal(false)}
@@ -101,11 +107,24 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
             </button>
           </div>
           <form onSubmit={handleAddSchool} className="flex flex-col gap-3">
+            <Input name="schoolName" label="Nama Sekolah" placeholder="mis. SMP PGRI 1" required />
+            <Input name="adminName" label="Nama Guru" placeholder="Nama lengkap guru" required />
             <Input
-              label="Nama Sekolah"
-              placeholder="mis. SMP PGRI 1"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
+              name="email"
+              type="email"
+              label="Email Guru (untuk login)"
+              placeholder="guru@email.com"
+              autoComplete="off"
+              required
+            />
+            <Input
+              name="password"
+              type="text"
+              label="Password Awal"
+              placeholder="Minimal 6 karakter"
+              hint="Kirim ke guru, minta diganti setelah login"
+              minLength={6}
+              autoComplete="off"
               required
             />
             <div className="flex flex-col gap-1.5">
@@ -122,12 +141,7 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
                 <option value="annual">Tahunan (1 Tahun)</option>
               </select>
             </div>
-            <Input
-              label="No. WhatsApp (opsional)"
-              placeholder="0812xxxx"
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value)}
-            />
+            <Input name="phone" type="tel" label="No. WhatsApp Guru (opsional)" placeholder="0812xxxx" />
             {error && <p className="text-sm font-semibold text-red-500">{error}</p>}
             <div className="flex gap-2">
               <Button type="submit" disabled={loading === 'add'}>

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 const items = [
   { href: '/beranda', label: 'Beranda', icon: '🏠' },
   { href: '/jurnal', label: 'Jurnal', icon: '📖' },
-  { href: '/riwayat', label: 'Riwayat', icon: '📅' },
+  { href: '/riwayat', label: 'Progres', icon: '🏆' },
   { href: '/profil', label: 'Profil', icon: '👤' },
 ] as const
 
@@ -24,11 +24,11 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors',
+                  'flex flex-col items-center gap-1 py-2.5 text-xs font-bold transition-colors',
                   active ? 'text-brand-blue' : 'text-ink-3',
                 )}
               >
-                <span className="text-xl leading-none">{item.icon}</span>
+                <span className="text-2xl leading-none">{item.icon}</span>
                 {item.label}
               </Link>
             </li>

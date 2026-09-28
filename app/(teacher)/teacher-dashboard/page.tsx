@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { habitColor, initials, todayISO } from '@/lib/utils'
+import { ReminderCard } from './ReminderCard'
 
 type Range = 'today' | 'week' | 'month'
 
@@ -73,6 +74,18 @@ export default async function TeacherDashboard({
         .lte('journal_date', todayISO())
         .neq('status', 'draft')
     : { data: [] }
+
+  const todayStr = todayISO()
+  const { data: todayJournals } = studentIds.length
+    ? await supabase
+        .from('journals')
+        .select('student_id')
+        .in('student_id', studentIds)
+        .eq('journal_date', todayStr)
+        .neq('status', 'draft')
+    : { data: [] as { student_id: string }[] }
+  const filledToday = new Set((todayJournals ?? []).map((j) => j.student_id))
+  const notFilledToday = (students ?? []).filter((s) => !filledToday.has(s.id)).map((s) => s.name)
 
   const journalIds = (journals ?? []).map((j) => j.id)
   const { data: entries } = journalIds.length
@@ -183,6 +196,10 @@ export default async function TeacherDashboard({
           <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
             Kelas {selectedClass?.name}
           </p>
+        )}
+
+        {selectedClass && (
+          <ReminderCard className={selectedClass.name} names={notFilledToday} total={students?.length ?? 0} />
         )}
 
         {/* Filter rentang waktu */}

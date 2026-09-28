@@ -17,9 +17,10 @@ const config: Config = {
         },
         line: '#E5E7EB',
         brand: {
-          blue: '#1A5FBA',
-          'blue-dark': '#133F80',
-          'blue-light': '#E8EFFE',
+          // Warna utama bisa diganti per sekolah lewat CSS variable (lihat lib/theme.ts).
+          blue: 'rgb(var(--brand-rgb) / <alpha-value>)',
+          'blue-dark': 'rgb(var(--brand-dark-rgb) / <alpha-value>)',
+          'blue-light': 'rgb(var(--brand-light-rgb) / <alpha-value>)',
           yellow: '#F5A623',
           teal: '#0EA5A0',
           green: '#10B981',
@@ -55,7 +56,7 @@ const config: Config = {
         row: '0 1px 4px rgba(0,0,0,.05)',
       },
       backgroundImage: {
-        'grad-blue': 'linear-gradient(160deg, #1A5FBA 0%, #133F80 100%)',
+        'grad-blue': 'linear-gradient(160deg, rgb(var(--brand-rgb)) 0%, rgb(var(--brand-dark-rgb)) 100%)',
         'grad-green': 'linear-gradient(160deg, #10B981, #059669)',
         'grad-dark': 'linear-gradient(160deg, #0F172A, #1E293B)',
         'grad-yellow': 'linear-gradient(160deg, #F59E0B, #D97706)',

@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --brand-rgb: 26 95 186;
+  --brand-dark-rgb: 19 63 128;
+  --brand-light-rgb: 232 239 254;
   --brand-blue: #1a5fba;
   --brand-blue-dark: #133f80;
   --brand-yellow: #f5a623;
@@ -46,4 +49,34 @@ h1, h2, h3, h4 {
 }
 .ring-anim {
   animation: ring-dash 0.9s ease-out forwards;
+}
+
+/* Perayaan jurnal lengkap */
+@keyframes confetti-fall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0.8; }
+}
+.confetti-piece {
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+@keyframes celebrate-pop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.celebrate-pop {
+  animation: celebrate-pop 0.45s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece { display: none; }
+  .celebrate-pop, .ring-anim { animation: none; }
+}
+
+/* Cetak rapor */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  @page { size: A4; margin: 14mm; }
 }

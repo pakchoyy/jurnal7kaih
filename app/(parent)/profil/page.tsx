@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/ui/LogoutButton'
 import { initials } from '@/lib/utils'
+import { InstallCard } from '@/components/pwa/InstallPrompt'
 
 export default async function ProfilPage() {
   const supabase = createServerClient()
@@ -81,6 +82,10 @@ export default async function ProfilPage() {
           <p className="mt-4 text-sm text-ink-3">
             Punya anak lain di sekolah ini? Login terpisah pakai NIS anak tersebut.
           </p>
+        </div>
+
+        <div className="mt-4">
+          <InstallCard />
         </div>
 
         <Link
