@@ -160,7 +160,7 @@ export function JurnalForm({
 
         <div className="mt-4 flex items-center gap-3">
           <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/25">
-            <div className="h-full rounded-full bg-white transition-all" style={{ width: `${progress}%` }} />
+            <div className="bar-grow h-full rounded-full bg-white transition-all" style={{ width: `${progress}%` }} />
           </div>
           <span className="font-display text-base font-black">
             {doneCount}/{total}

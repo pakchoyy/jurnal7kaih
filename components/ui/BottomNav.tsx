@@ -32,11 +32,18 @@ export function BottomNav({ items }: { items: NavItem[] }) {
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-2.5 text-xs font-bold transition-colors',
+                  'pressable flex flex-col items-center gap-0.5 pb-2 pt-1.5 text-xs font-bold transition-colors duration-200',
                   active ? 'text-brand-blue' : 'text-ink-2',
                 )}
               >
-                <Icon name={item.icon} className="h-7 w-7" />
+                <span
+                  className={cn(
+                    'flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300',
+                    active ? 'bg-brand-blue-light' : 'bg-transparent',
+                  )}
+                >
+                  <Icon name={item.icon} className={cn('h-6 w-6', active && 'nav-pop')} />
+                </span>
                 {item.label}
               </Link>
             </li>

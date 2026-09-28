@@ -160,7 +160,7 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
           Belum ada sekolah terdaftar.
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="stagger flex flex-col gap-3">
           {schools.map((s) => {
             const diff = s.active_until ? daysUntil(s.active_until) : -1
             const isExpired = diff <= 0

@@ -167,7 +167,7 @@ export default async function BerandaPage() {
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
               Kebiasaan Hari Ini
             </p>
-            <ul className="flex flex-col gap-2">
+            <ul className="stagger flex flex-col gap-2">
               {(habits ?? []).map((h: any) => {
                 const done = entryStatus[h.id] === 'done'
                 return (

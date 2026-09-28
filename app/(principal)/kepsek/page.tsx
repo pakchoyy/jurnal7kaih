@@ -66,7 +66,7 @@ export default async function KepsekDashboard() {
       {stats.length === 0 ? (
         <div className="mb-5 rounded-card bg-white p-5 text-center text-base text-ink-3 shadow-soft">Belum ada kelas.</div>
       ) : (
-        <ul className="mb-5 flex flex-col gap-2">
+        <ul className="stagger mb-5 flex flex-col gap-2">
           {stats
             .slice()
             .sort((a, b) => b.weekPct - a.weekPct)
@@ -80,7 +80,7 @@ export default async function KepsekDashboard() {
                   {c.teacher} · {c.todayCount}/{c.total} isi hari ini
                 </p>
                 <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-line">
-                  <div className="h-full rounded-full bg-brand-blue" style={{ width: `${Math.min(100, c.weekPct)}%` }} />
+                  <div className="bar-grow h-full rounded-full bg-brand-blue" style={{ width: `${Math.min(100, c.weekPct)}%` }} />
                 </div>
               </li>
             ))}
@@ -100,7 +100,7 @@ export default async function KepsekDashboard() {
                 <span className="font-bold text-ink-2">{pct}%</span>
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-line">
-                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
+                <div className="bar-grow h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
               </div>
             </div>
           )

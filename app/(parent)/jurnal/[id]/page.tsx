@@ -63,7 +63,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
           </span>
         </div>
 
-        <ul className="flex flex-col gap-3">
+        <ul className="stagger flex flex-col gap-3">
           {(entries ?? []).map((e: any) => {
             const habit = e.habits as unknown as {
               name: string
@@ -135,7 +135,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
               Catatan Guru
             </p>
-            <ul className="flex flex-col gap-2">
+            <ul className="stagger flex flex-col gap-2">
               {notes.map((n: any) => (
                 <li key={n.id} className="rounded-card border border-brand-blue/15 bg-brand-blue-light p-3.5">
                   <div className="mb-1.5 flex items-center gap-2">

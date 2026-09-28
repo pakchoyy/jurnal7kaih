@@ -56,7 +56,7 @@ export default async function ProfilPage() {
           {(links ?? []).length === 0 ? (
             <p className="text-sm text-ink-3">Belum ada anak.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="stagger flex flex-col gap-3">
               {(links ?? []).map((l: any) => {
                 const st = l.students as {
                   name: string

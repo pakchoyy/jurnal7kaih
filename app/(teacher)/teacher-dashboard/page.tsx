@@ -232,7 +232,7 @@ export default async function TeacherDashboard({
             {classes.length === 0 ? 'Buat kelas dan tambahkan siswa dulu.' : 'Belum ada siswa di kelas ini.'}
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {students.map((s) => {
               const doneSet = studentHabits[s.id] ?? new Set<string>()
               const done = doneSet.size

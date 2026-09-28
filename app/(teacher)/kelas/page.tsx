@@ -47,14 +47,14 @@ export default async function KelasPage() {
               {!isActive && (
                 <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-3">Tahun ajaran lalu</p>
               )}
-        <ul className="flex flex-col gap-3">
+        <ul className="stagger flex flex-col gap-3">
           {group.map((c: any) => {
             const studentCount = Array.isArray(c.students) ? c.students[0]?.count ?? 0 : 0
             return (
               <li key={c.id}>
                 <Link
                   href={`/kelas/${c.id}`}
-                  className="flex items-center gap-3 rounded-card bg-white p-4 shadow-soft transition active:scale-[.99]"
+                  className="flex items-center gap-3 pressable rounded-card bg-white p-4 shadow-soft"
                 >
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-blue-light font-display text-base font-black text-brand-blue">
                     {c.name}

@@ -105,7 +105,7 @@ export default async function RiwayatPage() {
                     <span className="font-bold text-ink-2">{count} hari</span>
                   </div>
                   <div className="h-3 overflow-hidden rounded-full bg-line">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
+                    <div className="bar-grow h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
                   </div>
                 </div>
               )
@@ -136,12 +136,12 @@ export default async function RiwayatPage() {
 
         <div>
           <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-2">Daftar Jurnal</p>
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {(journals ?? []).slice(0, 30).map((j) => (
               <li key={j.id}>
                 <Link
                   href={`/jurnal/${j.id}`}
-                  className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
+                  className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
                 >
                   <span className="font-semibold">{formatDateID(j.journal_date)}</span>
                   <span className="text-sm text-ink-3">{STATUS_LABEL[j.status] ?? j.status}</span>

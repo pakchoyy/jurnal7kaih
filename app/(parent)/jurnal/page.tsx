@@ -49,12 +49,12 @@ export default async function JurnalPage() {
             </Link>
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {journals.map((j) => (
               <li key={j.id}>
                 <Link
                   href={`/jurnal/${j.id}`}
-                  className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
+                  className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
                 >
                   <div>
                     <p className="font-display text-base font-extrabold text-ink">

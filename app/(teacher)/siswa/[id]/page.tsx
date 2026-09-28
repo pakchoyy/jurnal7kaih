@@ -132,12 +132,12 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
         <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
           Riwayat Jurnal
         </p>
-        <ul className="mb-5 flex flex-col gap-2">
+        <ul className="stagger mb-5 flex flex-col gap-2">
           {(journals ?? []).map((j) => (
             <li key={j.id}>
               <Link
                 href={`/siswa/${student.id}/jurnal/${j.id}`}
-                className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
+                className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
               >
                 <span className="font-semibold">{formatDateID(j.journal_date)}</span>
                 <span className="text-sm text-ink-3">{STATUS_LABEL[j.status] ?? j.status} ›</span>

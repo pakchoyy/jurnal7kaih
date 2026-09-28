@@ -30,7 +30,7 @@ export default function TimClient({ members, myId }: { members: Member[]; myId: 
 
   return (
     <div className="flex flex-col gap-4">
-      <ul className="flex flex-col gap-2">
+      <ul className="stagger flex flex-col gap-2">
         {members.map((m) => {
           const active = m.status !== 'inactive'
           return (

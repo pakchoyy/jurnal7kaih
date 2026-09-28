@@ -50,7 +50,7 @@ export default async function TeacherJournalDetail({ params }: { params: { id: s
         </form>
       )}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="stagger flex flex-col gap-2">
         {sorted.map((e) => {
           const info = describeHabitNote(e.habit?.slug ?? '', e.note)
           const ok = e.status === 'done'
