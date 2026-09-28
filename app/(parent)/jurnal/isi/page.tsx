@@ -40,7 +40,13 @@ export default async function IsiJurnalPage() {
   ])
 
   let entries: ExistingEntry[] = []
+  let photoCount = 0
   if (journal) {
+    const { count } = await supabase
+      .from('journal_photos')
+      .select('id', { count: 'exact', head: true })
+      .eq('journal_id', journal.id)
+    photoCount = count ?? 0
     const { data } = await supabase
       .from('journal_entries')
       .select('habit_id, status, note')
@@ -61,6 +67,7 @@ export default async function IsiJurnalPage() {
       habitItems={habitItems}
       existingEntries={entries}
       initialParentNote={journal?.parent_note ?? ''}
+      existingPhotoCount={photoCount}
     />
   )
 }

@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
+import { JournalThread } from '@/components/journal/JournalThread'
+import { JournalPhotos } from '@/components/journal/JournalPhotos'
 import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
 
 export default async function JurnalDetailPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: journal } = await supabase
     .from('journals')
@@ -148,6 +153,16 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
             </ul>
           </div>
         )}
+
+        <JournalPhotos supabase={supabase} journalId={journal.id} canDeleteUserId={user!.id} />
+
+        <JournalThread
+          supabase={supabase}
+          journalId={journal.id}
+          userId={user!.id}
+          title="Pesan dengan Wali Kelas"
+          placeholder="Tulis pesan untuk wali kelas…"
+        />
       </div>
     </div>
   )

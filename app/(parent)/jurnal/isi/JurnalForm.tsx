@@ -3,6 +3,9 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveJournal } from './actions'
+import { uploadFoto } from '@/components/journal/photoActions'
+import { compressImage } from '@/lib/compressImage'
+import { MAX_PHOTOS } from '@/lib/photos'
 import { Button } from '@/components/ui/Button'
 import { Celebration } from '@/components/ui/Celebration'
 import { habitFormComponents } from '@/components/habits'
@@ -30,6 +33,7 @@ interface Props {
   habitItems: Record<string, string[]>
   existingEntries: ExistingEntry[]
   initialParentNote: string
+  existingPhotoCount: number
 }
 
 interface EntryState {
@@ -44,6 +48,7 @@ export function JurnalForm({
   habitItems,
   existingEntries,
   initialParentNote,
+  existingPhotoCount,
 }: Props) {
   const router = useRouter()
 
@@ -65,6 +70,20 @@ export function JurnalForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [celebrate, setCelebrate] = useState<null | 'full' | 'partial'>(null)
+  const [photos, setPhotos] = useState<{ file: File; url: string }[]>([])
+  const photoSlots = MAX_PHOTOS - existingPhotoCount
+
+  async function addPhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).slice(0, photoSlots - photos.length)
+    e.target.value = ''
+    const next = await Promise.all(
+      files.map(async (f) => {
+        const file = await compressImage(f)
+        return { file, url: URL.createObjectURL(file) }
+      }),
+    )
+    setPhotos((prev) => [...prev, ...next])
+  }
 
   const doneCount = Object.values(entries).filter((e) => e.status === 'done').length
   const total = habits.length
@@ -103,11 +122,22 @@ export function JurnalForm({
         note: entries[h.id]?.note ?? {},
       })),
     })
-    setLoading(false)
     if (!result.ok) {
+      setLoading(false)
       setError(result.error ?? 'Gagal menyimpan')
       return
     }
+    for (const p of photos) {
+      const fd = new FormData()
+      fd.set('foto', p.file)
+      const res = await uploadFoto(result.journalId!, fd)
+      if (res.error) {
+        setLoading(false)
+        setError(`Jurnal tersimpan, tapi foto gagal diunggah: ${res.error}`)
+        return
+      }
+    }
+    setLoading(false)
     if (submit) {
       setCelebrate(doneCount === total ? 'full' : 'partial')
       setTimeout(() => {
@@ -243,6 +273,36 @@ export function JurnalForm({
             </div>
           )
         })}
+
+        {photoSlots > 0 && (
+          <div className="rounded-card bg-white p-4 shadow-soft">
+            <p className="mb-1 font-display text-base font-extrabold text-ink">📷 Foto kegiatan (boleh kosong)</p>
+            <p className="mb-3 text-sm text-ink-3">Maksimal {MAX_PHOTOS} foto per hari. Hanya guru kelas yang bisa melihat.</p>
+            <div className="flex flex-wrap gap-2">
+              {photos.map((p, i) => (
+                <div key={p.url} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.url} alt={`Foto ${i + 1}`} className="h-20 w-20 rounded-btn object-cover" />
+                  <button
+                    type="button"
+                    aria-label="Hapus foto"
+                    onClick={() => setPhotos((prev) => prev.filter((x) => x !== p))}
+                    className="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-xs text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {photos.length < photoSlots && (
+                <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-btn border-2 border-dashed border-line text-ink-3">
+                  <span className="text-2xl">＋</span>
+                  <span className="text-xs">Foto</span>
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
+                </label>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="rounded-card bg-white p-4 shadow-soft">
           <label htmlFor="parent-note" className="mb-1.5 block font-display text-base font-extrabold text-ink">
