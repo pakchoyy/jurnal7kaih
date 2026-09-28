@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-blue: #1a5fba;
+  --brand-yellow: #f5a623;
+  --brand-teal: #0ea5a0;
+  --brand-green: #22c55e;
+  --brand-dark: #1a1d2e;
+}
+
+body {
+  color: var(--brand-dark);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-nunito), Nunito, system-ui, sans-serif;
+  font-weight: 800;
+}
