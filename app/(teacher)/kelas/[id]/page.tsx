@@ -35,12 +35,26 @@ export default async function DetailKelasPage({ params }: { params: { id: string
           <h1 className="font-display text-lg font-black text-ink">Kelas {kelas.name}</h1>
           <p className="text-[11px] text-ink-3">Tingkat {kelas.grade} · {academicYearName}</p>
         </div>
-        <Link
-          href={`/kelas/${params.id}/tambah-siswa`}
-          className="rounded-btn bg-brand-blue px-3.5 py-2 text-xs font-bold text-white"
-        >
-          + Siswa
-        </Link>
+        <div className="flex gap-1.5">
+          <a
+            href={`/api/export-siswa?classId=${params.id}`}
+            className="rounded-btn border border-line bg-white px-3 py-2 text-xs font-bold text-ink-2"
+          >
+            ↓ Excel
+          </a>
+          <Link
+            href={`/kelas/${params.id}/import-siswa`}
+            className="rounded-btn border border-line bg-white px-3 py-2 text-xs font-bold text-ink-2"
+          >
+            ↑ Import
+          </Link>
+          <Link
+            href={`/kelas/${params.id}/tambah-siswa`}
+            className="rounded-btn bg-brand-blue px-3.5 py-2 text-xs font-bold text-white"
+          >
+            + Siswa
+          </Link>
+        </div>
       </div>
 
       <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">

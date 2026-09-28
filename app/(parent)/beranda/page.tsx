@@ -17,7 +17,7 @@ export default async function BerandaPage() {
 
   const { data: links } = await supabase
     .from('student_parents')
-    .select('student_id, relationship, students(id, name, class_id)')
+    .select('student_id, relationship, students(id, name, class_id, classes(homeroom_teacher_id, users(name, whatsapp)))')
     .eq('user_id', user!.id)
 
   const children = (links ?? []).map((l: any) => ({
@@ -25,6 +25,11 @@ export default async function BerandaPage() {
     name: (l.students as unknown as { name: string } | null)?.name ?? 'Siswa',
     relationship: l.relationship,
   }))
+
+  // Ambil WA guru dari kelas anak pertama
+  const firstLink = (links ?? [])[0] as any
+  const teacherWA = firstLink?.students?.classes?.users?.whatsapp as string | null
+  const teacherName = firstLink?.students?.classes?.users?.name as string | null
 
   const firstChild = children[0]?.id
   let streak = 0
@@ -187,6 +192,24 @@ export default async function BerandaPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Kontak Wali Kelas */}
+            {teacherWA && (
+              <div className="mt-5 rounded-[12px] border border-line bg-white p-4 shadow-row">
+                <p className="mb-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-3">
+                  Wali Kelas
+                </p>
+                <p className="mb-2 text-sm font-semibold text-ink">{teacherName ?? 'Guru'}</p>
+                <a
+                  href={`https://wa.me/${teacherWA.replace(/\D/g, '')}?text=Halo+Pak/Bu+Guru%2C+saya+orang+tua+siswa+ingin+bertanya.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-btn bg-emerald-500 px-4 py-2 text-sm font-bold text-white"
+                >
+                  <span>💬</span> Hubungi via WA
+                </a>
               </div>
             )}
           </>

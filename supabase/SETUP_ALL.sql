@@ -600,3 +600,14 @@ CREATE POLICY "license_keys_super" ON license_keys FOR ALL USING (
 
 CREATE INDEX IF NOT EXISTS idx_license_keys_key ON license_keys(key);
 CREATE INDEX IF NOT EXISTS idx_license_keys_used ON license_keys(used_by_school_id);
+
+-- ============================================================
+-- Fix: parent bisa baca nama + WA guru di sekolah mereka
+-- ============================================================
+DROP POLICY IF EXISTS "users_select" ON users;
+CREATE POLICY "users_select" ON users FOR SELECT USING (
+  id = auth.uid()
+  OR auth_role() = 'super_admin'
+  OR (auth_role() IN ('school_admin', 'teacher') AND school_id = auth_school_id())
+  OR (auth_role() = 'parent' AND school_id = auth_school_id() AND role IN ('teacher', 'school_admin'))
+);

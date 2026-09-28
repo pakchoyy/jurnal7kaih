@@ -4,6 +4,24 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
+export async function simpanWhatsapp(formData: FormData) {
+  const supabase = createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Tidak terautentikasi' }
+
+  const whatsapp = String(formData.get('whatsapp') ?? '').trim().replace(/\D/g, '')
+  const { error } = await supabase
+    .from('users')
+    .update({ whatsapp: whatsapp || null })
+    .eq('id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/pengaturan')
+  return { ok: true }
+}
+
 export async function pakaiLicenseKey(formData: FormData) {
   const supabase = createServerClient()
   const {
