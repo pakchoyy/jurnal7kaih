@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { habitColor, initials, todayISO } from '@/lib/utils'
 import { ReminderCard } from './ReminderCard'
+import { FloatingHabits } from '@/components/ui/FloatingHabits'
 
 type Range = 'today' | 'week' | 'month'
 
@@ -135,7 +136,8 @@ export default async function TeacherDashboard({
 
   return (
     <div>
-      <header className="bg-grad-dark px-5 pb-6 pt-6 text-white">
+      <header className="relative overflow-hidden bg-grad-dark px-5 pb-6 pt-6 text-white">
+        <FloatingHabits opacity="opacity-15" />
         <p className="text-[11px] opacity-60">Dashboard Guru</p>
         <h1 className="mb-4 font-display text-lg font-black">{profile?.name ?? 'Guru'}</h1>
 
@@ -167,12 +169,14 @@ export default async function TeacherDashboard({
         {classes.length === 0 ? (
           <div className="mb-4 rounded-card bg-white p-5 text-center shadow-soft">
             <p className="text-sm text-ink-2">Belum ada kelas.</p>
-            <Link
-              href="/kelas/buat"
-              className="mt-3 inline-block rounded-btn bg-brand-blue px-4 py-2 text-sm font-bold text-white"
-            >
-              + Buat Kelas Pertama
-            </Link>
+            <div className="mt-3 flex flex-col gap-2">
+              <Link href="/kelas/buat" className="rounded-btn bg-brand-blue px-4 py-3 text-base font-bold text-white">
+                + Buat Kelas Pertama
+              </Link>
+              <Link href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-4 py-3 text-base font-bold text-brand-blue">
+                📥 Import Kelas dari Excel
+              </Link>
+            </div>
           </div>
         ) : classes.length > 1 ? (
           <div className="mb-4">

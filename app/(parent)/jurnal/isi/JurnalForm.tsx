@@ -8,6 +8,7 @@ import { compressImage } from '@/lib/compressImage'
 import { MAX_PHOTOS } from '@/lib/photos'
 import { Button } from '@/components/ui/Button'
 import { Celebration } from '@/components/ui/Celebration'
+import { FloatingHabits } from '@/components/ui/FloatingHabits'
 import { habitFormComponents } from '@/components/habits'
 import { parseHabitNote } from '@/lib/schemas/habits'
 import { cn, habitColor, habitLight, todayISO, formatDateID } from '@/lib/utils'
@@ -154,6 +155,7 @@ export function JurnalForm({
     <div className="pb-6">
       <header className="relative overflow-hidden bg-grad-green px-5 pb-6 pt-6 text-white">
         <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
+        <FloatingHabits opacity="opacity-20" />
         <p className="text-sm font-medium opacity-90">Jurnal {studentName}</p>
         <h1 className="font-display text-2xl font-black">Isi 7 Kebiasaan</h1>
         <p className="mt-0.5 text-sm opacity-85">{formatDateID(todayISO())}</p>

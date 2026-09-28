@@ -51,6 +51,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
           { href: '/teacher-dashboard', label: 'Dashboard', icon: 'home' },
           { href: '/kelas', label: 'Kelas Saya', icon: 'class' },
           { href: '/kelas/buat', label: 'Buat Kelas Baru', icon: 'edit' },
+          { href: '/kelas/import', label: 'Import Kelas (Excel)', icon: 'list' },
           { href: '/siswa', label: 'Semua Siswa', icon: 'users' },
           { href: '/pengaturan/kebiasaan', label: 'Isi Poin Kebiasaan', icon: 'list' },
           { href: '/pengaturan/tim', label: 'Guru & Kepala Sekolah', icon: 'family' },

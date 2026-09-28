@@ -18,7 +18,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'SiHebat — Jurnal 7 Kebiasaan Anak Indonesia Hebat',
+  title: 'SiHebat — Aplikasi Jurnal Digital 7 Kebiasaan Anak Indonesia Hebat',
   applicationName: 'SiHebat',
   appleWebApp: { capable: true, title: 'SiHebat', statusBarStyle: 'default' },
   formatDetection: { telephone: false },

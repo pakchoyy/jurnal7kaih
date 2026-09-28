@@ -2,27 +2,15 @@
 
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ensureParentAccount, isSchoolActive } from '@/lib/parentAccount'
-import { isValidNIS } from '@/lib/utils'
+import { isSchoolActive } from '@/lib/parentAccount'
+import { insertStudents, type ImportTally, type StudentRow } from '@/lib/importStudents'
 
-export interface ImportResult {
-  success: number
-  skipped: number
-  errors: string[]
-}
+export type ImportResult = ImportTally
 
-type Row = { name: string; nis: string; nisn?: string; gender?: string }
+// Klien mengirim per potongan agar tiap panggilan jauh di bawah batas waktu server.
+const MAX_ROWS = 60
 
-const MAX_ROWS = 500
-
-function parseGender(g?: string): 'L' | 'P' | null {
-  const v = (g ?? '').trim().toLowerCase()
-  if (v === 'l' || v.startsWith('laki')) return 'L'
-  if (v === 'p' || v.startsWith('perempuan')) return 'P'
-  return null
-}
-
-export async function importSiswa(classId: string, rows: Row[]): Promise<ImportResult> {
+export async function importSiswa(classId: string, rows: StudentRow[]): Promise<ImportResult> {
   const fail = (msg: string): ImportResult => ({ success: 0, skipped: 0, errors: [msg] })
 
   const supabase = createServerClient()
@@ -42,7 +30,7 @@ export async function importSiswa(classId: string, rows: Row[]): Promise<ImportR
     return fail('Masa aktif habis. Aktifkan lisensi di menu Pengaturan.')
   }
   if (!Array.isArray(rows) || rows.length === 0) return fail('File kosong')
-  if (rows.length > MAX_ROWS) return fail(`Maksimal ${MAX_ROWS} siswa sekali import`)
+  if (rows.length > MAX_ROWS) return fail(`Maksimal ${MAX_ROWS} siswa per kiriman`)
 
   const { data: kelas } = await supabase
     .from('classes')
@@ -52,66 +40,7 @@ export async function importSiswa(classId: string, rows: Row[]): Promise<ImportR
     .maybeSingle()
   if (!kelas) return fail('Kelas tidak ditemukan')
 
-  const admin = createAdminClient()
-  let success = 0
-  let skipped = 0
-  const errors: string[] = []
-
-  for (const [i, row] of rows.entries()) {
-    const line = i + 2
-    const name = String(row.name ?? '').trim()
-    const nis = String(row.nis ?? '').trim()
-    if (!name || !nis) {
-      errors.push(`Baris ${line}: nama/NIS kosong`)
-      skipped++
-      continue
-    }
-    if (!isValidNIS(nis)) {
-      errors.push(`Baris ${line} (${name}): NIS "${nis}" tidak valid`)
-      skipped++
-      continue
-    }
-
-    const { data: student, error: sErr } = await supabase
-      .from('students')
-      .insert({
-        school_id: profile.school_id,
-        class_id: classId,
-        name,
-        student_number: nis,
-        nisn: String(row.nisn ?? '').trim() || null,
-        gender: parseGender(row.gender),
-        status: 'active',
-      })
-      .select('id')
-      .single()
-
-    if (sErr) {
-      skipped++
-      errors.push(
-        sErr.code === '23505'
-          ? `Baris ${line} (${name}): NIS ${nis} sudah terdaftar`
-          : `Baris ${line} (${name}): ${sErr.message}`,
-      )
-      continue
-    }
-
-    const parentErr = await ensureParentAccount(admin, {
-      studentId: student.id,
-      studentName: name,
-      nis,
-      schoolId: profile.school_id,
-      schoolCode,
-    })
-    if (parentErr) {
-      await supabase.from('students').delete().eq('id', student.id)
-      skipped++
-      errors.push(`Baris ${line}: ${parentErr}`)
-      continue
-    }
-
-    success++
-  }
-
-  return { success, skipped, errors }
+  const tally: ImportTally = { success: 0, skipped: 0, errors: [] }
+  await insertStudents(supabase, createAdminClient(), { schoolId: profile.school_id, schoolCode, classId }, rows, tally)
+  return tally
 }

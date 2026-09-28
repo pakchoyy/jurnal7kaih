@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
-    name: 'SiHebat — Jurnal 7 Kebiasaan Anak Indonesia Hebat',
+    name: 'SiHebat — Aplikasi Jurnal Digital 7 Kebiasaan Anak Indonesia Hebat',
     short_name: 'SiHebat',
     description: 'Catat 7 Kebiasaan Anak Indonesia Hebat setiap hari, untuk orang tua dan guru.',
     start_url: '/',

@@ -20,22 +20,35 @@ export default async function KelasPage() {
         <h1 className="font-display text-lg font-black text-ink">Kelas Saya</h1>
         <Link
           href="/kelas/buat"
-          className="rounded-btn bg-brand-blue px-3.5 py-2 text-xs font-bold text-white"
+          className="rounded-btn bg-brand-blue px-3.5 py-2.5 text-sm font-bold text-white"
         >
           + Buat Kelas
         </Link>
       </div>
+      <Link
+        href="/kelas/import"
+        className="pressable mb-4 flex items-center gap-3 rounded-card border-2 border-dashed border-brand-blue/30 bg-white p-4"
+      >
+        <span className="float-y text-2xl">📥</span>
+        <span className="flex-1">
+          <span className="block text-base font-bold text-ink">Import Kelas dari Excel</span>
+          <span className="block text-sm text-ink-3">Banyak kelas & siswa sekaligus, akun ortu otomatis</span>
+        </span>
+        <span className="text-ink-3">›</span>
+      </Link>
 
       {!classes || classes.length === 0 ? (
         <div className="rounded-card bg-white p-8 text-center shadow-soft">
           <p className="text-sm text-ink-2">Belum ada kelas.</p>
           <p className="mt-1 text-xs text-ink-3">Buat kelas pertama untuk mulai input siswa.</p>
-          <Link
-            href="/kelas/buat"
-            className="mt-4 inline-block rounded-btn bg-brand-blue px-5 py-2.5 text-sm font-bold text-white"
-          >
-            Buat Kelas Pertama
-          </Link>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/kelas/buat" className="rounded-btn bg-brand-blue px-5 py-3 text-base font-bold text-white">
+              Buat Kelas Pertama
+            </Link>
+            <Link href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-5 py-3 text-base font-bold text-brand-blue">
+              atau Import dari Excel
+            </Link>
+          </div>
         </div>
       ) : (
         <>

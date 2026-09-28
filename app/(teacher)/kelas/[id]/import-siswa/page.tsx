@@ -1,13 +1,11 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as XLSX from 'xlsx'
 import { importSiswa, type ImportResult } from './actions'
 
 export default function ImportSiswaPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<{ name: string; nis: string; nisn?: string; gender?: string }[]>([])
   const [loading, setLoading] = useState(false)
@@ -33,13 +31,24 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
     reader.readAsArrayBuffer(file)
   }
 
+  const [progress, setProgress] = useState<number | null>(null)
+
   async function handleImport() {
     if (!preview.length) return
     setLoading(true)
-    const res = await importSiswa(params.id, preview)
+    const total: ImportResult = { success: 0, skipped: 0, errors: [] }
+    for (let i = 0; i < preview.length; i += 40) {
+      setProgress(i)
+      const res = await importSiswa(params.id, preview.slice(i, i + 40))
+      total.success += res.success
+      total.skipped += res.skipped
+      total.errors.push(...res.errors.map((e) => e.replace(/^Baris (\d+)/, (_, n) => `Baris ${Number(n) + i}`)))
+      if (res.errors.length === 1 && res.success === 0 && res.skipped === 0) break
+    }
+    setProgress(null)
     setLoading(false)
-    setResult(res)
-    if (res.success > 0) setPreview([])
+    setResult(total)
+    if (total.success > 0) setPreview([])
   }
 
   return (
@@ -110,7 +119,7 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
             disabled={loading}
             className="mt-4 w-full rounded-btn bg-brand-blue py-3 text-sm font-bold text-white disabled:opacity-50"
           >
-            {loading ? `Mengimpor ${preview.length} siswa…` : `Import ${preview.length} Siswa`}
+            {loading ? `Mengimpor ${progress ?? 0}/${preview.length}… jangan tutup halaman` : `Import ${preview.length} Siswa`}
           </button>
         </div>
       )}
