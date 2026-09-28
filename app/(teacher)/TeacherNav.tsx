@@ -5,19 +5,18 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const nav = [
-  { href: '/admin-dashboard', label: 'Dashboard' },
+  { href: '/teacher-dashboard', label: 'Dashboard' },
   { href: '/kelas', label: 'Kelas' },
   { href: '/siswa', label: 'Siswa' },
-  { href: '/guru', label: 'Guru' },
-  { href: '/kode-aktivasi', label: 'Kode Aktivasi' },
+  { href: '/pengaturan', label: 'Pengaturan' },
 ]
 
-export function AdminNav() {
+export default function TeacherNav() {
   const pathname = usePathname()
   return (
     <nav className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line bg-white px-3">
       {nav.map((n) => {
-        const active = pathname.startsWith(n.href)
+        const active = pathname === n.href || pathname.startsWith(n.href + '/')
         return (
           <Link
             key={n.href}

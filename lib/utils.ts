@@ -18,6 +18,24 @@ export function generateActivationCode(length = 8): string {
   return code
 }
 
+/** Nomor WA ke format internasional tanpa simbol: 0812… → 62812… */
+export function normalizeWA(value: string): string {
+  let digits = value.replace(/\D/g, '')
+  if (digits.startsWith('0')) digits = '62' + digits.slice(1)
+  return digits
+}
+
+/** NIS dipakai sebagai bagian email login, jadi batasi karakternya. */
+export function isValidNIS(nis: string): boolean {
+  return /^[A-Za-z0-9.-]{1,30}$/.test(nis)
+}
+
+// Supabase mewajibkan password ≥ 6 karakter, padahal password awal ortu = NIS
+// yang bisa lebih pendek. Password ≥ 6 tidak diubah, jadi password pilihan user aman.
+export function toAuthPassword(password: string): string {
+  return password.length >= 6 ? password : `${password}#7kaih`
+}
+
 /** Tanggal lokal dalam format YYYY-MM-DD. */
 export function todayISO(date = new Date()): string {
   const y = date.getFullYear()
@@ -87,6 +105,16 @@ export function formatDateID(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+/** Redirect URL berdasarkan role setelah login. */
+export function getRoleRedirect(role?: string | null): string {
+  switch (role) {
+    case 'parent': return '/beranda'
+    case 'teacher': return '/teacher-dashboard'
+    case 'super_admin': return '/sekolah'
+    default: return '/login'
+  }
 }
 
 /** Sisa hari menuju tanggal (bisa negatif bila lewat). */

@@ -3,6 +3,7 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { validateHabitNote } from '@/lib/schemas/habits'
 import { todayISO } from '@/lib/utils'
+import { isSchoolActive } from '@/lib/parentAccount'
 
 export interface SaveJournalInput {
   studentId: string
@@ -34,6 +35,9 @@ export async function saveJournal(input: SaveJournalInput): Promise<SaveJournalR
 
   const schoolId = (link.students as unknown as { school_id: string } | null)?.school_id
   if (!schoolId) return { ok: false, error: 'Data sekolah tidak ditemukan' }
+  if (!(await isSchoolActive(supabase, schoolId))) {
+    return { ok: false, error: 'Langganan sekolah sudah berakhir. Hubungi wali kelas.' }
+  }
 
   const journalDate = todayISO()
 

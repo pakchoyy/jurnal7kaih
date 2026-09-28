@@ -20,7 +20,7 @@ const RANGE_LABEL: Record<Range, string> = {
 export default async function TeacherDashboard({
   searchParams,
 }: {
-  searchParams: { range?: string }
+  searchParams: { range?: string; kelas?: string }
 }) {
   const range: Range =
     searchParams.range === 'week' || searchParams.range === 'month' ? searchParams.range : 'today'
@@ -36,13 +36,21 @@ export default async function TeacherDashboard({
     .eq('id', user!.id)
     .single()
 
-  const { data: classes } = await supabase
+  // Semua kelas milik guru ini
+  const { data: allClasses } = await supabase
     .from('classes')
     .select('id, name, grade')
     .eq('homeroom_teacher_id', user!.id)
+    .order('grade')
+    .order('name')
 
-  const classIds = (classes ?? []).map((c) => c.id)
-  const className = classes?.map((c) => c.name).join(', ') || 'Belum ada kelas'
+  const classes = allClasses ?? []
+
+  // Kelas yang dipilih (default: pertama)
+  const selectedClassId = searchParams.kelas ?? classes[0]?.id ?? null
+  const selectedClass = classes.find((c) => c.id === selectedClassId) ?? classes[0] ?? null
+
+  const classIds = selectedClassId ? [selectedClassId] : []
 
   const { data: students } = classIds.length
     ? await supabase
@@ -56,7 +64,6 @@ export default async function TeacherDashboard({
   const studentIds = (students ?? []).map((s) => s.id)
   const start = rangeStart(range)
 
-  // Jurnal dalam rentang + entries
   const { data: journals } = studentIds.length
     ? await supabase
         .from('journals')
@@ -75,11 +82,9 @@ export default async function TeacherDashboard({
         .in('journal_id', journalIds)
     : { data: [] }
 
-  // Map journal -> student
   const journalToStudent: Record<string, string> = {}
   for (const j of journals ?? []) journalToStudent[j.id] = j.student_id
 
-  // Per siswa: set habit_id yang done
   const studentHabits: Record<string, Set<string>> = {}
   for (const e of entries ?? []) {
     const sid = journalToStudent[e.journal_id]
@@ -90,7 +95,6 @@ export default async function TeacherDashboard({
     }
   }
 
-  // Habit breakdown
   const { data: habits } = await supabase
     .from('habits')
     .select('id, slug, name, icon')
@@ -104,7 +108,6 @@ export default async function TeacherDashboard({
 
   const totalStudents = students?.length ?? 0
   const submittedJournals = journals?.length ?? 0
-  // Hari efektif dalam rentang
   const daysInRange = range === 'today' ? 1 : range === 'week' ? 7 : 30
   const compliance =
     totalStudents > 0
@@ -114,46 +117,80 @@ export default async function TeacherDashboard({
   const habitTotal = habits?.length ?? 7
   const denom = Math.max(1, submittedJournals)
 
-  const stats = [
-    { value: submittedJournals, label: 'Jurnal masuk', accent: true },
-    { value: totalStudents, label: 'Total siswa', accent: false },
-    { value: `${Math.min(100, compliance)}%`, label: 'Kepatuhan', accent: true },
-    { value: className, label: 'Kelas diampu', accent: false, small: true },
-  ]
-
   return (
     <div>
-      {/* Header gelap ala mockup screen 3 */}
       <header className="bg-grad-dark px-5 pb-6 pt-6 text-white">
-        <p className="text-[11px] opacity-60">Dashboard Guru · {className}</p>
+        <p className="text-[11px] opacity-60">Dashboard Guru</p>
         <h1 className="mb-4 font-display text-lg font-black">{profile?.name ?? 'Guru'}</h1>
 
-        <div className="grid grid-cols-2 gap-2">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5"
-            >
-              <p
-                className={`font-display font-black leading-tight ${
-                  s.small ? 'text-sm' : 'text-xl'
-                } ${s.accent ? 'text-emerald-300' : 'text-white'}`}
-              >
-                {s.value}
-              </p>
-              <p className="mt-0.5 text-[10px] text-white/55">{s.label}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5">
+            <p className="font-display text-xl font-black leading-tight text-emerald-300">
+              {submittedJournals}
+            </p>
+            <p className="mt-0.5 text-[10px] text-white/55">Jurnal masuk</p>
+          </div>
+          <div className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5">
+            <p className="font-display text-xl font-black leading-tight text-white">
+              {totalStudents}
+            </p>
+            <p className="mt-0.5 text-[10px] text-white/55">Total siswa</p>
+          </div>
+          <div className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5">
+            <p className="font-display text-xl font-black leading-tight text-emerald-300">
+              {Math.min(100, compliance)}%
+            </p>
+            <p className="mt-0.5 text-[10px] text-white/55">Kepatuhan</p>
+          </div>
         </div>
       </header>
 
-      <div className="px-5 py-5">
-        {/* Filter tabs */}
+      <div className="px-5 py-4">
+
+        {/* Pilih kelas (jika lebih dari 1) */}
+        {classes.length === 0 ? (
+          <div className="mb-4 rounded-card bg-white p-5 text-center shadow-soft">
+            <p className="text-sm text-ink-2">Belum ada kelas.</p>
+            <Link
+              href="/kelas/buat"
+              className="mt-3 inline-block rounded-btn bg-brand-blue px-4 py-2 text-sm font-bold text-white"
+            >
+              + Buat Kelas Pertama
+            </Link>
+          </div>
+        ) : classes.length > 1 ? (
+          <div className="mb-4">
+            <p className="mb-1.5 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
+              Pilih Kelas
+            </p>
+            <div className="no-scrollbar flex gap-2 overflow-x-auto">
+              {classes.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/teacher-dashboard?kelas=${c.id}&range=${range}`}
+                  className={`rounded-pill border-[1.5px] px-3.5 py-1.5 text-[11px] font-bold transition ${
+                    selectedClassId === c.id
+                      ? 'border-brand-blue bg-brand-blue text-white'
+                      : 'border-line bg-white text-ink-2'
+                  }`}
+                >
+                  Kelas {c.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="mb-3 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
+            Kelas {selectedClass?.name}
+          </p>
+        )}
+
+        {/* Filter rentang waktu */}
         <div className="mb-4 flex gap-2">
           {(['today', 'week', 'month'] as Range[]).map((r) => (
             <Link
               key={r}
-              href={`/teacher-dashboard?range=${r}`}
+              href={`/teacher-dashboard?range=${r}${selectedClassId ? `&kelas=${selectedClassId}` : ''}`}
               className={`rounded-pill border-[1.5px] px-3.5 py-1.5 text-[11px] font-bold transition ${
                 range === r
                   ? 'border-brand-blue bg-brand-blue text-white'
@@ -172,7 +209,7 @@ export default async function TeacherDashboard({
 
         {!students || students.length === 0 ? (
           <div className="rounded-card bg-white p-5 text-center text-sm text-ink-3 shadow-soft">
-            Belum ada siswa di kelas Anda.
+            {classes.length === 0 ? 'Buat kelas dan tambahkan siswa dulu.' : 'Belum ada siswa di kelas ini.'}
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -215,29 +252,33 @@ export default async function TeacherDashboard({
         )}
 
         {/* Breakdown per kebiasaan */}
-        <p className="mb-3 mt-6 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
-          Kepatuhan Per Kebiasaan · {RANGE_LABEL[range]}
-        </p>
-        <div className="flex flex-col gap-2.5 rounded-card bg-white p-4 shadow-soft">
-          {(habits ?? []).map((h: any) => {
-            const pct = Math.round(((habitCount[h.id] ?? 0) / denom) * 100)
-            return (
-              <div key={h.id} className="flex items-center gap-2.5">
-                <span className="w-6 text-center text-sm">{h.icon}</span>
-                <span className="w-24 flex-shrink-0 truncate text-[11px] font-semibold text-ink-2">
-                  {h.name}
-                </span>
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-line">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{ width: `${Math.min(100, pct)}%`, background: habitColor(h.slug) }}
-                  />
-                </span>
-                <span className="w-9 text-right text-[11px] font-bold text-ink-2">{pct}%</span>
-              </div>
-            )
-          })}
-        </div>
+        {submittedJournals > 0 && (
+          <>
+            <p className="mb-3 mt-6 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
+              Kepatuhan Per Kebiasaan · {RANGE_LABEL[range]}
+            </p>
+            <div className="flex flex-col gap-2.5 rounded-card bg-white p-4 shadow-soft">
+              {(habits ?? []).map((h: any) => {
+                const pct = Math.round(((habitCount[h.id] ?? 0) / denom) * 100)
+                return (
+                  <div key={h.id} className="flex items-center gap-2.5">
+                    <span className="w-6 text-center text-sm">{h.icon}</span>
+                    <span className="w-24 flex-shrink-0 truncate text-[11px] font-semibold text-ink-2">
+                      {h.name}
+                    </span>
+                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+                      <span
+                        className="block h-full rounded-full"
+                        style={{ width: `${Math.min(100, pct)}%`, background: habitColor(h.slug) }}
+                      />
+                    </span>
+                    <span className="w-9 text-right text-[11px] font-bold text-ink-2">{pct}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { registerSchoolSelf } from '@/app/aktivasi-sekolah/actions'
+import { registerSchoolSelf } from './actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthShell } from '@/components/ui/AuthShell'
@@ -19,16 +19,13 @@ export default function DaftarTrialPage() {
     const form = new FormData(e.currentTarget)
 
     setLoading(true)
-    const res = await registerSchoolSelf(
-      {
-        schoolName: String(form.get('schoolName') ?? ''),
-        adminName: String(form.get('adminName') ?? ''),
-        email: String(form.get('email') ?? ''),
-        password: String(form.get('password') ?? ''),
-        phone: String(form.get('phone') ?? ''),
-      },
-      'trial',
-    )
+    const res = await registerSchoolSelf({
+      schoolName: String(form.get('schoolName') ?? ''),
+      adminName: String(form.get('adminName') ?? ''),
+      email: String(form.get('email') ?? ''),
+      password: String(form.get('password') ?? ''),
+      phone: String(form.get('phone') ?? ''),
+    })
     setLoading(false)
 
     if (!res.ok) {
@@ -40,14 +37,14 @@ export default function DaftarTrialPage() {
 
   return (
     <AuthShell
-      gradient="bg-grad-yellow"
+      gradient="bg-grad-teal"
       badge={
-        <span className="inline-block rounded-pill bg-white/25 px-3 py-1 text-xs font-bold text-brand-dark">
+        <span className="inline-block rounded-pill bg-white/25 px-3 py-1 text-xs font-bold text-white">
           ✨ Coba Gratis 14 Hari
         </span>
       }
-      title="Daftar Trial Sekolah"
-      subtitle="Coba semua fitur Jurnal 7Kaih tanpa biaya."
+      title="Daftar Akun Guru"
+      subtitle="Gratis 14 hari, semua fitur. Tanpa kartu kredit."
       footer={
         <p className="text-sm text-ink-2">
           Sudah punya akun?{' '}
@@ -64,12 +61,13 @@ export default function DaftarTrialPage() {
           placeholder="mis. SMP Negeri 1 Contoh"
           required
         />
-        <Input name="adminName" label="Nama Admin Sekolah" placeholder="Nama Anda" required />
+        <Input name="adminName" label="Nama Guru" placeholder="Nama lengkap Anda" autoComplete="name" required />
         <Input
           name="email"
           type="email"
-          label="Email Admin"
-          placeholder="admin@sekolah.sch.id"
+          label="Email"
+          placeholder="nama@email.com"
+          autoComplete="email"
           required
         />
         <Input
@@ -77,9 +75,19 @@ export default function DaftarTrialPage() {
           type="password"
           label="Password"
           placeholder="Minimal 6 karakter"
+          autoComplete="new-password"
+          minLength={6}
           required
         />
-        <Input name="phone" type="tel" label="Nomor WhatsApp (opsional)" placeholder="0812xxxx" />
+        <Input
+          name="phone"
+          type="tel"
+          inputMode="tel"
+          label="Nomor WhatsApp"
+          placeholder="0812xxxxxxxx"
+          hint="Ditampilkan ke orang tua agar mudah menghubungi Anda"
+          required
+        />
 
         {error && (
           <p className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-500">{error}</p>

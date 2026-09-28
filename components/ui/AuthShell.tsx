@@ -34,7 +34,7 @@ export function AuthShell({
       </div>
 
       {/* Card melayang */}
-      <div className="mx-auto -mt-7 max-w-lg px-5">
+      <div className="relative z-10 mx-auto -mt-7 max-w-lg px-5">
         <div className="rounded-modal bg-white p-5 shadow-lift">{children}</div>
         {footer && <div className="py-5 text-center">{footer}</div>}
       </div>

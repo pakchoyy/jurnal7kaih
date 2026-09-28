@@ -14,7 +14,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: request.headers } })
   }
 
-  const response = NextResponse.next({ request: { headers: request.headers } })
+  const pathname = request.nextUrl.pathname
+  let response = NextResponse.next({ request })
 
   try {
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -24,6 +25,7 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           )
@@ -35,8 +37,7 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    const pathname = request.nextUrl.pathname
-    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/aktivasi')
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/daftar-trial')
 
     if (!user && !isAuthRoute) {
       const url = request.nextUrl.clone()
@@ -46,7 +47,7 @@ export async function middleware(request: NextRequest) {
 
     if (user && isAuthRoute) {
       const url = request.nextUrl.clone()
-      url.pathname = '/beranda'
+      url.pathname = '/'
       return NextResponse.redirect(url)
     }
 
