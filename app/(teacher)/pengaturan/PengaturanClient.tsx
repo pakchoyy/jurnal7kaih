@@ -28,10 +28,12 @@ export default function PengaturanClient({
   whatsapp,
   plan,
   activeUntil,
+  tampilan,
 }: {
   whatsapp: string
   plan: string
   activeUntil: string | null
+  tampilan: React.ReactNode
 }) {
   const [wa, setWa] = useState(whatsapp)
   const [waLoading, setWaLoading] = useState(false)
@@ -106,6 +108,8 @@ export default function PengaturanClient({
         </span>
         <span className="text-ink-3">›</span>
       </Link>
+
+      {tampilan}
 
       <div className="mb-4">
         <InstallCard />

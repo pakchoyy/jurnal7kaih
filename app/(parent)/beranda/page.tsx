@@ -12,9 +12,11 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, password_changed')
+    .select('name, password_changed, schools(name, logo_url)')
     .eq('id', user!.id)
     .single()
+
+  const school = profile?.schools as unknown as { name: string; logo_url: string | null } | null
 
   const { data: links } = await supabase
     .from('student_parents')
@@ -95,7 +97,16 @@ export default async function BerandaPage() {
         <div className="pointer-events-none absolute -bottom-6 left-8 h-20 w-20 rounded-full bg-white/[.05]" />
 
         <div className="relative">
-          <p className="text-xs font-medium opacity-80">Selamat datang,</p>
+          {school?.name && (
+            <div className="mb-3 flex items-center gap-2">
+              {school.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={school.logo_url} alt="" className="h-8 w-8 rounded-lg bg-white object-contain p-0.5" />
+              )}
+              <span className="truncate text-sm font-semibold opacity-90">{school.name}</span>
+            </div>
+          )}
+          <p className="text-sm font-medium opacity-85">Selamat datang,</p>
           <h1 className="mb-4 text-xl font-black">{profile?.name ?? 'Orang Tua Hebat'}</h1>
 
           <div className="flex items-center gap-3 rounded-[14px] border border-white/20 bg-white/15 p-3 backdrop-blur-sm">

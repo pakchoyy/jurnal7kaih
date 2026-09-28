@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --brand-rgb: 26 95 186;
+  --brand-dark-rgb: 19 63 128;
+  --brand-light-rgb: 232 239 254;
   --brand-blue: #1a5fba;
   --brand-blue-dark: #133f80;
   --brand-yellow: #f5a623;
