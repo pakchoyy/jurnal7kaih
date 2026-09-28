@@ -9,7 +9,7 @@ export default async function KelasPage() {
 
   const { data: classes } = await supabase
     .from('classes')
-    .select('id, name, grade, students(count)')
+    .select('id, name, grade, students(count), academic_years(name, is_active)')
     .eq('homeroom_teacher_id', user!.id)
     .order('grade')
     .order('name')
@@ -38,8 +38,17 @@ export default async function KelasPage() {
           </Link>
         </div>
       ) : (
+        <>
+        {[true, false].map((isActive) => {
+          const group = classes.filter((c: any) => !!c.academic_years?.is_active === isActive)
+          if (group.length === 0) return null
+          return (
+            <div key={String(isActive)} className="mb-5">
+              {!isActive && (
+                <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-3">Tahun ajaran lalu</p>
+              )}
         <ul className="flex flex-col gap-3">
-          {classes.map((c: any) => {
+          {group.map((c: any) => {
             const studentCount = Array.isArray(c.students) ? c.students[0]?.count ?? 0 : 0
             return (
               <li key={c.id}>
@@ -51,8 +60,10 @@ export default async function KelasPage() {
                     {c.name}
                   </span>
                   <div className="flex-1">
-                    <p className="font-display text-sm font-extrabold text-ink">Kelas {c.name}</p>
-                    <p className="text-[11px] text-ink-3">Tingkat {c.grade}</p>
+                    <p className="font-display text-base font-extrabold text-ink">Kelas {c.name}</p>
+                    <p className="text-sm text-ink-3">
+                      Tingkat {c.grade} · {c.academic_years?.name ?? ''}
+                    </p>
                   </div>
                   <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-ink-2">
                     {studentCount} siswa
@@ -63,6 +74,10 @@ export default async function KelasPage() {
             )
           })}
         </ul>
+            </div>
+          )
+        })}
+        </>
       )}
     </div>
   )

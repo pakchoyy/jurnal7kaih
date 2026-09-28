@@ -40,12 +40,15 @@ export default async function TeacherDashboard({
   // Semua kelas milik guru ini
   const { data: allClasses } = await supabase
     .from('classes')
-    .select('id, name, grade')
+    .select('id, name, grade, academic_years(is_active)')
     .eq('homeroom_teacher_id', user!.id)
     .order('grade')
     .order('name')
 
-  const classes = allClasses ?? []
+  const activeYear = (allClasses ?? []).filter(
+    (c) => (c.academic_years as unknown as { is_active: boolean } | null)?.is_active,
+  )
+  const classes = activeYear.length ? activeYear : allClasses ?? []
 
   // Kelas yang dipilih (default: pertama)
   const selectedClassId = searchParams.kelas ?? classes[0]?.id ?? null
