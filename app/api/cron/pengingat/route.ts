@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       .map(async (s) => {
         const names = pendingByUser.get(s.user_id)!.join(' & ')
         const payload = JSON.stringify({
-          title: 'Jurnal 7 Kebiasaan',
+          title: 'SiHebat',
           body: `Jurnal ${names} hari ini belum diisi. Yuk isi sebelum tidur 😊`,
           url: '/jurnal/isi',
         })

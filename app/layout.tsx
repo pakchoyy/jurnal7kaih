@@ -18,9 +18,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Jurnal 7 Kebiasaan Anak Indonesia Hebat',
-  applicationName: 'Jurnal 7KAIH',
-  appleWebApp: { capable: true, title: 'Jurnal 7KAIH', statusBarStyle: 'default' },
+  title: 'SiHebat — Jurnal 7 Kebiasaan Anak Indonesia Hebat',
+  applicationName: 'SiHebat',
+  appleWebApp: { capable: true, title: 'SiHebat', statusBarStyle: 'default' },
   formatDetection: { telephone: false },
   icons: {
     icon: [{ url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' }],

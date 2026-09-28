@@ -22,7 +22,7 @@ export default async function PrincipalLayout({ children }: { children: React.Re
   return (
     <div className="min-h-dvh bg-bg pb-10" style={themeVars(school?.theme_color)}>
       <AppHeader
-        title={school?.name ?? 'Jurnal 7KAIH'}
+        title={school?.name ?? 'SiHebat'}
         subtitle={`Kepala Sekolah · ${profile.name}`}
         logoUrl={school?.logo_url}
         homeHref="/kepsek"
