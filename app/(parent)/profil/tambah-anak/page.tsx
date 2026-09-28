@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -37,34 +38,53 @@ export default function TambahAnakPage() {
   }
 
   return (
-    <div className="px-5 py-6">
-      <h1 className="text-2xl font-black text-brand-blue">Tambah Anak</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Masukkan kode aktivasi dari sekolah untuk menautkan anak ke akun Anda.
-      </p>
+    <div>
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
+        <Link href="/profil" className="text-xl text-ink-3">
+          ←
+        </Link>
+        <h1 className="text-base font-black text-brand-blue">Tambah Anak</h1>
+      </header>
 
-      <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-4">
-        <Input name="code" label="Kode Aktivasi" placeholder="8 karakter" required className="uppercase" />
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-brand-dark">Hubungan</label>
-          <select
-            name="relationship"
-            defaultValue="Ayah"
-            className="rounded-btn border border-gray-300 px-3 py-2.5 text-base outline-none focus:border-brand-blue"
-          >
-            {relationships.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+      <div className="px-5 py-5">
+        <div className="mb-5 rounded-card bg-grad-blue p-4 text-white shadow-soft">
+          <p className="text-sm font-semibold">🔗 Tautkan anak ke akun Anda</p>
+          <p className="mt-0.5 text-[11px] opacity-80">
+            Masukkan kode aktivasi 8 karakter yang diberikan pihak sekolah.
+          </p>
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        <Button type="submit" size="lg" disabled={loading}>
-          {loading ? 'Menautkan…' : 'Tautkan Anak'}
-        </Button>
-      </form>
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          <Input
+            name="code"
+            label="Kode Aktivasi"
+            placeholder="8 karakter"
+            required
+            className="uppercase tracking-widest"
+          />
+          <div className="flex flex-col gap-1.5">
+            <label className="font-display text-[13px] font-extrabold text-ink">Hubungan</label>
+            <select
+              name="relationship"
+              defaultValue="Ayah"
+              className="w-full rounded-btn border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-blue"
+            >
+              {relationships.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {error && (
+            <p className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-500">{error}</p>
+          )}
+          <Button type="submit" size="lg" block disabled={loading}>
+            {loading ? 'Menautkan…' : 'Tautkan Anak'}
+          </Button>
+        </form>
+      </div>
     </div>
   )
 }

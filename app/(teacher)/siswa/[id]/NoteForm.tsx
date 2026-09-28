@@ -18,19 +18,19 @@ export function NoteForm({
   const [error, setError] = useState<string | null>(null)
 
   return (
-    <div className="rounded-card bg-white p-4 shadow-sm">
-      <label className="mb-1 block text-sm font-medium text-brand-dark">Tambah catatan</label>
+    <div className="rounded-card bg-white p-4 shadow-soft">
       <textarea
-        className="w-full rounded-btn border border-gray-300 p-3 text-sm outline-none focus:border-brand-blue"
+        className="w-full rounded-btn border-[1.5px] border-line p-3 text-sm outline-none placeholder:text-ink-3 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15"
         rows={3}
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Catatan untuk siswa/orang tua…"
       />
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-1 text-sm font-semibold text-red-500">{error}</p>}
       <Button
         type="button"
-        className="mt-2 w-full"
+        block
+        className="mt-2"
         disabled={loading}
         onClick={async () => {
           setError(null)

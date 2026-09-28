@@ -31,8 +31,8 @@ export default async function KodeAktivasiPage() {
   }))
 
   return (
-    <div className="px-5 py-6">
-      <h1 className="mb-4 text-2xl font-black text-brand-blue">Kode Aktivasi Orang Tua</h1>
+    <div className="px-5 py-5">
+      <h1 className="mb-4 font-display text-lg font-black text-ink">Kode Aktivasi Orang Tua</h1>
       <KodeAktivasiClient students={studentOptions} codes={codeRows} />
     </div>
   )

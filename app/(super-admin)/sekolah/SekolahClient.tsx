@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createSchoolManual, extendSchoolLicense } from './actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { daysUntil, formatDateID } from '@/lib/utils'
 
 interface SchoolItem {
   id: string
@@ -24,10 +25,13 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Form state
   const [newName, setNewName] = useState('')
   const [newPlan, setNewPlan] = useState<'trial' | 'semester' | 'annual'>('semester')
   const [newPhone, setNewPhone] = useState('')
+
+  const activeCount = schools.filter((s) => s.active_until && daysUntil(s.active_until) > 0).length
+  const trialCount = schools.filter((s) => s.plan === 'trial').length
+  const expiredCount = schools.filter((s) => !s.active_until || daysUntil(s.active_until) <= 0).length
 
   async function handleAddSchool(e: React.FormEvent) {
     e.preventDefault()
@@ -56,29 +60,42 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
     router.refresh()
   }
 
-  const now = new Date()
-
   return (
-    <div className="px-5 py-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-brand-blue">Monitoring Sekolah & Lisensi</h1>
-          <p className="text-xs text-gray-500">
-            Total {schools.length} sekolah terdaftar (otomatis dari Lynk.id & trial)
-          </p>
+    <div className="px-5 py-5">
+      {/* Statistik ringkas */}
+      <div className="mb-5 grid grid-cols-3 gap-2">
+        <div className="rounded-card bg-white p-3 text-center shadow-soft">
+          <p className="font-display text-2xl font-black text-emerald-500">{activeCount}</p>
+          <p className="text-[10px] text-ink-3">Aktif</p>
         </div>
+        <div className="rounded-card bg-white p-3 text-center shadow-soft">
+          <p className="font-display text-2xl font-black text-brand-yellow">{trialCount}</p>
+          <p className="text-[10px] text-ink-3">Trial</p>
+        </div>
+        <div className="rounded-card bg-white p-3 text-center shadow-soft">
+          <p className="font-display text-2xl font-black text-red-500">{expiredCount}</p>
+          <p className="text-[10px] text-ink-3">Expired</p>
+        </div>
+      </div>
+
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-sm font-extrabold text-ink">
+          Daftar Sekolah ({schools.length})
+        </h2>
         <Button size="sm" onClick={() => setShowAddModal(true)}>
           + Tambah Manual
         </Button>
       </div>
 
       {showAddModal && (
-        <div className="mb-6 rounded-card border border-brand-blue/30 bg-white p-5 shadow-md">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-bold text-brand-blue">Tambah Sekolah Manual (Cadangan)</h2>
+        <div className="mb-5 rounded-card border border-brand-blue/30 bg-white p-5 shadow-lift">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-display text-sm font-black text-brand-blue">
+              Tambah Sekolah Manual (Cadangan)
+            </h3>
             <button
               onClick={() => setShowAddModal(false)}
-              className="text-sm font-bold text-gray-400 hover:text-gray-600"
+              className="text-sm font-bold text-ink-3 hover:text-ink-2"
             >
               ✕
             </button>
@@ -91,12 +108,14 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
               onChange={(e) => setNewName(e.target.value)}
               required
             />
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-brand-dark">Paket Lisensi</label>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-display text-[13px] font-extrabold text-ink">
+                Paket Lisensi
+              </label>
               <select
                 value={newPlan}
                 onChange={(e) => setNewPlan(e.target.value as any)}
-                className="rounded-btn border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+                className="rounded-btn border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-blue"
               >
                 <option value="semester">Semester (6 Bulan)</option>
                 <option value="trial">Trial (14 Hari)</option>
@@ -109,16 +128,12 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
               value={newPhone}
               onChange={(e) => setNewPhone(e.target.value)}
             />
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm font-semibold text-red-500">{error}</p>}
             <div className="flex gap-2">
               <Button type="submit" disabled={loading === 'add'}>
                 {loading === 'add' ? 'Menyimpan…' : 'Simpan Sekolah'}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setShowAddModal(false)}
-              >
+              <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
                 Batal
               </Button>
             </div>
@@ -127,59 +142,58 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
       )}
 
       {schools.length === 0 ? (
-        <p className="mt-5 text-gray-500">Belum ada sekolah terdaftar.</p>
+        <div className="rounded-card bg-white p-6 text-center text-sm text-ink-3 shadow-soft">
+          Belum ada sekolah terdaftar.
+        </div>
       ) : (
         <ul className="flex flex-col gap-3">
           {schools.map((s) => {
-            const activeUntil = s.active_until ? new Date(s.active_until) : null
-            const diffDays = activeUntil
-              ? Math.ceil((activeUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-              : 0
-            const isExpired = diffDays <= 0
+            const diff = s.active_until ? daysUntil(s.active_until) : -1
+            const isExpired = diff <= 0
 
             return (
-              <li
-                key={s.id}
-                className="flex flex-col gap-3 rounded-card bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-brand-dark">{s.name}</span>
-                    <span className="font-mono text-xs text-gray-400">({s.code})</span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        isExpired
-                          ? 'bg-red-100 text-red-600'
-                          : s.plan === 'trial'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-brand-green/15 text-brand-green'
-                      }`}
-                    >
-                      {s.plan?.toUpperCase()} · {isExpired ? 'EXPIRED' : `${diffDays} hari lagi`}
-                    </span>
+              <li key={s.id} className="rounded-card bg-white p-4 shadow-soft">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-sm font-extrabold text-ink">
+                      {s.name}
+                    </p>
+                    <p className="font-mono text-[11px] text-ink-3">{s.code}</p>
                   </div>
-                  <p className="mt-1 text-xs text-gray-400">
-                    Aktif s/d: {activeUntil ? activeUntil.toISOString().slice(0, 10) : '-'} · Email:{' '}
-                    {s.buyer_email || s.phone || '-'}
-                  </p>
+                  <span
+                    className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                      isExpired
+                        ? 'bg-red-100 text-red-600'
+                        : s.plan === 'trial'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-emerald-100 text-emerald-600'
+                    }`}
+                  >
+                    {s.plan?.toUpperCase() ?? '-'} · {isExpired ? 'EXPIRED' : `${diff} hari`}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <p className="mt-1.5 text-[11px] text-ink-3">
+                  {s.active_until ? `Aktif s/d ${formatDateID(s.active_until)}` : 'Tanpa masa aktif'} ·
+                  {' '}{s.buyer_email || s.phone || 'tanpa kontak'}
+                </p>
+
+                <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
                   <button
                     type="button"
                     disabled={loading === s.id}
                     onClick={() => handleExtend(s.id, 6)}
-                    className="rounded-btn border border-brand-blue/30 bg-brand-blue/5 px-3 py-1.5 text-xs font-bold text-brand-blue transition hover:bg-brand-blue hover:text-white disabled:opacity-50"
+                    className="flex-1 rounded-btn border-[1.5px] border-brand-blue/30 bg-brand-blue/5 px-3 py-1.5 font-display text-[11px] font-extrabold text-brand-blue transition hover:bg-brand-blue hover:text-white disabled:opacity-50"
                   >
-                    {loading === s.id ? '…' : '+6 Bulan (1 Semester)'}
+                    {loading === s.id ? '…' : '+6 Bulan'}
                   </button>
                   <button
                     type="button"
                     disabled={loading === s.id}
                     onClick={() => handleExtend(s.id, 12)}
-                    className="rounded-btn border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:border-gray-400 disabled:opacity-50"
+                    className="rounded-btn border-[1.5px] border-line px-3 py-1.5 text-[11px] font-semibold text-ink-2 transition hover:border-ink-3 disabled:opacity-50"
                   >
-                    +1 Thn
+                    +1 Tahun
                   </button>
                 </div>
               </li>

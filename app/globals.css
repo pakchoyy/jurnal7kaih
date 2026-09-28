@@ -4,18 +4,46 @@
 
 :root {
   --brand-blue: #1a5fba;
+  --brand-blue-dark: #133f80;
   --brand-yellow: #f5a623;
   --brand-teal: #0ea5a0;
-  --brand-green: #22c55e;
+  --brand-green: #10b981;
   --brand-dark: #1a1d2e;
+  --bg: #eef2fa;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  color: var(--brand-dark);
+  background: var(--bg);
+  color: #111827;
   font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-nunito), Nunito, system-ui, sans-serif;
   font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Sembunyikan scrollbar untuk nav horizontal (admin/guru) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animasikan ring progress */
+@keyframes ring-dash {
+  from {
+    stroke-dashoffset: var(--ring-circumference);
+  }
+}
+.ring-anim {
+  animation: ring-dash 0.9s ease-out forwards;
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
+import { formatDateID } from '@/lib/utils'
 
 export default async function JurnalPage() {
   const supabase = createServerClient()
@@ -9,57 +10,78 @@ export default async function JurnalPage() {
 
   const { data: links } = await supabase
     .from('student_parents')
-    .select('student_id')
+    .select('student_id, students(name)')
     .eq('user_id', user!.id)
+
   const studentIds = (links ?? []).map((l) => l.student_id)
+  const studentName =
+    (links?.[0]?.students as unknown as { name: string } | null)?.name ?? 'Siswa'
 
   const { data: journals } = studentIds.length
     ? await supabase
         .from('journals')
-        .select('id, journal_date, status, student_id')
+        .select('id, journal_date, status')
         .in('student_id', studentIds)
         .order('journal_date', { ascending: false })
         .limit(30)
     : { data: [] }
 
   return (
-    <div className="px-5 py-6">
-      <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-black text-brand-blue">Jurnal</h1>
+    <div>
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/90 px-5 py-4 backdrop-blur">
+        <div>
+          <h1 className="text-lg font-black text-brand-blue">Jurnal</h1>
+          <p className="text-[11px] text-ink-3">{studentName}</p>
+        </div>
         <Link
           href="/jurnal/isi"
-          className="rounded-btn bg-brand-blue px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-btn bg-brand-blue px-4 py-2 font-display text-xs font-extrabold text-white shadow-soft"
         >
           + Isi
         </Link>
-      </div>
+      </header>
 
-      {!journals || journals.length === 0 ? (
-        <p className="text-gray-500">Belum ada jurnal.</p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {journals.map((j) => (
-            <li key={j.id}>
-              <Link
-                href={`/jurnal/${j.id}`}
-                className="flex items-center justify-between rounded-card bg-white p-4 shadow-sm"
-              >
-                <span className="font-medium">{j.journal_date}</span>
-                <StatusBadge status={j.status} />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="px-5 py-5">
+        {!journals || journals.length === 0 ? (
+          <div className="rounded-card bg-white p-6 text-center shadow-soft">
+            <p className="text-ink-2">Belum ada jurnal.</p>
+            <Link
+              href="/jurnal/isi"
+              className="mt-3 inline-block rounded-btn bg-brand-green px-4 py-2 text-xs font-bold text-white"
+            >
+              Isi Jurnal Hari Ini
+            </Link>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {journals.map((j) => (
+              <li key={j.id}>
+                <Link
+                  href={`/jurnal/${j.id}`}
+                  className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
+                >
+                  <div>
+                    <p className="font-display text-sm font-extrabold text-ink">
+                      {formatDateID(j.journal_date)}
+                    </p>
+                    <p className="text-[11px] text-ink-3">{j.journal_date}</p>
+                  </div>
+                  <StatusBadge status={j.status} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-500',
-    submitted: 'bg-brand-green/15 text-brand-green',
-    reviewed: 'bg-brand-blue/15 text-brand-blue',
+    draft: 'bg-gray-100 text-ink-3',
+    submitted: 'bg-emerald-100 text-emerald-600',
+    reviewed: 'bg-blue-100 text-blue-600',
   }
   const label: Record<string, string> = {
     draft: 'Draft',
@@ -67,7 +89,7 @@ function StatusBadge({ status }: { status: string }) {
     reviewed: 'Ditinjau',
   }
   return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${map[status] ?? ''}`}>
+    <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${map[status] ?? ''}`}>
       {label[status] ?? status}
     </span>
   )

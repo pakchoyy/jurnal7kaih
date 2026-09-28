@@ -4,7 +4,7 @@ export function cn(...classes: Array<string | false | null | undefined>): string
 
 /** Buat kode aktivasi 8 karakter alfanumerik uppercase. */
 export function generateActivationCode(length = 8): string {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // tanpa karakter ambigu O/0/I/1
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let code = ''
   const bytes = new Uint8Array(length)
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
@@ -30,16 +30,12 @@ export function todayISO(date = new Date()): string {
  * Hitung streak: jumlah hari berturut-turut ke belakang (dari hari ini)
  * dengan status submitted/reviewed. Lihat Key Business Logic #5.
  */
-export function calculateStreak(
-  submittedDates: string[],
-  today = new Date(),
-): number {
+export function calculateStreak(submittedDates: string[], today = new Date()): number {
   const set = new Set(submittedDates)
   let streak = 0
   const cursor = new Date(today)
   cursor.setHours(0, 0, 0, 0)
 
-  // Grace: kalau hari ini belum submit, mulai dari kemarin.
   if (!set.has(todayISO(cursor))) {
     cursor.setDate(cursor.getDate() - 1)
   }
@@ -50,4 +46,53 @@ export function calculateStreak(
   }
 
   return streak
+}
+
+/** Warna latar tipis (light) untuk badge habit. */
+export function habitLight(slug: string): string {
+  const map: Record<string, string> = {
+    'bangun-pagi': '#FEF3C7',
+    beribadah: '#EDE9FE',
+    berolahraga: '#D1FAE5',
+    'makan-sehat': '#CFFAFE',
+    'gemar-belajar': '#DBEAFE',
+    bermasyarakat: '#FCE7F3',
+    'tidur-cepat': '#E0E7FF',
+  }
+  return map[slug] ?? '#EEF2FA'
+}
+
+/** Warna utama habit. */
+export function habitColor(slug: string, fallback = '#6B7280'): string {
+  const map: Record<string, string> = {
+    'bangun-pagi': '#F59E0B',
+    beribadah: '#8B5CF6',
+    berolahraga: '#10B981',
+    'makan-sehat': '#06B6D4',
+    'gemar-belajar': '#3B82F6',
+    bermasyarakat: '#EC4899',
+    'tidur-cepat': '#6366F1',
+  }
+  return map[slug] ?? fallback
+}
+
+/** Inisial nama untuk avatar (maks 2 huruf). */
+export function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).slice(0, 2)
+  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || '?'
+}
+
+/** Format tanggal Indonesia: "12 Jun 2025". */
+export function formatDateID(iso: string): string {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return iso
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+/** Sisa hari menuju tanggal (bisa negatif bila lewat). */
+export function daysUntil(iso: string): number {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return 0
+  const now = new Date()
+  return Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 }

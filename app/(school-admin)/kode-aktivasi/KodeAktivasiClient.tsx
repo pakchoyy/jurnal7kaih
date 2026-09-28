@@ -31,11 +31,13 @@ export function KodeAktivasiClient({
   const [loading, setLoading] = useState(false)
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   async function handleGenerate() {
     if (!selectedStudent) return
     setError(null)
     setGeneratedCode(null)
+    setCopied(false)
     setLoading(true)
     const res = await generateActivationCodeAction(selectedStudent)
     setLoading(false)
@@ -49,14 +51,16 @@ export function KodeAktivasiClient({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-card bg-white p-4 shadow-sm">
-        <h2 className="font-bold text-gray-700">Generate Kode Baru</h2>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+    <div className="flex flex-col gap-5">
+      <div className="rounded-card bg-white p-4 shadow-soft">
+        <h2 className="mb-3 font-display text-sm font-extrabold text-ink">Generate Kode Baru</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-brand-dark">Pilih Siswa</label>
+            <label className="mb-1.5 block font-display text-[13px] font-extrabold text-ink">
+              Pilih Siswa
+            </label>
             <select
-              className="w-full rounded-btn border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+              className="w-full rounded-btn border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-blue"
               value={selectedStudent}
               onChange={(e) => setSelectedStudent(e.target.value)}
             >
@@ -72,54 +76,64 @@ export function KodeAktivasiClient({
           </Button>
         </div>
 
-        {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-2 text-sm font-semibold text-red-500">{error}</p>}
+
         {generatedCode && (
-          <div className="mt-3 rounded-btn bg-brand-green/10 p-3 text-center">
-            <p className="text-xs text-gray-500">Kode Berhasil Dibuat:</p>
-            <p className="text-2xl font-black text-brand-green tracking-widest">{generatedCode}</p>
+          <div className="mt-3 rounded-card border border-emerald-200 bg-emerald-50 p-4 text-center">
+            <p className="text-[11px] text-emerald-700">Kode Aktivasi Berhasil Dibuat</p>
+            <p className="my-2 font-display text-3xl font-black tracking-[.35em] text-emerald-600">
+              {generatedCode}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard?.writeText(generatedCode)
+                setCopied(true)
+              }}
+              className="rounded-btn bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white"
+            >
+              {copied ? 'Tersalin ✓' : 'Salin Kode'}
+            </button>
           </div>
+        )}
+        {students.length === 0 && (
+          <p className="mt-2 text-xs text-ink-3">
+            Tambahkan siswa terlebih dahulu di menu Siswa.
+          </p>
         )}
       </div>
 
-      <div className="rounded-card bg-white p-4 shadow-sm">
-        <h2 className="mb-3 font-bold text-gray-700">Daftar Kode Aktivasi</h2>
+      <div>
+        <h2 className="mb-3 font-display text-sm font-extrabold text-ink">Daftar Kode Aktivasi</h2>
         {codes.length === 0 ? (
-          <p className="text-sm text-gray-400">Belum ada kode aktivasi yang dibuat.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-gray-100 text-left text-xs text-gray-400">
-                <tr>
-                  <th className="px-3 py-2">Kode</th>
-                  <th className="px-3 py-2">Siswa</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Kedaluwarsa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {codes.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50">
-                    <td className="px-3 py-2 font-mono font-bold">{c.code}</td>
-                    <td className="px-3 py-2 text-gray-600">{c.student_name}</td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          c.used_at
-                            ? 'bg-gray-100 text-gray-400'
-                            : 'bg-brand-blue/15 text-brand-blue'
-                        }`}
-                      >
-                        {c.used_at ? 'Sudah dipakai' : 'Belum dipakai'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-xs text-gray-400">
-                      {c.expires_at.slice(0, 10)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="rounded-card bg-white p-5 text-center text-sm text-ink-3 shadow-soft">
+            Belum ada kode aktivasi.
           </div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {codes.map((c) => (
+              <li
+                key={c.id}
+                className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3 shadow-row"
+              >
+                <div>
+                  <p className="font-mono font-display text-sm font-black tracking-widest text-ink">
+                    {c.code}
+                  </p>
+                  <p className="text-[11px] text-ink-3">
+                    {c.student_name} · exp {c.expires_at.slice(0, 10)}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                    c.used_at ? 'bg-gray-100 text-ink-3' : 'bg-brand-blue/15 text-brand-blue'
+                  }`}
+                >
+                  {c.used_at ? 'Dipakai' : 'Aktif'}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { parseHabitNote } from '@/lib/schemas/habits'
+import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
 
 export default async function JurnalDetailPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
@@ -13,9 +14,9 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
 
   if (!journal) {
     return (
-      <div className="px-5 py-6">
-        <p className="text-gray-500">Jurnal tidak ditemukan.</p>
-        <Link href="/jurnal" className="text-brand-blue">
+      <div className="px-5 py-8">
+        <p className="text-ink-2">Jurnal tidak ditemukan.</p>
+        <Link href="/jurnal" className="text-sm font-semibold text-brand-blue">
           ← Kembali
         </Link>
       </div>
@@ -34,71 +35,113 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
     .order('created_at', { ascending: false })
 
   const studentName = (journal.students as unknown as { name: string } | null)?.name ?? 'Siswa'
+  const doneCount = (entries ?? []).filter((e: any) => e.status === 'done').length
+  const total = (entries ?? []).length
 
   return (
-    <div className="px-5 py-6">
-      <Link href="/jurnal" className="text-sm text-brand-blue">
-        ← Kembali
-      </Link>
-      <h1 className="mt-2 text-2xl font-black text-brand-blue">{studentName}</h1>
-      <p className="text-gray-500">{journal.journal_date}</p>
-
-      <ul className="mt-5 flex flex-col gap-3">
-        {(entries ?? []).map((e: any) => {
-          const habit = e.habits as unknown as {
-            name: string
-            slug: string
-            icon: string
-            color: string
-          } | null
-          let noteText = ''
-          if (habit && e.note) {
-            try {
-              noteText = JSON.stringify(parseHabitNote(habit.slug, e.note))
-            } catch {
-              noteText = e.note
-            }
-          }
-          return (
-            <li
-              key={e.id}
-              className="rounded-card bg-white p-4 shadow-sm"
-              style={{ borderLeft: `4px solid ${habit?.color ?? '#ccc'}` }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">
-                  {habit?.icon} {habit?.name}
-                </span>
-                <span
-                  className={`text-xs font-semibold ${
-                    e.status === 'done' ? 'text-brand-green' : 'text-gray-400'
-                  }`}
-                >
-                  {e.status === 'done' ? 'Selesai' : 'Belum'}
-                </span>
-              </div>
-              {noteText && <p className="mt-1 break-words text-sm text-gray-500">{noteText}</p>}
-            </li>
-          )
-        })}
-      </ul>
-
-      {notes && notes.length > 0 && (
-        <div className="mt-6">
-          <h2 className="mb-2 font-bold text-gray-700">Catatan Guru</h2>
-          <ul className="flex flex-col gap-2">
-            {notes.map((n: any) => (
-              <li key={n.id} className="rounded-card bg-brand-blue/5 p-3">
-                <p className="text-sm">{n.note}</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  {(n.users as unknown as { name: string } | null)?.name ?? 'Guru'} ·{' '}
-                  {n.created_at.slice(0, 10)}
-                </p>
-              </li>
-            ))}
-          </ul>
+    <div>
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
+        <Link href="/jurnal" className="text-xl text-ink-3">
+          ←
+        </Link>
+        <div>
+          <h1 className="text-base font-black text-brand-blue">{studentName}</h1>
+          <p className="text-[11px] text-ink-3">{formatDateID(journal.journal_date)}</p>
         </div>
-      )}
+      </header>
+
+      <div className="px-5 py-5">
+        <div className="mb-4 flex items-center justify-between rounded-card bg-grad-blue px-4 py-3 text-white shadow-soft">
+          <span className="text-sm font-semibold opacity-90">Kebiasaan selesai</span>
+          <span className="font-display text-xl font-black">
+            {doneCount}/{total}
+          </span>
+        </div>
+
+        <ul className="flex flex-col gap-3">
+          {(entries ?? []).map((e: any) => {
+            const habit = e.habits as unknown as {
+              name: string
+              slug: string
+              icon: string
+              color: string
+            } | null
+            let noteText = ''
+            if (habit && e.note) {
+              try {
+                const parsed = parseHabitNote(habit.slug, e.note) as Record<string, unknown>
+                noteText = Object.entries(parsed)
+                  .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+                  .join(' · ')
+              } catch {
+                noteText = e.note
+              }
+            }
+            const color = habitColor(habit?.slug ?? '')
+            const done = e.status === 'done'
+            return (
+              <li
+                key={e.id}
+                className="rounded-card bg-white p-4 shadow-soft"
+                style={{ borderLeft: `4px solid ${color}` }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 font-display text-sm font-extrabold text-ink">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg text-base"
+                      style={{ background: habitLight(habit?.slug ?? '') }}>
+                      {habit?.icon ?? '•'}
+                    </span>
+                    {habit?.name}
+                  </span>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+                    style={{
+                      background: done ? habitLight(habit?.slug ?? '') : '#F3F4F6',
+                      color: done ? color : '#9CA3AF',
+                    }}
+                  >
+                    {done ? 'Selesai' : 'Belum'}
+                  </span>
+                </div>
+                {noteText && <p className="mt-2 break-words text-xs text-ink-2">{noteText}</p>}
+              </li>
+            )
+          })}
+        </ul>
+
+        {journal.parent_note && (
+          <div className="mt-4 rounded-card border border-line bg-white p-4 shadow-row">
+            <p className="mb-1 font-display text-xs font-bold uppercase text-ink-2">
+              Catatan Orang Tua
+            </p>
+            <p className="text-sm text-ink">{journal.parent_note}</p>
+          </div>
+        )}
+
+        {notes && notes.length > 0 && (
+          <div className="mt-5">
+            <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
+              Catatan Guru
+            </p>
+            <ul className="flex flex-col gap-2">
+              {notes.map((n: any) => (
+                <li key={n.id} className="rounded-card border border-brand-blue/15 bg-brand-blue-light p-3.5">
+                  <div className="mb-1.5 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-blue text-[10px] font-bold text-white">
+                      {initials((n.users as unknown as { name: string } | null)?.name ?? 'Guru')}
+                    </span>
+                    <span className="text-xs font-bold text-brand-blue">
+                      {(n.users as unknown as { name: string } | null)?.name ?? 'Guru'}
+                    </span>
+                    <span className="text-[10px] text-ink-3">{n.created_at.slice(0, 10)}</span>
+                  </div>
+                  <p className="text-sm text-ink">{n.note}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

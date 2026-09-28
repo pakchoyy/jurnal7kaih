@@ -17,7 +17,7 @@ export default async function ParentLayout({ children }: { children: React.React
   if (profile?.role !== 'parent') redirect('/login')
 
   return (
-    <div className="mx-auto min-h-dvh max-w-lg bg-gray-50 pb-20">
+    <div className="mx-auto min-h-dvh max-w-lg bg-bg pb-24">
       {children}
       <BottomNav />
     </div>

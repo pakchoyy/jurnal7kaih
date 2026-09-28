@@ -19,8 +19,10 @@ export function CheckboxGroup({ label, options, value, onChange }: CheckboxGroup
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      {label && <span className="text-sm font-medium text-brand-dark">{label}</span>}
+    <div className="flex flex-col gap-1.5">
+      {label && (
+        <span className="font-display text-[13px] font-extrabold text-ink">{label}</span>
+      )}
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const checked = value.includes(option)
@@ -30,10 +32,10 @@ export function CheckboxGroup({ label, options, value, onChange }: CheckboxGroup
               type="button"
               onClick={() => toggle(option)}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-sm transition',
+                'rounded-pill border-[1.5px] px-3.5 py-1.5 text-xs font-semibold transition active:scale-[.97]',
                 checked
-                  ? 'border-brand-blue bg-brand-blue text-white'
-                  : 'border-gray-300 bg-white text-gray-600',
+                  ? 'border-brand-green bg-brand-green text-white'
+                  : 'border-line bg-white text-ink-2',
               )}
             >
               {option}

@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 
-export default function LogoutButton() {
+export default function LogoutButton({ compact }: { compact?: boolean }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -12,7 +13,10 @@ export default function LogoutButton() {
     <button
       type="button"
       disabled={loading}
-      className="w-full rounded-btn border border-red-200 bg-red-50 py-3 font-semibold text-red-500 disabled:opacity-50"
+      className={cn(
+        'rounded-btn border-[1.5px] border-red-200 bg-red-50 font-display font-extrabold text-red-500 transition active:scale-[.98] disabled:opacity-50',
+        compact ? 'px-3 py-1.5 text-[11px]' : 'w-full py-3',
+      )}
       onClick={async () => {
         setLoading(true)
         const supabase = createClient()

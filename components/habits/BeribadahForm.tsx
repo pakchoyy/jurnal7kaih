@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { CheckboxGroup } from '@/components/forms/CheckboxGroup'
 import type { HabitFormProps } from './BangunPagiForm'
 
-// Daftar default (Islam). Untuk agama lain, sesuaikan di UI/profil.
 const defaultOptions = [
   'Sholat Subuh',
   'Sholat Dzuhur',
@@ -33,14 +32,14 @@ export function BeribadahForm({ value, onChange }: HabitFormProps) {
       />
       <div className="flex gap-2">
         <input
-          className="flex-1 rounded-btn border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-blue"
+          className="flex-1 rounded-btn border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm outline-none placeholder:text-ink-3 focus:border-brand-green"
           placeholder="Tambah kegiatan lain…"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
         />
         <button
           type="button"
-          className="rounded-btn bg-brand-blue px-3 py-2 text-sm font-semibold text-white"
+          className="rounded-btn bg-brand-green px-4 text-sm font-bold text-white"
           onClick={() => {
             if (custom.trim()) {
               setActivities([...activities, custom.trim()])

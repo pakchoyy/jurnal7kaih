@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { registerSchoolSelf } from './actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { AuthShell } from '@/components/ui/AuthShell'
 
 export default function AktivasiSekolahPage() {
   const router = useRouter()
@@ -34,22 +35,28 @@ export default function AktivasiSekolahPage() {
       setError(res.error ?? 'Gagal mendaftar')
       return
     }
-
     router.push('/login?registered=1')
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-6 py-10">
-      <div className="mb-8 text-center">
-        <span className="inline-block rounded-full bg-brand-green/15 px-3 py-1 text-xs font-bold text-brand-green">
-          Paket Semester (6 Bulan)
+    <AuthShell
+      gradient="bg-grad-green"
+      badge={
+        <span className="inline-block rounded-pill bg-white/20 px-3 py-1 text-xs font-bold">
+          ✅ Paket Semester (6 Bulan)
         </span>
-        <h1 className="mt-2 text-2xl font-black text-brand-blue">Aktivasi Sekolah 7Kaih</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Terima kasih telah berlangganan! Daftarkan sekolah & akun admin Anda.
+      }
+      title="Aktivasi Sekolah"
+      subtitle="Terima kasih berlangganan! Daftarkan sekolah & akun admin Anda."
+      footer={
+        <p className="text-xs text-ink-3">
+          Sudah pernah daftar?{' '}
+          <Link href="/login" className="font-semibold text-brand-blue">
+            Masuk ke Akun
+          </Link>
         </p>
-      </div>
-
+      }
+    >
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <Input
           name="schoolName"
@@ -77,26 +84,15 @@ export default function AktivasiSekolahPage() {
           placeholder="Minimal 6 karakter"
           required
         />
-        <Input
-          name="phone"
-          type="tel"
-          label="Nomor WhatsApp (opsional)"
-          placeholder="0812xxxx"
-        />
+        <Input name="phone" type="tel" label="Nomor WhatsApp (opsional)" placeholder="0812xxxx" />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <Button type="submit" size="lg" disabled={loading}>
-          {loading ? 'Mendaftarkan…' : 'Daftarkan & Aktifkan Sekolah'}
+        {error && (
+          <p className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-500">{error}</p>
+        )}
+        <Button type="submit" variant="green" size="lg" block disabled={loading}>
+          {loading ? 'Mendaftarkan…' : 'Daftarkan & Aktifkan'}
         </Button>
       </form>
-
-      <p className="mt-6 text-center text-xs text-gray-400">
-        Sudah pernah daftar?{' '}
-        <Link href="/login" className="font-semibold text-brand-blue">
-          Masuk ke Akun
-        </Link>
-      </p>
-    </main>
+    </AuthShell>
   )
 }
