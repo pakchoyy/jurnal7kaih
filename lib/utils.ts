@@ -122,7 +122,7 @@ export function initials(name: string): string {
 export function formatDateID(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 }
 
 /** Redirect URL berdasarkan role setelah login. */

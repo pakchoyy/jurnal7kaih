@@ -84,6 +84,14 @@ export default async function RiwayatPage() {
 
         <BadgeShelf best={best} current={streak} />
 
+        <Link
+          href={`/rapor/${studentId}`}
+          className="flex items-center justify-between rounded-card bg-white p-4 text-base font-bold text-brand-blue shadow-soft"
+        >
+          📄 Rapor Bulanan (cetak / PDF)
+          <span className="text-ink-3">›</span>
+        </Link>
+
         <div className="rounded-card bg-white p-4 shadow-soft">
           <p className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-ink-2">
             Per Kebiasaan · 30 Hari
