@@ -69,14 +69,14 @@ export async function registerSchoolSelf(
 
   const uid = created.user.id
 
-  // 4. Buat profile admin sekolah di public.users
+  // 4. Buat profile guru di public.users
   const { error: pErr } = await admin.from('users').insert({
     id: uid,
     school_id: school.id,
     name: adminName,
     email,
     phone: phone || null,
-    role: 'school_admin',
+    role: 'teacher',
     status: 'active',
   })
 
@@ -84,6 +84,23 @@ export async function registerSchoolSelf(
     await admin.from('schools').delete().eq('id', school.id)
     await admin.auth.admin.deleteUser(uid)
     return { ok: false, error: pErr.message }
+  }
+
+  // 5. Buat tahun ajaran aktif default
+  const year = now.getFullYear()
+  const startYear = now.getMonth() >= 6 ? year : year - 1
+  const { error: ayErr } = await admin.from('academic_years').insert({
+    school_id: school.id,
+    name: `${startYear}/${startYear + 1}`,
+    start_date: `${startYear}-07-01`,
+    end_date: `${startYear + 1}-06-30`,
+    is_active: true,
+  })
+
+  if (ayErr) {
+    await admin.from('schools').delete().eq('id', school.id)
+    await admin.auth.admin.deleteUser(uid)
+    return { ok: false, error: ayErr.message }
   }
 
   return { ok: true }

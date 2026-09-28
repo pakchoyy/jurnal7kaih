@@ -94,7 +94,6 @@ export function getRoleRedirect(role?: string | null): string {
   switch (role) {
     case 'parent': return '/beranda'
     case 'teacher': return '/teacher-dashboard'
-    case 'school_admin': return '/admin-dashboard'
     case 'super_admin': return '/sekolah'
     default: return '/login'
   }
