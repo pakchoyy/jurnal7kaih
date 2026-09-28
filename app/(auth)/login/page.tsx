@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { loginSchema } from '@/lib/schemas/auth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const registered = searchParams.get('registered')
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,10 +44,16 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-6 py-10">
-      <div className="mb-8 text-center">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-black text-brand-blue">Jurnal 7Kaih</h1>
         <p className="mt-1 text-gray-500">7 Kebiasaan Anak Indonesia Hebat</p>
       </div>
+
+      {registered && (
+        <div className="mb-4 rounded-card bg-brand-green/15 p-3 text-center text-sm font-semibold text-brand-green">
+          Pendaftaran sekolah berhasil! Silakan login dengan email & password Anda.
+        </div>
+      )}
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <Input name="email" type="email" label="Email" placeholder="nama@email.com" required />
@@ -55,12 +64,28 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Punya kode aktivasi?{' '}
-        <Link href="/aktivasi" className="font-semibold text-brand-blue">
-          Aktivasi akun
-        </Link>
-      </p>
+      <div className="mt-6 flex flex-col gap-2 text-center text-sm text-gray-500">
+        <p>
+          Orang Tua punya kode aktivasi?{' '}
+          <Link href="/aktivasi" className="font-semibold text-brand-blue">
+            Aktivasi Akun Ortu
+          </Link>
+        </p>
+        <p>
+          Sekolah ingin mencoba?{' '}
+          <Link href="/daftar-trial" className="font-semibold text-brand-teal">
+            Coba Gratis 14 Hari
+          </Link>
+        </p>
+      </div>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center text-sm text-gray-400">Memuat…</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

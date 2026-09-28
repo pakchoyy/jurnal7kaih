@@ -8,6 +8,8 @@ export type Json =
 
 export type Role = 'super_admin' | 'school_admin' | 'teacher' | 'parent'
 
+export type LicensePlan = 'trial' | 'semester' | 'annual' | 'lifetime'
+
 export type School = {
   id: string
   name: string
@@ -16,6 +18,10 @@ export type School = {
   address: string | null
   phone: string | null
   status: 'active' | 'inactive'
+  plan: LicensePlan
+  active_until: string
+  purchased_at: string
+  buyer_email: string | null
   created_at: string
   updated_at: string
 }
