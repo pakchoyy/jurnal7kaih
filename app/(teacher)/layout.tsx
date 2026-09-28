@@ -54,6 +54,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
           { href: '/kelas/import', label: 'Import Kelas (Excel)', icon: 'list' },
           { href: '/siswa', label: 'Semua Siswa', icon: 'users' },
           { href: '/pengaturan/kebiasaan', label: 'Isi Poin Kebiasaan', icon: 'list' },
+          { href: '/pengaturan/kalender', label: 'Hari Sekolah & Libur', icon: 'journal' },
           { href: '/pengaturan/tim', label: 'Guru & Kepala Sekolah', icon: 'family' },
           { href: '/pengaturan', label: 'Pengaturan & Lisensi', icon: 'settings' },
         ]}

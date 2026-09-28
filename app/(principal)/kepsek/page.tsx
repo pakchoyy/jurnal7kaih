@@ -1,15 +1,18 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
+import { countSchoolDays, getSchoolCalendar } from '@/lib/schoolCalendar'
 
 export default async function KepsekDashboard() {
   const supabase = createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  const { data: me } = await supabase.from('users').select('name').eq('id', user!.id).single()
+  const { data: me } = await supabase.from('users').select('name, school_id').eq('id', user!.id).single()
 
   const today = todayISO()
+  const cal = await getSchoolCalendar(supabase, me?.school_id ?? '')
+  const week = Math.max(1, countSchoolDays(shiftISO(today, -6), today, cal))
 
   const [{ data: classStats }, { data: habitStats }, { data: habits }] = await Promise.all([
     supabase.rpc('principal_class_stats', { p_today: today }),
@@ -31,13 +34,13 @@ export default async function KepsekDashboard() {
     teacher: c.teacher_name ?? '-',
     total: Number(c.total_students),
     todayCount: Number(c.today_count),
-    weekPct: Number(c.total_students) ? Math.round((Number(c.week_count) / (Number(c.total_students) * 7)) * 100) : 0,
+    weekPct: Number(c.total_students) ? Math.round((Number(c.week_count) / (Number(c.total_students) * week)) * 100) : 0,
   }))
 
   const totalStudents = stats.reduce((a, c) => a + c.total, 0)
   const todayAll = stats.reduce((a, c) => a + c.todayCount, 0)
   const weekAll = ((classStats ?? []) as ClassStat[]).reduce((a, c) => a + Number(c.week_count), 0)
-  const weekPctAll = totalStudents ? Math.round((weekAll / (totalStudents * 7)) * 100) : 0
+  const weekPctAll = totalStudents ? Math.round((weekAll / (totalStudents * week)) * 100) : 0
   const hs = (habitStats ?? []) as { habit_id: string; done_count: number; journal_count: number }[]
   const totalJournals30 = Number(hs[0]?.journal_count ?? 0)
   const habitCount: Record<string, number> = Object.fromEntries(hs.map((h) => [h.habit_id, Number(h.done_count)]))

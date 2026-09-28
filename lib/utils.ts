@@ -58,26 +58,43 @@ export function shiftISO(iso: string, days: number): string {
  * Hitung streak: jumlah hari berturut-turut ke belakang (dari hari ini)
  * dengan status submitted/reviewed. Lihat Key Business Logic #5.
  */
-export function calculateStreak(submittedDates: string[], today = new Date()): number {
+export function calculateStreak(
+  submittedDates: string[],
+  today = new Date(),
+  isSchoolDay: (iso: string) => boolean = () => true,
+): number {
   const set = new Set(submittedDates)
   let cursor = todayISO(today)
   if (!set.has(cursor)) cursor = shiftISO(cursor, -1)
   let streak = 0
-  while (set.has(cursor)) {
-    streak++
-    cursor = shiftISO(cursor, -1)
+  // Hari libur yang tidak diisi dilewati, tidak memutus streak.
+  for (let guard = 0; guard < 400; guard++, cursor = shiftISO(cursor, -1)) {
+    if (set.has(cursor)) streak++
+    else if (isSchoolDay(cursor)) break
   }
   return streak
 }
 
-/** Rekor hari berturut-turut terpanjang. */
-export function bestStreak(submittedDates: string[]): number {
+/** Rekor hari berturut-turut terpanjang (hari libur tidak memutus). */
+export function bestStreak(
+  submittedDates: string[],
+  isSchoolDay: (iso: string) => boolean = () => true,
+): number {
   const sorted = Array.from(new Set(submittedDates)).sort()
   let best = 0
   let run = 0
   let prev = ''
   for (const d of sorted) {
-    run = prev && shiftISO(prev, 1) === d ? run + 1 : 1
+    let continues = !!prev
+    if (prev) {
+      for (let x = shiftISO(prev, 1), g = 0; x < d; x = shiftISO(x, 1), g++) {
+        if (g > 60 || isSchoolDay(x)) {
+          continues = false
+          break
+        }
+      }
+    }
+    run = continues ? run + 1 : 1
     best = Math.max(best, run)
     prev = d
   }

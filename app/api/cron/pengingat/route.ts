@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { todayISO } from '@/lib/utils'
+import { isSchoolDay, parseSchoolDays } from '@/lib/schoolCalendar'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
       ...(await fetchAll((a, b) =>
         admin
           .from('student_parents')
-          .select('user_id, student_id, students!inner(name, status, schools!inner(active_until))')
+          .select('user_id, student_id, students!inner(name, status, school_id, schools!inner(active_until, school_days))')
           .in('user_id', chunk)
           .range(a, b),
       )),
@@ -64,11 +65,27 @@ export async function GET(req: NextRequest) {
     rows.forEach((r) => filled.add(r.student_id))
   }
 
+  // Sekolah yang hari ini libur tidak dikirimi pengingat.
+  const { data: holidaysToday } = await admin
+    .from('school_holidays')
+    .select('school_id')
+    .lte('start_date', today)
+    .gte('end_date', today)
+  const onHoliday = new Set((holidaysToday ?? []).map((h) => h.school_id))
+
   const pendingByUser = new Map<string, string[]>()
   for (const l of links) {
-    const st = l.students as { name: string; status: string; schools: { active_until: string | null } }
+    const st = l.students as {
+      name: string
+      status: string
+      school_id: string
+      schools: { active_until: string | null; school_days: string | null }
+    }
     const active = st.status === 'active' && st.schools.active_until && new Date(st.schools.active_until) > new Date()
-    if (!active || filled.has(l.student_id)) continue
+    const schoolDay =
+      !onHoliday.has(st.school_id) &&
+      isSchoolDay(today, { days: parseSchoolDays(st.schools.school_days), holidays: [] })
+    if (!active || !schoolDay || filled.has(l.student_id)) continue
     pendingByUser.set(l.user_id, [...(pendingByUser.get(l.user_id) ?? []), st.name.split(' ')[0]])
   }
 

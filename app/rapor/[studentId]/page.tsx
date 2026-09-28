@@ -5,6 +5,7 @@ import { describeHabitNote } from '@/lib/schemas/habits'
 import { themeVars } from '@/lib/theme'
 import { bestStreak, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { PrintButton } from './PrintButton'
+import { countSchoolDays, getSchoolCalendar, isSchoolDay } from '@/lib/schoolCalendar'
 
 const MONTHS = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -45,7 +46,6 @@ export default async function RaporPage({
   const daysInMonth = new Date(Date.UTC(year, mon, 0)).getUTCDate()
   const lastDay = shiftISO(firstDay, daysInMonth - 1)
   const periodEnd = month === thisMonth ? today : lastDay
-  const periodDays = month > thisMonth ? 0 : Number(periodEnd.slice(8, 10))
 
   // RLS memastikan hanya ortu / wali kelas siswa ini yang bisa membaca.
   const { data: student } = await supabase
@@ -54,6 +54,9 @@ export default async function RaporPage({
     .eq('id', params.studentId)
     .maybeSingle()
   if (!student) notFound()
+
+  const cal = await getSchoolCalendar(supabase, student.school_id)
+  const periodDays = month > thisMonth ? 0 : countSchoolDays(firstDay, periodEnd, cal)
 
   const kelas = student.classes as unknown as { name: string; users: { name: string } | null } | null
   const school = student.schools as unknown as { name: string; logo_url: string | null; theme_color: string | null } | null
@@ -84,7 +87,7 @@ export default async function RaporPage({
 
   const filledDates = (journals ?? []).map((j) => j.journal_date)
   const filled = filledDates.length
-  const fillPct = periodDays ? Math.round((filled / periodDays) * 100) : 0
+  const fillPct = periodDays ? Math.min(100, Math.round((filled / periodDays) * 100)) : 0
 
   const rows = (habits ?? []).map((h) => {
     const mine = (entries ?? []).filter((e) => e.habit_id === h.id && e.status === 'done')
@@ -96,7 +99,7 @@ export default async function RaporPage({
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([k]) => k)
-    const pct = periodDays ? Math.round((mine.length / periodDays) * 100) : 0
+    const pct = periodDays ? Math.min(100, Math.round((mine.length / periodDays) * 100)) : 0
     return { ...h, days: mine.length, pct, top }
   })
   const avg = rows.length ? Math.round(rows.reduce((a, r) => a + r.pct, 0) / rows.length) : 0
@@ -170,10 +173,10 @@ export default async function RaporPage({
             <p className="font-display text-2xl font-black text-brand-blue">
               {filled}/{periodDays}
             </p>
-            <p className="text-xs text-ink-2">Hari mengisi ({fillPct}%)</p>
+            <p className="text-xs text-ink-2">Hari sekolah terisi ({fillPct}%)</p>
           </div>
           <div className="rounded-btn bg-amber-50 p-3">
-            <p className="font-display text-2xl font-black text-amber-700">{bestStreak(filledDates)}</p>
+            <p className="font-display text-2xl font-black text-amber-700">{bestStreak(filledDates, (d) => isSchoolDay(d, cal))}</p>
             <p className="text-xs text-ink-2">Rekor berturut-turut</p>
           </div>
           <div className="rounded-btn bg-emerald-50 p-3">
