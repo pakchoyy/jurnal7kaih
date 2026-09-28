@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { simpanWhatsapp, pakaiLicenseKey } from './actions'
+import { InstallCard } from '@/components/pwa/InstallPrompt'
 
 const PLAN_LABEL: Record<string, string> = {
   trial: 'Trial',
@@ -91,6 +92,10 @@ export default function PengaturanClient({
         {activeUntil && (
           <p className="mt-0.5 text-xs text-ink-3">Aktif hingga {formatDate(activeUntil)}</p>
         )}
+      </div>
+
+      <div className="mb-4">
+        <InstallCard />
       </div>
 
       {/* Nomor WhatsApp */}
