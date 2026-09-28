@@ -8,6 +8,7 @@ const nav = [
   { href: '/teacher-dashboard', label: 'Dashboard' },
   { href: '/kelas', label: 'Kelas' },
   { href: '/siswa', label: 'Siswa' },
+  { href: '/pengaturan', label: 'Pengaturan' },
 ]
 
 export default function TeacherNav() {
