@@ -9,7 +9,7 @@ export default async function KelasPage() {
 
   const { data: classes } = await supabase
     .from('classes')
-    .select('id, name, grade, students(count)')
+    .select('id, name, grade, students(count), academic_years(name, is_active)')
     .eq('homeroom_teacher_id', user!.id)
     .order('grade')
     .order('name')
@@ -38,21 +38,32 @@ export default async function KelasPage() {
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {classes.map((c: any) => {
+        <>
+        {[true, false].map((isActive) => {
+          const group = classes.filter((c: any) => !!c.academic_years?.is_active === isActive)
+          if (group.length === 0) return null
+          return (
+            <div key={String(isActive)} className="mb-5">
+              {!isActive && (
+                <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-3">Tahun ajaran lalu</p>
+              )}
+        <ul className="stagger flex flex-col gap-3">
+          {group.map((c: any) => {
             const studentCount = Array.isArray(c.students) ? c.students[0]?.count ?? 0 : 0
             return (
               <li key={c.id}>
                 <Link
                   href={`/kelas/${c.id}`}
-                  className="flex items-center gap-3 rounded-card bg-white p-4 shadow-soft transition active:scale-[.99]"
+                  className="flex items-center gap-3 pressable rounded-card bg-white p-4 shadow-soft"
                 >
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-blue-light font-display text-base font-black text-brand-blue">
                     {c.name}
                   </span>
                   <div className="flex-1">
-                    <p className="font-display text-sm font-extrabold text-ink">Kelas {c.name}</p>
-                    <p className="text-[11px] text-ink-3">Tingkat {c.grade}</p>
+                    <p className="font-display text-base font-extrabold text-ink">Kelas {c.name}</p>
+                    <p className="text-sm text-ink-3">
+                      Tingkat {c.grade} · {c.academic_years?.name ?? ''}
+                    </p>
                   </div>
                   <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-ink-2">
                     {studentCount} siswa
@@ -63,6 +74,10 @@ export default async function KelasPage() {
             )
           })}
         </ul>
+            </div>
+          )
+        })}
+        </>
       )}
     </div>
   )

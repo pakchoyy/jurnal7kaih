@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, formatDateID, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
+import { getChildren } from '@/lib/activeChild'
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Belum dikirim',
@@ -15,14 +16,9 @@ export default async function RiwayatPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: links } = await supabase
-    .from('student_parents')
-    .select('student_id, students(name)')
-    .eq('user_id', user!.id)
-    .limit(1)
-
-  const studentId = links?.[0]?.student_id
-  const studentName = (links?.[0]?.students as unknown as { name: string } | null)?.name ?? 'Siswa'
+  const { active } = await getChildren(supabase, user!.id)
+  const studentId = active?.id
+  const studentName = active?.name ?? 'Siswa'
 
   if (!studentId) {
     return <div className="px-5 py-10 text-center text-base text-ink-2">Akun belum terhubung ke data anak.</div>
@@ -109,7 +105,7 @@ export default async function RiwayatPage() {
                     <span className="font-bold text-ink-2">{count} hari</span>
                   </div>
                   <div className="h-3 overflow-hidden rounded-full bg-line">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
+                    <div className="bar-grow h-full rounded-full" style={{ width: `${pct}%`, background: habitColor(h.slug) }} />
                   </div>
                 </div>
               )
@@ -140,12 +136,12 @@ export default async function RiwayatPage() {
 
         <div>
           <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-2">Daftar Jurnal</p>
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {(journals ?? []).slice(0, 30).map((j) => (
               <li key={j.id}>
                 <Link
                   href={`/jurnal/${j.id}`}
-                  className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
+                  className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
                 >
                   <span className="font-semibold">{formatDateID(j.journal_date)}</span>
                   <span className="text-sm text-ink-3">{STATUS_LABEL[j.status] ?? j.status}</span>

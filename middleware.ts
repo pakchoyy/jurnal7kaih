@@ -15,6 +15,8 @@ export async function middleware(request: NextRequest) {
   }
 
   const pathname = request.nextUrl.pathname
+  // Cron dipanggil Vercel tanpa sesi; diamankan dengan CRON_SECRET di route-nya.
+  if (pathname.startsWith('/api/cron/')) return NextResponse.next()
   let response = NextResponse.next({ request })
 
   try {

@@ -40,12 +40,15 @@ export default async function TeacherDashboard({
   // Semua kelas milik guru ini
   const { data: allClasses } = await supabase
     .from('classes')
-    .select('id, name, grade')
+    .select('id, name, grade, academic_years(is_active)')
     .eq('homeroom_teacher_id', user!.id)
     .order('grade')
     .order('name')
 
-  const classes = allClasses ?? []
+  const activeYear = (allClasses ?? []).filter(
+    (c) => (c.academic_years as unknown as { is_active: boolean } | null)?.is_active,
+  )
+  const classes = activeYear.length ? activeYear : allClasses ?? []
 
   // Kelas yang dipilih (default: pertama)
   const selectedClassId = searchParams.kelas ?? classes[0]?.id ?? null
@@ -229,7 +232,7 @@ export default async function TeacherDashboard({
             {classes.length === 0 ? 'Buat kelas dan tambahkan siswa dulu.' : 'Belum ada siswa di kelas ini.'}
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {students.map((s) => {
               const doneSet = studentHabits[s.id] ?? new Set<string>()
               const done = doneSet.size

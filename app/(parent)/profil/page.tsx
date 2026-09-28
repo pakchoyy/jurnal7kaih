@@ -3,6 +3,8 @@ import { createServerClient } from '@/lib/supabase/server'
 import LogoutButton from '@/components/ui/LogoutButton'
 import { initials } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
+import { BigTextToggle } from '@/components/ui/BigTextToggle'
+import { PushToggle } from '@/components/push/PushToggle'
 
 export default async function ProfilPage() {
   const supabase = createServerClient()
@@ -54,7 +56,7 @@ export default async function ProfilPage() {
           {(links ?? []).length === 0 ? (
             <p className="text-sm text-ink-3">Belum ada anak.</p>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="stagger flex flex-col gap-3">
               {(links ?? []).map((l: any) => {
                 const st = l.students as {
                   name: string
@@ -79,9 +81,20 @@ export default async function ProfilPage() {
               })}
             </ul>
           )}
-          <p className="mt-4 text-sm text-ink-3">
-            Punya anak lain di sekolah ini? Login terpisah pakai NIS anak tersebut.
-          </p>
+          <Link
+            href="/profil/tambah-anak"
+            className="mt-4 block rounded-btn border-2 border-brand-blue/30 py-3 text-center text-base font-bold text-brand-blue"
+          >
+            + Tambah Kakak / Adik
+          </Link>
+        </div>
+
+        <div className="mt-4">
+          <PushToggle />
+        </div>
+
+        <div className="mt-4">
+          <BigTextToggle />
         </div>
 
         <div className="mt-4">

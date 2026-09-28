@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { formatDateID } from '@/lib/utils'
+import { getChildren } from '@/lib/activeChild'
 
 export default async function JurnalPage() {
   const supabase = createServerClient()
@@ -8,14 +9,9 @@ export default async function JurnalPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: links } = await supabase
-    .from('student_parents')
-    .select('student_id, students(name)')
-    .eq('user_id', user!.id)
-
-  const studentIds = (links ?? []).map((l) => l.student_id)
-  const studentName =
-    (links?.[0]?.students as unknown as { name: string } | null)?.name ?? 'Siswa'
+  const { active } = await getChildren(supabase, user!.id)
+  const studentIds = active ? [active.id] : []
+  const studentName = active?.name ?? 'Siswa'
 
   const { data: journals } = studentIds.length
     ? await supabase
@@ -28,10 +24,10 @@ export default async function JurnalPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/90 px-5 py-4 backdrop-blur">
+      <header className="flex items-center justify-between border-b border-line bg-white/90 px-5 py-4 backdrop-blur">
         <div>
           <h1 className="text-lg font-black text-brand-blue">Jurnal</h1>
-          <p className="text-[11px] text-ink-3">{studentName}</p>
+          <p className="text-sm text-ink-3">{studentName}</p>
         </div>
         <Link
           href="/jurnal/isi"
@@ -53,18 +49,17 @@ export default async function JurnalPage() {
             </Link>
           </div>
         ) : (
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {journals.map((j) => (
               <li key={j.id}>
                 <Link
                   href={`/jurnal/${j.id}`}
-                  className="flex items-center justify-between rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
+                  className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
                 >
                   <div>
-                    <p className="font-display text-sm font-extrabold text-ink">
+                    <p className="font-display text-base font-extrabold text-ink">
                       {formatDateID(j.journal_date)}
                     </p>
-                    <p className="text-[11px] text-ink-3">{j.journal_date}</p>
                   </div>
                   <StatusBadge status={j.status} />
                 </Link>
@@ -84,12 +79,12 @@ function StatusBadge({ status }: { status: string }) {
     reviewed: 'bg-blue-100 text-blue-600',
   }
   const label: Record<string, string> = {
-    draft: 'Draft',
+    draft: 'Belum dikirim',
     submitted: 'Terkirim',
-    reviewed: 'Ditinjau',
+    reviewed: 'Sudah dicek',
   }
   return (
-    <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${map[status] ?? ''}`}>
+    <span className={`rounded-full px-3 py-1 text-xs font-bold ${map[status] ?? ''}`}>
       {label[status] ?? status}
     </span>
   )

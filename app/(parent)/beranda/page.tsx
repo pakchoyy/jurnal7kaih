@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
+import { ChildSwitcher } from '@/components/parent/ChildSwitcher'
+import { getChildren } from '@/lib/activeChild'
+import { PushToggle } from '@/components/push/PushToggle'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -12,29 +15,14 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, password_changed, schools(name, logo_url)')
+    .select('name, password_changed')
     .eq('id', user!.id)
     .single()
 
-  const school = profile?.schools as unknown as { name: string; logo_url: string | null } | null
-
-  const { data: links } = await supabase
-    .from('student_parents')
-    .select('student_id, relationship, students(id, name, class_id, classes(homeroom_teacher_id, users(name, whatsapp)))')
-    .eq('user_id', user!.id)
-
-  const children = (links ?? []).map((l: any) => ({
-    id: l.student_id,
-    name: (l.students as unknown as { name: string } | null)?.name ?? 'Siswa',
-    relationship: l.relationship,
-  }))
-
-  // Ambil WA guru dari kelas anak pertama
-  const firstLink = (links ?? [])[0] as any
-  const teacherWA = firstLink?.students?.classes?.users?.whatsapp as string | null
-  const teacherName = firstLink?.students?.classes?.users?.name as string | null
-
-  const firstChild = children[0]?.id
+  const { children, active } = await getChildren(supabase, user!.id)
+  const teacherWA = active?.teacherWA ?? null
+  const teacherName = active?.teacherName ?? null
+  const firstChild = active?.id
   let streak = 0
   let best = 0
   let todayDone = false
@@ -97,17 +85,14 @@ export default async function BerandaPage() {
         <div className="pointer-events-none absolute -bottom-6 left-8 h-20 w-20 rounded-full bg-white/[.05]" />
 
         <div className="relative">
-          {school?.name && (
-            <div className="mb-3 flex items-center gap-2">
-              {school.logo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={school.logo_url} alt="" className="h-8 w-8 rounded-lg bg-white object-contain p-0.5" />
-              )}
-              <span className="truncate text-sm font-semibold opacity-90">{school.name}</span>
-            </div>
-          )}
-          <p className="text-sm font-medium opacity-85">Selamat datang,</p>
-          <h1 className="mb-4 text-xl font-black">{profile?.name ?? 'Orang Tua Hebat'}</h1>
+          {active && children.length > 1 ? (
+            <ChildSwitcher items={children.map((c) => ({ id: c.id, name: c.name }))} activeId={active.id} />
+          ) : null}
+          <p className="text-sm font-medium opacity-85">Jurnal anak:</p>
+          <h1 className="mb-4 text-xl font-black">
+            {active?.name ?? profile?.name ?? 'Orang Tua Hebat'}
+            {active?.className ? <span className="ml-2 text-sm font-semibold opacity-80">Kelas {active.className}</span> : null}
+          </h1>
 
           <div className="flex items-center gap-3 rounded-[14px] border border-white/20 bg-white/15 p-3 backdrop-blur-sm">
             <ProgressRing
@@ -119,15 +104,13 @@ export default async function BerandaPage() {
               label={<span className="text-[11px] text-white">{progress}%</span>}
             />
             <div className="flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wide opacity-75">
-                Progress hari ini
-              </p>
-              <p className="font-display text-sm font-black">
+              <p className="text-xs font-medium opacity-80">Hari ini</p>
+              <p className="font-display text-base font-black">
                 {doneCount}/{habitTotal} kebiasaan
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-medium uppercase tracking-wide opacity-75">Streak</p>
+              <p className="text-xs font-medium opacity-80">Berturut</p>
               <p className="font-display text-lg font-black text-brand-yellow">🔥 {streak}</p>
             </div>
           </div>
@@ -162,25 +145,29 @@ export default async function BerandaPage() {
               }`}
             >
               <div>
-                <p className="font-display text-sm font-black">
+                <p className="font-display text-lg font-black">
                   {todayDone ? 'Jurnal hari ini sudah diisi ✓' : 'Isi Jurnal Hari Ini'}
                 </p>
-                <p className="text-xs opacity-80">
+                <p className="text-sm opacity-85">
                   {todayDone ? 'Ketuk untuk melihat / ubah' : 'Yuk lengkapi 7 kebiasaan anak'}
                 </p>
               </div>
-              <span className="text-2xl">{todayDone ? '✅' : '📝'}</span>
+              <span className="text-3xl">{todayDone ? '✅' : '📝'}</span>
             </Link>
 
             <div className="mb-5">
               <BadgeShelf best={best} current={streak} compact />
             </div>
 
+            <div className="mb-5 empty:hidden">
+              <PushToggle hideWhenOn />
+            </div>
+
             {/* Preview kebiasaan hari ini */}
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
               Kebiasaan Hari Ini
             </p>
-            <ul className="flex flex-col gap-2">
+            <ul className="stagger flex flex-col gap-2">
               {(habits ?? []).map((h: any) => {
                 const done = entryStatus[h.id] === 'done'
                 return (
@@ -207,29 +194,13 @@ export default async function BerandaPage() {
               })}
             </ul>
 
-            {children.length > 1 && (
-              <div className="mt-5 rounded-card bg-white p-4 shadow-soft">
-                <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
-                  Anak Saya
-                </p>
-                <ul className="flex flex-col gap-2">
-                  {children.map((c) => (
-                    <li key={c.id} className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{c.name}</span>
-                      <span className="text-xs text-ink-3">{c.relationship}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             {/* Kontak Wali Kelas */}
             {teacherWA && (
               <div className="mt-5 rounded-[12px] border border-line bg-white p-4 shadow-row">
                 <p className="mb-0.5 text-xs font-bold uppercase tracking-wide text-ink-3">Wali Kelas</p>
                 <p className="mb-2 text-sm font-semibold text-ink">{teacherName ?? 'Guru'}</p>
                 <a
-                  href={`https://wa.me/${normalizeWA(teacherWA)}?text=${encodeURIComponent(`Halo Pak/Bu ${teacherName ?? 'Guru'}, saya orang tua dari ${children[0]?.name ?? 'siswa'}.`)}`}
+                  href={`https://wa.me/${normalizeWA(teacherWA)}?text=${encodeURIComponent(`Halo Pak/Bu ${teacherName ?? 'Guru'}, saya orang tua dari ${active?.name ?? 'siswa'}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-btn bg-emerald-600 px-5 py-3 text-base font-bold text-white"

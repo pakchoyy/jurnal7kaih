@@ -35,7 +35,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
       <h1 className="font-display text-xl font-black text-ink">Kelas {kelas.name}</h1>
       <p className="mb-4 text-sm text-ink-3">Tingkat {kelas.grade} · Tahun ajaran {academicYearName}</p>
 
-      <div className="mb-5 grid grid-cols-3 gap-2">
+      <div className="mb-2 grid grid-cols-3 gap-2">
         <Link
           href={`/kelas/${params.id}/tambah-siswa`}
           className="rounded-btn bg-brand-blue px-2 py-3 text-center text-sm font-bold text-white"
@@ -53,6 +53,20 @@ export default async function DetailKelasPage({ params }: { params: { id: string
           className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
         >
           Unduh Excel
+        </a>
+      </div>
+      <div className="mb-5 grid grid-cols-2 gap-2">
+        <Link
+          href={`/kelas/${params.id}/naik-kelas`}
+          className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
+        >
+          ⬆️ Naik Kelas / Lulus
+        </Link>
+        <a
+          href={`/kelas/${params.id}/kartu-login`}
+          className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
+        >
+          🪪 Kartu Login Ortu
         </a>
       </div>
 
@@ -74,7 +88,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="stagger flex flex-col gap-2">
           {students.map((s) => (
             <li
               key={s.id}

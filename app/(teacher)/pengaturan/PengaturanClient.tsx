@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { simpanWhatsapp, pakaiLicenseKey } from './actions'
 import Link from 'next/link'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
+import { BigTextToggle } from '@/components/ui/BigTextToggle'
 
 const PLAN_LABEL: Record<string, string> = {
   trial: 'Trial',
@@ -110,6 +111,22 @@ export default function PengaturanClient({
       </Link>
 
       {tampilan}
+
+      <Link
+        href="/pengaturan/tim"
+        className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
+      >
+        <span className="text-2xl">👥</span>
+        <span className="flex-1">
+          <span className="block text-base font-bold text-ink">Guru & Kepala Sekolah</span>
+          <span className="block text-sm text-ink-3">Tambah guru lain & akun kepala sekolah</span>
+        </span>
+        <span className="text-ink-3">›</span>
+      </Link>
+
+      <div className="mb-4">
+        <BigTextToggle />
+      </div>
 
       <div className="mb-4">
         <InstallCard />

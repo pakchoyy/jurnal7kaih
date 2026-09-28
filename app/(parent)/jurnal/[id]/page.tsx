@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
+import { JournalThread } from '@/components/journal/JournalThread'
+import { JournalPhotos } from '@/components/journal/JournalPhotos'
 import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
 
 export default async function JurnalDetailPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: journal } = await supabase
     .from('journals')
@@ -40,7 +45,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
+      <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
         <Link href="/jurnal" className="text-xl text-ink-3">
           ←
         </Link>
@@ -58,7 +63,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
           </span>
         </div>
 
-        <ul className="flex flex-col gap-3">
+        <ul className="stagger flex flex-col gap-3">
           {(entries ?? []).map((e: any) => {
             const habit = e.habits as unknown as {
               name: string
@@ -130,7 +135,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
               Catatan Guru
             </p>
-            <ul className="flex flex-col gap-2">
+            <ul className="stagger flex flex-col gap-2">
               {notes.map((n: any) => (
                 <li key={n.id} className="rounded-card border border-brand-blue/15 bg-brand-blue-light p-3.5">
                   <div className="mb-1.5 flex items-center gap-2">
@@ -148,6 +153,16 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
             </ul>
           </div>
         )}
+
+        <JournalPhotos supabase={supabase} journalId={journal.id} canDeleteUserId={user!.id} />
+
+        <JournalThread
+          supabase={supabase}
+          journalId={journal.id}
+          userId={user!.id}
+          title="Pesan dengan Wali Kelas"
+          placeholder="Tulis pesan untuk wali kelas…"
+        />
       </div>
     </div>
   )

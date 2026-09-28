@@ -86,7 +86,7 @@ export default function LisensiClient({
       <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
         Semua Key ({keys.length})
       </p>
-      <ul className="flex flex-col gap-2">
+      <ul className="stagger flex flex-col gap-2">
         {keys.map((k) => (
           <li
             key={k.key}
