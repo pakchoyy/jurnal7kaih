@@ -29,32 +29,31 @@ export default async function DetailKelasPage({ params }: { params: { id: string
 
   return (
     <div className="px-5 py-5">
-      <div className="mb-5 flex items-center gap-3">
-        <Link href="/kelas" className="text-sm text-brand-blue">← Kelas</Link>
-        <div className="flex-1">
-          <h1 className="font-display text-lg font-black text-ink">Kelas {kelas.name}</h1>
-          <p className="text-[11px] text-ink-3">Tingkat {kelas.grade} · {academicYearName}</p>
-        </div>
-        <div className="flex gap-1.5">
-          <a
-            href={`/api/export-siswa?classId=${params.id}`}
-            className="rounded-btn border border-line bg-white px-3 py-2 text-xs font-bold text-ink-2"
-          >
-            ↓ Excel
-          </a>
-          <Link
-            href={`/kelas/${params.id}/import-siswa`}
-            className="rounded-btn border border-line bg-white px-3 py-2 text-xs font-bold text-ink-2"
-          >
-            ↑ Import
-          </Link>
-          <Link
-            href={`/kelas/${params.id}/tambah-siswa`}
-            className="rounded-btn bg-brand-blue px-3.5 py-2 text-xs font-bold text-white"
-          >
-            + Siswa
-          </Link>
-        </div>
+      <Link href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+        ← Semua Kelas
+      </Link>
+      <h1 className="font-display text-xl font-black text-ink">Kelas {kelas.name}</h1>
+      <p className="mb-4 text-sm text-ink-3">Tingkat {kelas.grade} · Tahun ajaran {academicYearName}</p>
+
+      <div className="mb-5 grid grid-cols-3 gap-2">
+        <Link
+          href={`/kelas/${params.id}/tambah-siswa`}
+          className="rounded-btn bg-brand-blue px-2 py-3 text-center text-sm font-bold text-white"
+        >
+          + Siswa
+        </Link>
+        <Link
+          href={`/kelas/${params.id}/import-siswa`}
+          className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
+        >
+          Import Excel
+        </Link>
+        <a
+          href={`/api/export-siswa?classId=${params.id}`}
+          className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
+        >
+          Unduh Excel
+        </a>
       </div>
 
       <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
@@ -85,9 +84,9 @@ export default async function DetailKelasPage({ params }: { params: { id: string
                 {initials(s.name)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-display text-sm font-extrabold text-ink">{s.name}</p>
-                <p className="text-[11px] text-ink-3">
-                  NIS: <strong>{s.student_number ?? '-'}</strong>
+                <p className="truncate font-display text-base font-extrabold text-ink">{s.name}</p>
+                <p className="text-sm text-ink-3">
+                  NIS: <strong className="text-ink">{s.student_number ?? '-'}</strong>
                   {s.nisn && ` · NISN: ${s.nisn}`}
                 </p>
               </div>
@@ -109,8 +108,8 @@ export default async function DetailKelasPage({ params }: { params: { id: string
       )}
 
       {students && students.length > 0 && (
-        <div className="mt-4 rounded-[12px] border border-line bg-amber-50 p-3.5 text-[12px] text-amber-700">
-          💡 NIS di atas dipakai orang tua untuk login. Password default = NIS. Beritahu orang tua via WA.
+        <div className="mt-4 rounded-[12px] border border-amber-200 bg-amber-50 p-3.5 text-sm text-amber-900">
+          💡 Orang tua login di tab <b>Orang Tua</b> pakai NIS anak. Password awal = NIS. Kirimkan info ini lewat WA.
         </div>
       )}
     </div>

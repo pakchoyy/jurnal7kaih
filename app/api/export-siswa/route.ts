@@ -43,17 +43,20 @@ export async function GET(req: NextRequest) {
     Status: s.status === 'active' ? 'Aktif' : 'Nonaktif',
   }))
 
-  const ws = XLSX.utils.json_to_sheet(rows)
+  const ws = XLSX.utils.json_to_sheet(rows, {
+    header: ['No', 'Nama', 'NIS', 'NISN', 'Jenis Kelamin', 'Status'],
+  })
   ws['!cols'] = [{ wch: 4 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 10 }]
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, `Kelas ${kelas.name}`)
+  const safeName = kelas.name.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 20) || 'kelas'
+  XLSX.utils.book_append_sheet(wb, ws, `Kelas ${safeName}`)
 
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
 
   return new NextResponse(buf, {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="siswa-kelas-${kelas.name}.xlsx"`,
+      'Content-Disposition': `attachment; filename="siswa-kelas-${safeName}.xlsx"`,
     },
   })
 }

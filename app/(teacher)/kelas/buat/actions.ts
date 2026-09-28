@@ -3,7 +3,9 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
-export async function buatKelas(formData: FormData) {
+export type FormState = { error?: string } | null
+
+export async function buatKelas(_prev: FormState, formData: FormData): Promise<FormState> {
   const supabase = createServerClient()
   const {
     data: { user },
@@ -17,10 +19,10 @@ export async function buatKelas(formData: FormData) {
     .single()
   if (!profile?.school_id) return { error: 'Profil tidak ditemukan' }
 
-  const name = String(formData.get('name') ?? '').trim().toUpperCase()
-  const grade = parseInt(String(formData.get('grade') ?? '7'))
+  const name = String(formData.get('name') ?? '').trim().toUpperCase().slice(0, 30)
+  const grade = parseInt(String(formData.get('grade') ?? '1'), 10)
   if (!name) return { error: 'Nama kelas wajib diisi' }
-  if (![7, 8, 9].includes(grade)) return { error: 'Tingkat tidak valid' }
+  if (!(grade >= 1 && grade <= 12)) return { error: 'Tingkat tidak valid' }
 
   // Ambil tahun ajaran aktif
   const { data: ay } = await supabase
@@ -29,7 +31,7 @@ export async function buatKelas(formData: FormData) {
     .eq('school_id', profile.school_id)
     .eq('is_active', true)
     .maybeSingle()
-  if (!ay) return { error: 'Tahun ajaran aktif tidak ditemukan. Hubungi admin.' }
+  if (!ay) return { error: 'Tahun ajaran aktif tidak ditemukan. Hubungi admin aplikasi.' }
 
   const { data: kelas, error } = await supabase
     .from('classes')

@@ -1,23 +1,28 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { revalidatePath } from 'next/cache'
+import { normalizeWA } from '@/lib/utils'
 
 export async function simpanWhatsapp(formData: FormData) {
   const supabase = createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { error: 'Tidak terautentikasi' }
+  if (!user) return { error: 'Sesi habis, silakan login ulang' }
 
-  const whatsapp = String(formData.get('whatsapp') ?? '').trim().replace(/\D/g, '')
+  const whatsapp = normalizeWA(String(formData.get('whatsapp') ?? ''))
+  if (whatsapp && !/^62\d{8,13}$/.test(whatsapp)) {
+    return { error: 'Nomor WA tidak valid. Contoh: 081234567890' }
+  }
+
   const { error } = await supabase
     .from('users')
     .update({ whatsapp: whatsapp || null })
     .eq('id', user.id)
-
   if (error) return { error: error.message }
+
   revalidatePath('/pengaturan')
   return { ok: true }
 }
@@ -27,55 +32,52 @@ export async function pakaiLicenseKey(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { error: 'Tidak terautentikasi' }
+  if (!user) return { error: 'Sesi habis, silakan login ulang' }
 
   const { data: profile } = await supabase
     .from('users')
     .select('school_id, role')
     .eq('id', user.id)
     .single()
-
-  if (!profile?.school_id || profile.role !== 'teacher') {
-    return { error: 'Akses ditolak' }
-  }
+  if (!profile?.school_id || profile.role !== 'teacher') return { error: 'Akses ditolak' }
 
   const key = String(formData.get('key') ?? '').trim().toUpperCase()
-  if (!key) return { error: 'Masukkan kode lisensi' }
+  if (!/^7KAIH(-[A-Z0-9]{6}){3}$/.test(key)) return { error: 'Format kode salah. Contoh: 7KAIH-ABC123-DEF456-GHI789' }
 
   const admin = createAdminClient()
-
-  // Cek key di DB
-  const { data: licenseRow, error: fetchErr } = await admin
-    .from('license_keys')
-    .select('id, plan, duration_months, used_at')
-    .eq('key', key)
-    .single()
-
-  if (fetchErr || !licenseRow) return { error: 'Kode lisensi tidak ditemukan' }
-  if (licenseRow.used_at) return { error: 'Kode lisensi sudah pernah dipakai' }
-
-  // Hitung active_until baru
   const now = new Date()
-  const activeUntil = new Date(now)
-  activeUntil.setMonth(activeUntil.getMonth() + licenseRow.duration_months)
 
-  // Update schools.plan + active_until
-  const { error: updateErr } = await admin
-    .from('schools')
-    .update({
-      plan: licenseRow.plan,
-      active_until: activeUntil.toISOString(),
-    })
-    .eq('id', profile.school_id)
-
-  if (updateErr) return { error: updateErr.message }
-
-  // Tandai key sudah dipakai
-  await admin
+  // Update bersyarat = klaim atomik; dua sekolah tidak bisa memakai kode yang sama.
+  const { data: claimed } = await admin
     .from('license_keys')
     .update({ used_at: now.toISOString(), used_by_school_id: profile.school_id })
-    .eq('id', licenseRow.id)
+    .eq('key', key)
+    .is('used_at', null)
+    .select('id, plan, duration_months')
+    .maybeSingle()
+  if (!claimed) return { error: 'Kode tidak ditemukan atau sudah pernah dipakai' }
 
-  revalidatePath('/pengaturan')
-  return { ok: true, plan: licenseRow.plan, activeUntil: activeUntil.toISOString() }
+  const { data: school } = await admin
+    .from('schools')
+    .select('active_until')
+    .eq('id', profile.school_id)
+    .single()
+
+  // Sisa masa aktif tidak hangus saat perpanjang.
+  const current = school?.active_until ? new Date(school.active_until) : now
+  const activeUntil = new Date(Math.max(current.getTime(), now.getTime()))
+  activeUntil.setMonth(activeUntil.getMonth() + claimed.duration_months)
+
+  const { error: updateErr } = await admin
+    .from('schools')
+    .update({ plan: claimed.plan, active_until: activeUntil.toISOString() })
+    .eq('id', profile.school_id)
+
+  if (updateErr) {
+    await admin.from('license_keys').update({ used_at: null, used_by_school_id: null }).eq('id', claimed.id)
+    return { error: 'Gagal mengaktifkan, coba lagi.' }
+  }
+
+  revalidatePath('/', 'layout')
+  return { ok: true, plan: claimed.plan as string, activeUntil: activeUntil.toISOString() }
 }

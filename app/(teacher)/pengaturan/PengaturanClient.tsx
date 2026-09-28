@@ -10,6 +10,8 @@ const PLAN_LABEL: Record<string, string> = {
   lifetime: 'Lifetime',
 }
 
+const ADMIN_WA = process.env.NEXT_PUBLIC_ADMIN_WA ?? ''
+
 function daysLeft(until: string | null): number | null {
   if (!until) return null
   return Math.ceil((new Date(until).getTime() - Date.now()) / 86400000)
@@ -74,35 +76,37 @@ export default function PengaturanClient({
 
       {/* Status plan */}
       <div className="mb-4 rounded-card bg-white p-4 shadow-soft">
-        <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-ink-3">Status Langganan</p>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-3">Status Langganan</p>
         <div className="flex items-center justify-between">
           <p className="font-display text-base font-extrabold text-ink">{PLAN_LABEL[plan] ?? plan}</p>
           {!isExpired && days !== null && (
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${plan === 'trial' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${plan === 'trial' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
               {days} hari lagi
             </span>
           )}
           {isExpired && (
-            <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-bold text-red-600">Expired</span>
+            <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-600">Expired</span>
           )}
         </div>
         {activeUntil && (
-          <p className="mt-0.5 text-[11px] text-ink-3">Aktif hingga {formatDate(activeUntil)}</p>
+          <p className="mt-0.5 text-xs text-ink-3">Aktif hingga {formatDate(activeUntil)}</p>
         )}
       </div>
 
       {/* Nomor WhatsApp */}
       <div className="mb-4 rounded-card bg-white p-5 shadow-soft">
         <p className="mb-1 font-display text-sm font-extrabold text-ink">Nomor WhatsApp Guru</p>
-        <p className="mb-3 text-[12px] text-ink-3">
+        <p className="mb-3 text-sm text-ink-3">
           Ditampilkan ke orang tua siswa di halaman beranda mereka.
         </p>
         <form onSubmit={handleWa} className="flex gap-2">
           <input
             value={wa}
             onChange={(e) => setWa(e.target.value)}
-            placeholder="08xxxxxxxxxx"
+            placeholder="081234567890"
+            type="tel"
             inputMode="tel"
+            aria-label="Nomor WhatsApp"
             className="flex-1 rounded-btn border border-line px-3 py-2.5 text-sm focus:border-brand-blue focus:outline-none"
           />
           <button
@@ -123,7 +127,7 @@ export default function PengaturanClient({
       {/* License Key */}
       <div className="rounded-card bg-white p-5 shadow-soft">
         <p className="mb-1 font-display text-sm font-extrabold text-ink">Aktifkan Lisensi Pro</p>
-        <p className="mb-4 text-[12px] text-ink-3">
+        <p className="mb-4 text-sm text-ink-3">
           Masukkan kode lisensi untuk upgrade atau perpanjang masa aktif.
         </p>
         <form onSubmit={handleKey} className="flex flex-col gap-3">
@@ -131,6 +135,9 @@ export default function PengaturanClient({
             value={key}
             onChange={(e) => setKey(e.target.value.toUpperCase())}
             placeholder="7KAIH-XXXXXX-XXXXXX-XXXXXX"
+            aria-label="Kode lisensi"
+            autoComplete="off"
+            spellCheck={false}
             className="w-full rounded-btn border border-line px-3 py-2.5 font-mono text-sm uppercase tracking-widest focus:border-brand-blue focus:outline-none"
             required
           />
@@ -147,17 +154,19 @@ export default function PengaturanClient({
             {keyLoading ? 'Memproses…' : 'Aktifkan'}
           </button>
         </form>
-        <p className="mt-3 text-[11px] text-ink-3">
-          Belum punya kode?{' '}
-          <a
-            href="https://wa.me/6281234567890?text=Halo%2C+saya+ingin+upgrade+ke+Pro+7Kaih"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-brand-teal underline"
-          >
-            Hubungi kami via WA
-          </a>
-        </p>
+        {ADMIN_WA && (
+          <p className="mt-3 text-sm text-ink-2">
+            Belum punya kode?{' '}
+            <a
+              href={`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent('Halo, saya ingin membeli lisensi Pro Jurnal 7Kaih')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-brand-teal underline"
+            >
+              Beli via WhatsApp
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )

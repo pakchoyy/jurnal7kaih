@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import { calculateStreak, todayISO, habitColor, habitLight } from '@/lib/utils'
+import { calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -11,7 +11,7 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name')
+    .select('name, password_changed')
     .eq('id', user!.id)
     .single()
 
@@ -121,12 +121,22 @@ export default async function BerandaPage() {
       </header>
 
       <div className="px-5 py-5">
+        {profile && !profile.password_changed && (
+          <Link
+            href="/profil/ganti-password"
+            className="mb-4 flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 p-4"
+          >
+            <span className="text-2xl">🔑</span>
+            <span className="flex-1 text-sm text-amber-900">
+              <b>Password Anda masih NIS anak.</b> Ketuk di sini untuk menggantinya.
+            </span>
+          </Link>
+        )}
+
         {children.length === 0 ? (
           <div className="rounded-card bg-white p-6 text-center shadow-soft">
-            <p className="text-ink-2">Belum ada anak terhubung.</p>
-            <p className="mt-1 text-sm text-ink-3">
-              Tambahkan anak lewat menu Profil bila punya kode aktivasi.
-            </p>
+            <p className="text-base text-ink-2">Akun belum terhubung ke data anak.</p>
+            <p className="mt-1 text-sm text-ink-3">Silakan hubungi wali kelas.</p>
           </div>
         ) : (
           <>
@@ -164,9 +174,9 @@ export default async function BerandaPage() {
                       className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
                       style={{ background: habitColor(h.slug) }}
                     />
-                    <span className="flex-1 text-sm font-semibold text-ink">{h.name}</span>
+                    <span className="flex-1 text-base font-semibold text-ink">{h.name}</span>
                     <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                      className="rounded-full px-2.5 py-1 text-xs font-bold"
                       style={{
                         background: done ? habitLight(h.slug) : '#F3F4F6',
                         color: done ? habitColor(h.slug) : '#9CA3AF',
@@ -198,15 +208,13 @@ export default async function BerandaPage() {
             {/* Kontak Wali Kelas */}
             {teacherWA && (
               <div className="mt-5 rounded-[12px] border border-line bg-white p-4 shadow-row">
-                <p className="mb-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-3">
-                  Wali Kelas
-                </p>
+                <p className="mb-0.5 text-xs font-bold uppercase tracking-wide text-ink-3">Wali Kelas</p>
                 <p className="mb-2 text-sm font-semibold text-ink">{teacherName ?? 'Guru'}</p>
                 <a
-                  href={`https://wa.me/${teacherWA.replace(/\D/g, '')}?text=Halo+Pak/Bu+Guru%2C+saya+orang+tua+siswa+ingin+bertanya.`}
+                  href={`https://wa.me/${normalizeWA(teacherWA)}?text=${encodeURIComponent(`Halo Pak/Bu ${teacherName ?? 'Guru'}, saya orang tua dari ${children[0]?.name ?? 'siswa'}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-btn bg-emerald-500 px-4 py-2 text-sm font-bold text-white"
+                  className="inline-flex items-center gap-2 rounded-btn bg-emerald-600 px-5 py-3 text-base font-bold text-white"
                 >
                   <span>💬</span> Hubungi via WA
                 </a>

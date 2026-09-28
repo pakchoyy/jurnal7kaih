@@ -16,12 +16,10 @@ CREATE TABLE IF NOT EXISTS license_keys (
 ALTER TABLE license_keys ENABLE ROW LEVEL SECURITY;
 
 -- Hanya super_admin bisa lihat semua key
+DROP POLICY IF EXISTS "license_keys_super" ON license_keys;
 CREATE POLICY "license_keys_super" ON license_keys FOR ALL USING (
   auth_role() = 'super_admin'
 );
-
--- Teacher bisa INSERT (saat pakai key) — tapi via server action dengan admin client
--- jadi tidak perlu RLS untuk INSERT dari client
 
 -- Index untuk lookup cepat
 CREATE INDEX IF NOT EXISTS idx_license_keys_key ON license_keys(key);

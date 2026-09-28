@@ -3,12 +3,10 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { generateActivationCode } from '@/lib/utils'
 
 function generateKey(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const segment = (n: number) =>
-    Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  return `7KAIH-${segment(6)}-${segment(6)}-${segment(6)}`
+  return `7KAIH-${generateActivationCode(6)}-${generateActivationCode(6)}-${generateActivationCode(6)}`
 }
 
 const DURATION: Record<string, number> = {

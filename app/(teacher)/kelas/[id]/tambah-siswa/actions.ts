@@ -1,10 +1,14 @@
 'use server'
 
+import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { redirect } from 'next/navigation'
+import { ensureParentAccount, isSchoolActive } from '@/lib/parentAccount'
+import { isValidNIS } from '@/lib/utils'
 
-export async function tambahSiswa(classId: string, formData: FormData) {
+export type FormState = { error?: string } | null
+
+export async function tambahSiswa(classId: string, _prev: FormState, formData: FormData): Promise<FormState> {
   const supabase = createServerClient()
   const {
     data: { user },
@@ -13,10 +17,22 @@ export async function tambahSiswa(classId: string, formData: FormData) {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('school_id')
+    .select('school_id, schools(code)')
     .eq('id', user.id)
     .single()
-  if (!profile?.school_id) return { error: 'Profil tidak ditemukan' }
+  const schoolCode = (profile?.schools as unknown as { code: string } | null)?.code
+  if (!profile?.school_id || !schoolCode) return { error: 'Profil tidak ditemukan' }
+  if (!(await isSchoolActive(supabase, profile.school_id))) {
+    return { error: 'Masa aktif habis. Aktifkan lisensi di menu Pengaturan.' }
+  }
+
+  const { data: kelas } = await supabase
+    .from('classes')
+    .select('id')
+    .eq('id', classId)
+    .eq('homeroom_teacher_id', user.id)
+    .maybeSingle()
+  if (!kelas) return { error: 'Kelas tidak ditemukan' }
 
   const name = String(formData.get('name') ?? '').trim()
   const nis = String(formData.get('nis') ?? '').trim()
@@ -24,60 +40,38 @@ export async function tambahSiswa(classId: string, formData: FormData) {
   const gender = String(formData.get('gender') ?? '')
 
   if (!name) return { error: 'Nama siswa wajib diisi' }
-  if (!nis) return { error: 'NIS wajib diisi (dipakai untuk login orang tua)' }
+  if (!nis) return { error: 'NIS wajib diisi (dipakai orang tua untuk login)' }
+  if (!isValidNIS(nis)) return { error: 'NIS hanya boleh huruf, angka, titik, atau strip (tanpa spasi)' }
 
-  const { data: student, error } = await supabase.from('students').insert({
-    school_id: profile.school_id,
-    class_id: classId,
-    name,
-    student_number: nis,
-    nisn: nisn || null,
-    gender: gender || null,
-    status: 'active',
-  }).select('id').single()
+  const { data: student, error } = await supabase
+    .from('students')
+    .insert({
+      school_id: profile.school_id,
+      class_id: classId,
+      name,
+      student_number: nis,
+      nisn: nisn || null,
+      gender: gender === 'L' || gender === 'P' ? gender : null,
+      status: 'active',
+    })
+    .select('id')
+    .single()
 
   if (error) {
     if (error.code === '23505') return { error: `NIS ${nis} sudah dipakai siswa lain` }
     return { error: error.message }
   }
 
-  // Buat akun auth orang tua pakai email fake {NIS}@7kaih.internal, password = NIS
-  const parentEmail = `${nis}@7kaih.internal`
-  const admin = createAdminClient()
-
-  let parentUserId: string | null = null
-
-  // Cek apakah akun sudah ada
-  const { data: existingUsers } = await admin.auth.admin.listUsers()
-  const existing = existingUsers?.users?.find(u => u.email === parentEmail)
-
-  if (existing) {
-    parentUserId = existing.id
-  } else {
-    const { data: created, error: createErr } = await admin.auth.admin.createUser({
-      email: parentEmail,
-      password: nis,
-      email_confirm: true,
-    })
-    if (createErr) return { error: `Gagal buat akun ortu: ${createErr.message}` }
-    parentUserId = created.user.id
-
-    // Insert ke public.users
-    await admin.from('users').insert({
-      id: parentUserId,
-      school_id: profile.school_id,
-      role: 'parent',
-      name: `Orang Tua ${name}`,
-    })
-  }
-
-  // Link ortu ke siswa
-  if (student?.id && parentUserId) {
-    await admin.from('student_parents').insert({
-      student_id: student.id,
-      user_id: parentUserId,
-      relationship: 'Wali',
-    }).select()
+  const parentErr = await ensureParentAccount(createAdminClient(), {
+    studentId: student.id,
+    studentName: name,
+    nis,
+    schoolId: profile.school_id,
+    schoolCode,
+  })
+  if (parentErr) {
+    await supabase.from('students').delete().eq('id', student.id)
+    return { error: parentErr }
   }
 
   redirect(`/kelas/${classId}`)

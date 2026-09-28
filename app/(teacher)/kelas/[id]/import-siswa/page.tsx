@@ -20,7 +20,7 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
     reader.onload = (ev) => {
       const wb = XLSX.read(ev.target?.result, { type: 'array' })
       const ws = wb.Sheets[wb.SheetNames[0]]
-      const raw: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
+      const raw: any[] = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false })
       const rows = raw.map((r) => ({
         name: String(r['Nama'] ?? r['name'] ?? r['NAMA'] ?? ''),
         nis: String(r['NIS'] ?? r['nis'] ?? ''),
@@ -45,19 +45,20 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
   return (
     <div className="px-5 py-5">
       <div className="mb-5 flex items-center gap-3">
-        <Link href={`/kelas/${params.id}`} className="text-sm text-brand-blue">← Kelas</Link>
+        <Link href={`/kelas/${params.id}`} className="py-2 text-sm font-semibold text-brand-blue">← Kembali</Link>
         <h1 className="font-display text-lg font-black text-ink">Import Siswa (Excel)</h1>
       </div>
 
       {/* Panduan format */}
       <div className="mb-5 rounded-[12px] bg-amber-50 p-4 text-[12px] text-amber-700">
         <p className="mb-1 font-bold">Format kolom Excel:</p>
-        <p>Nama · NIS · NISN (opsional) · Jenis Kelamin (L/P atau Laki-laki/Perempuan)</p>
+        <p>Baris pertama = judul kolom: <b>Nama</b>, <b>NIS</b>, <b>NISN</b> (boleh kosong), <b>Jenis Kelamin</b> (L/P).</p>
+        <p className="mt-1">Akun orang tua otomatis dibuat. Login pakai NIS, password awal = NIS.</p>
         <a
           href={`/api/export-siswa?classId=${params.id}`}
           className="mt-2 inline-block font-semibold underline"
         >
-          ↓ Download template dari kelas ini
+          ↓ Download contoh format (Excel)
         </a>
       </div>
 

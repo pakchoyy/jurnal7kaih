@@ -2,17 +2,16 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { registerSchoolSchema, type RegisterSchoolInput } from '@/lib/schemas/license'
-import { generateActivationCode } from '@/lib/utils'
+import { generateActivationCode, normalizeWA } from '@/lib/utils'
 
 export interface RegisterSchoolResult {
   ok: boolean
   error?: string
 }
 
-export async function registerSchoolSelf(
-  input: RegisterSchoolInput,
-  plan: 'semester' | 'trial',
-): Promise<RegisterSchoolResult> {
+const TRIAL_DAYS = 14
+
+export async function registerSchoolSelf(input: RegisterSchoolInput): Promise<RegisterSchoolResult> {
   const parsed = registerSchoolSchema.safeParse(input)
   if (!parsed.success) {
     return { ok: false, error: parsed.error.errors[0]?.message ?? 'Data tidak valid' }
@@ -24,14 +23,10 @@ export async function registerSchoolSelf(
   // 1. Buat kode unik sekolah (6 karakter)
   const schoolCode = 'SCH-' + generateActivationCode(6)
 
-  // Masa aktif: semester = 6 bulan, trial = 14 hari
   const now = new Date()
   const activeUntil = new Date(now)
-  if (plan === 'semester') {
-    activeUntil.setMonth(activeUntil.getMonth() + 6)
-  } else {
-    activeUntil.setDate(activeUntil.getDate() + 14)
-  }
+  activeUntil.setDate(activeUntil.getDate() + TRIAL_DAYS)
+  const wa = phone ? normalizeWA(phone) : null
 
   // 2. Insert row sekolah
   const { data: school, error: sErr } = await admin
@@ -40,7 +35,7 @@ export async function registerSchoolSelf(
       name: schoolName,
       code: schoolCode,
       phone: phone || null,
-      plan,
+      plan: 'trial',
       active_until: activeUntil.toISOString(),
       buyer_email: email,
       status: 'active',
@@ -49,7 +44,7 @@ export async function registerSchoolSelf(
     .single()
 
   if (sErr || !school) {
-    return { ok: false, error: sErr?.message ?? 'Gagal mebuat data sekolah' }
+    return { ok: false, error: sErr?.message ?? 'Gagal membuat data sekolah' }
   }
 
   // 3. Buat auth user via Admin API
@@ -76,6 +71,7 @@ export async function registerSchoolSelf(
     name: adminName,
     email,
     phone: phone || null,
+    whatsapp: wa,
     role: 'teacher',
     status: 'active',
   })

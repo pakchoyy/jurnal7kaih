@@ -18,6 +18,18 @@ export function generateActivationCode(length = 8): string {
   return code
 }
 
+/** Nomor WA ke format internasional tanpa simbol: 0812… → 62812… */
+export function normalizeWA(value: string): string {
+  let digits = value.replace(/\D/g, '')
+  if (digits.startsWith('0')) digits = '62' + digits.slice(1)
+  return digits
+}
+
+/** NIS dipakai sebagai bagian email login, jadi batasi karakternya. */
+export function isValidNIS(nis: string): boolean {
+  return /^[A-Za-z0-9.-]{1,30}$/.test(nis)
+}
+
 /** Tanggal lokal dalam format YYYY-MM-DD. */
 export function todayISO(date = new Date()): string {
   const y = date.getFullYear()
