@@ -23,7 +23,7 @@ export default function TambahAnakPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
+      <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
         <Link href="/profil" aria-label="Kembali" className="px-1 text-2xl text-ink-2">
           ←
         </Link>

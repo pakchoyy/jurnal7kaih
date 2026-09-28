@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
-import LogoutButton from '@/components/ui/LogoutButton'
+import { AppHeader } from '@/components/ui/AppHeader'
+import { BottomNav } from '@/components/ui/BottomNav'
 import { ExpiredGate } from '@/components/ui/ExpiredGate'
 import { themeVars } from '@/lib/theme'
-import TeacherNav from './TeacherNav'
 
 function daysLeft(until: string | null): number | null {
   if (!until) return null
@@ -37,53 +37,56 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   const isExpired = days !== null && days <= 0
   const isTrial = school?.plan === 'trial'
   const showBanner = isExpired || (isTrial && days !== null && days <= 3)
+  const badge = isExpired ? 'Habis' : isTrial ? `Trial ${days} hari` : 'PRO'
 
   return (
-    <div className="mx-auto min-h-dvh max-w-3xl bg-bg pb-10" style={themeVars(school?.theme_color)}>
-      <div className="flex items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
-        {school?.logo_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={school.logo_url} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-contain" />
-        )}
-        <div className="min-w-0 flex-1">
-          <Link href="/teacher-dashboard" className="font-display text-base font-black text-brand-blue">
-            Panel Guru
-          </Link>
-          {school?.name && (
-            <p className="truncate text-xs text-ink-3">{school.name}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          {isTrial && !isExpired && days !== null && (
-            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
-              Trial {days} hari
-            </span>
-          )}
-          <LogoutButton compact />
-        </div>
-      </div>
+    <div className="min-h-dvh bg-bg pb-24" style={themeVars(school?.theme_color)}>
+      <AppHeader
+        title={school?.name ?? 'Jurnal 7KAIH'}
+        subtitle={profile?.name ? `Guru · ${profile.name}` : 'Panel Guru'}
+        logoUrl={school?.logo_url}
+        badge={badge}
+        homeHref="/teacher-dashboard"
+        menu={[
+          { href: '/teacher-dashboard', label: 'Dashboard', icon: 'home' },
+          { href: '/kelas', label: 'Kelas Saya', icon: 'class' },
+          { href: '/kelas/buat', label: 'Buat Kelas Baru', icon: 'edit' },
+          { href: '/siswa', label: 'Semua Siswa', icon: 'users' },
+          { href: '/pengaturan/kebiasaan', label: 'Isi Poin Kebiasaan', icon: 'list' },
+          { href: '/pengaturan/tim', label: 'Guru & Kepala Sekolah', icon: 'family' },
+          { href: '/pengaturan', label: 'Pengaturan & Lisensi', icon: 'settings' },
+        ]}
+      />
 
       {showBanner && (
         <div className={`px-5 py-3 text-center text-sm font-semibold ${isExpired ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'}`}>
-          {isExpired
-            ? 'Masa aktif sudah habis. '
-            : `Masa trial tinggal ${days} hari. `}
-          <Link href="/pengaturan" className="underline font-bold">
+          {isExpired ? 'Masa aktif sudah habis. ' : `Masa trial tinggal ${days} hari. `}
+          <Link href="/pengaturan" className="font-bold underline">
             Upgrade ke Pro →
           </Link>
         </div>
       )}
 
-      <TeacherNav />
-      <ExpiredGate
-        expired={isExpired}
-        allowPrefix="/pengaturan"
-        title="Masa aktif habis"
-        message="Data Anda aman. Masukkan kode lisensi untuk lanjut memakai aplikasi."
-        action={{ href: '/pengaturan', label: 'Masukkan Kode Lisensi' }}
-      >
-        {children}
-      </ExpiredGate>
+      <div className="mx-auto max-w-3xl">
+        <ExpiredGate
+          expired={isExpired}
+          allowPrefix="/pengaturan"
+          title="Masa aktif habis"
+          message="Data Anda aman. Masukkan kode lisensi untuk lanjut memakai aplikasi."
+          action={{ href: '/pengaturan', label: 'Masukkan Kode Lisensi' }}
+        >
+          {children}
+        </ExpiredGate>
+      </div>
+
+      <BottomNav
+        items={[
+          { href: '/teacher-dashboard', label: 'Dashboard', icon: 'home' },
+          { href: '/kelas', label: 'Kelas', icon: 'class' },
+          { href: '/siswa', label: 'Siswa', icon: 'users' },
+          { href: '/pengaturan', label: 'Pengaturan', icon: 'settings' },
+        ]}
+      />
     </div>
   )
 }

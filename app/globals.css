@@ -85,3 +85,15 @@ h1, h2, h3, h4 {
 html.big-text body {
   zoom: 1.15;
 }
+
+/* Laci menu hamburger */
+@keyframes drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.drawer-in {
+  animation: drawer-in 0.22s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-in { animation: none; }
+}

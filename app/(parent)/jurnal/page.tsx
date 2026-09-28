@@ -24,7 +24,7 @@ export default async function JurnalPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/90 px-5 py-4 backdrop-blur">
+      <header className="flex items-center justify-between border-b border-line bg-white/90 px-5 py-4 backdrop-blur">
         <div>
           <h1 className="text-lg font-black text-brand-blue">Jurnal</h1>
           <p className="text-sm text-ink-3">{studentName}</p>

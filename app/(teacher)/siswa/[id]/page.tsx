@@ -56,7 +56,7 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
+      <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5">
         <Link href="/teacher-dashboard" className="text-xl text-ink-3">
           ←
         </Link>

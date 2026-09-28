@@ -15,11 +15,9 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, password_changed, schools(name, logo_url)')
+    .select('name, password_changed')
     .eq('id', user!.id)
     .single()
-
-  const school = profile?.schools as unknown as { name: string; logo_url: string | null } | null
 
   const { children, active } = await getChildren(supabase, user!.id)
   const teacherWA = active?.teacherWA ?? null
@@ -87,15 +85,6 @@ export default async function BerandaPage() {
         <div className="pointer-events-none absolute -bottom-6 left-8 h-20 w-20 rounded-full bg-white/[.05]" />
 
         <div className="relative">
-          {school?.name && (
-            <div className="mb-3 flex items-center gap-2">
-              {school.logo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={school.logo_url} alt="" className="h-8 w-8 rounded-lg bg-white object-contain p-0.5" />
-              )}
-              <span className="truncate text-sm font-semibold opacity-90">{school.name}</span>
-            </div>
-          )}
           {active && children.length > 1 ? (
             <ChildSwitcher items={children.map((c) => ({ id: c.id, name: c.name }))} activeId={active.id} />
           ) : null}
