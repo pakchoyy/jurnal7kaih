@@ -2,7 +2,12 @@ import { z } from 'zod'
 
 export const loginSchema = z.object({
   email: z.string().email('Email tidak valid'),
-  password: z.string().min(6, 'Minimal 6 karakter'),
+  password: z.string().min(1, 'Password wajib diisi'),
+})
+
+export const loginNisSchema = z.object({
+  nis: z.string().trim().min(1, 'NIS wajib diisi'),
+  password: z.string().min(1, 'Password wajib diisi'),
 })
 
 export const activateParentSchema = z.object({

@@ -4,7 +4,6 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { loginSchema } from '@/lib/schemas/auth'
 import { getRoleRedirect } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -15,6 +14,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const registered = searchParams.get('registered')
 
+  const [tab, setTab] = useState<'parent' | 'teacher'>('parent')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -22,22 +22,28 @@ function LoginForm() {
     e.preventDefault()
     setError(null)
     const form = new FormData(e.currentTarget)
-    const parsed = loginSchema.safeParse({
-      email: form.get('email'),
-      password: form.get('password'),
-    })
-    if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message ?? 'Input tidak valid')
-      return
+
+    let email: string
+    const password = String(form.get('password') ?? '')
+
+    if (tab === 'parent') {
+      const nis = String(form.get('nis') ?? '').trim()
+      if (!nis) { setError('NIS wajib diisi'); return }
+      if (!password) { setError('Password wajib diisi'); return }
+      email = `${nis}@7kaih.internal`
+    } else {
+      email = String(form.get('email') ?? '').trim()
+      if (!email) { setError('Email wajib diisi'); return }
+      if (!password) { setError('Password wajib diisi'); return }
     }
 
     setLoading(true)
     const supabase = createClient()
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword(parsed.data)
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
 
     if (signInError || !signInData.user) {
-      setError('Email atau password salah')
+      setError(tab === 'parent' ? 'NIS atau password salah' : 'Email atau password salah')
       return
     }
 
@@ -56,20 +62,20 @@ function LoginForm() {
       title="Masuk"
       subtitle="7 Kebiasaan Anak Indonesia Hebat"
       footer={
-        <div className="flex flex-col gap-2 text-sm text-ink-2">
-          <p>
-            Orang Tua punya kode aktivasi?{' '}
-            <Link href="/aktivasi" className="font-semibold text-brand-blue">
-              Aktivasi Akun Ortu
-            </Link>
+        tab === 'teacher' ? (
+          <div className="flex flex-col gap-2 text-sm text-ink-2">
+            <p>
+              Sekolah ingin mencoba?{' '}
+              <Link href="/daftar-trial" className="font-semibold text-brand-teal">
+                Coba Gratis 14 Hari
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-ink-2">
+            Lupa NIS? Hubungi wali kelas via WA.
           </p>
-          <p>
-            Sekolah ingin mencoba?{' '}
-            <Link href="/daftar-trial" className="font-semibold text-brand-teal">
-              Coba Gratis 14 Hari
-            </Link>
-          </p>
-        </div>
+        )
       }
     >
       {registered && (
@@ -78,12 +84,60 @@ function LoginForm() {
         </div>
       )}
 
+      {/* Tab switcher */}
+      <div className="mb-5 flex rounded-btn bg-gray-100 p-1">
+        <button
+          type="button"
+          onClick={() => { setTab('parent'); setError(null) }}
+          className={`flex-1 rounded-[10px] py-2 text-sm font-semibold transition ${
+            tab === 'parent' ? 'bg-white text-ink shadow-sm' : 'text-ink-3'
+          }`}
+        >
+          Orang Tua
+        </button>
+        <button
+          type="button"
+          onClick={() => { setTab('teacher'); setError(null) }}
+          className={`flex-1 rounded-[10px] py-2 text-sm font-semibold transition ${
+            tab === 'teacher' ? 'bg-white text-ink shadow-sm' : 'text-ink-3'
+          }`}
+        >
+          Guru / Admin
+        </button>
+      </div>
+
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Input name="email" type="email" label="Email" placeholder="nama@email.com" required />
-        <Input name="password" type="password" label="Password" placeholder="••••••" required />
+        {tab === 'parent' ? (
+          <Input
+            name="nis"
+            type="text"
+            label="NIS Siswa"
+            placeholder="Nomor Induk Siswa"
+            required
+            inputMode="numeric"
+          />
+        ) : (
+          <Input
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="nama@email.com"
+            required
+          />
+        )}
+
+        <Input
+          name="password"
+          type="password"
+          label={tab === 'parent' ? 'Password (default: NIS)' : 'Password'}
+          placeholder="••••••"
+          required
+        />
+
         {error && (
           <p className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-500">{error}</p>
         )}
+
         <Button type="submit" size="lg" block disabled={loading}>
           {loading ? 'Memproses…' : 'Masuk'}
         </Button>
