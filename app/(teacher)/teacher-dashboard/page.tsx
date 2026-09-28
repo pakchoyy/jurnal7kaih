@@ -4,25 +4,19 @@ import { habitColor, initials, todayISO } from '@/lib/utils'
 import { ReminderCard } from './ReminderCard'
 import { FloatingHabits } from '@/components/ui/FloatingHabits'
 
-type Range = 'today' | 'week' | 'month'
-
-function rangeStart(range: Range): string {
-  const d = new Date()
-  if (range === 'week') d.setDate(d.getDate() - 6)
-  if (range === 'month') d.setDate(d.getDate() - 29)
-  return todayISO(d)
-}
+import { getPeriod, type Range } from '@/lib/period'
+import { PeriodNav } from './PeriodNav'
 
 const RANGE_LABEL: Record<Range, string> = {
-  today: 'Hari Ini',
-  week: 'Minggu',
-  month: 'Bulan',
+  today: 'Harian',
+  week: 'Mingguan',
+  month: 'Bulanan',
 }
 
 export default async function TeacherDashboard({
   searchParams,
 }: {
-  searchParams: { range?: string; kelas?: string }
+  searchParams: { range?: string; kelas?: string; mundur?: string }
 }) {
   const range: Range =
     searchParams.range === 'week' || searchParams.range === 'month' ? searchParams.range : 'today'
@@ -67,15 +61,25 @@ export default async function TeacherDashboard({
     : { data: [] }
 
   const studentIds = (students ?? []).map((s) => s.id)
-  const start = rangeStart(range)
+  const offset = Math.min(520, Math.max(0, parseInt(searchParams.mundur ?? '0', 10) || 0))
+  const period = getPeriod(range, offset)
+  const href = (o: { range?: Range; mundur?: number; kelas?: string | null }) => {
+    const q = new URLSearchParams()
+    q.set('range', o.range ?? range)
+    const m = o.mundur ?? offset
+    if (m > 0) q.set('mundur', String(m))
+    const k = o.kelas === undefined ? selectedClassId : o.kelas
+    if (k) q.set('kelas', k)
+    return `/teacher-dashboard?${q}`
+  }
 
   const { data: journals } = studentIds.length
     ? await supabase
         .from('journals')
         .select('id, student_id, journal_date, status')
         .in('student_id', studentIds)
-        .gte('journal_date', start)
-        .lte('journal_date', todayISO())
+        .gte('journal_date', period.start)
+        .lte('journal_date', period.end)
         .neq('status', 'draft')
     : { data: [] }
 
@@ -123,13 +127,13 @@ export default async function TeacherDashboard({
     if (e.status === 'done') habitCount[e.habit_id] = (habitCount[e.habit_id] ?? 0) + 1
   }
 
+  const daysFilled: Record<string, number> = {}
+  for (const j of journals ?? []) daysFilled[j.student_id] = (daysFilled[j.student_id] ?? 0) + 1
+
   const totalStudents = students?.length ?? 0
   const submittedJournals = journals?.length ?? 0
-  const daysInRange = range === 'today' ? 1 : range === 'week' ? 7 : 30
   const compliance =
-    totalStudents > 0
-      ? Math.round((submittedJournals / (totalStudents * daysInRange)) * 100)
-      : 0
+    totalStudents > 0 ? Math.round((submittedJournals / (totalStudents * period.days)) * 100) : 0
 
   const habitTotal = habits?.length ?? 7
   const denom = Math.max(1, submittedJournals)
@@ -146,19 +150,19 @@ export default async function TeacherDashboard({
             <p className="font-display text-xl font-black leading-tight text-emerald-300">
               {submittedJournals}
             </p>
-            <p className="mt-0.5 text-[10px] text-white/55">Jurnal masuk</p>
+            <p className="mt-0.5 text-[11px] text-white/70">Jurnal masuk</p>
           </div>
           <div className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5">
             <p className="font-display text-xl font-black leading-tight text-white">
               {totalStudents}
             </p>
-            <p className="mt-0.5 text-[10px] text-white/55">Total siswa</p>
+            <p className="mt-0.5 text-[11px] text-white/70">Total siswa</p>
           </div>
           <div className="rounded-[12px] border border-white/10 bg-white/[.08] px-3 py-2.5">
             <p className="font-display text-xl font-black leading-tight text-emerald-300">
               {Math.min(100, compliance)}%
             </p>
-            <p className="mt-0.5 text-[10px] text-white/55">Kepatuhan</p>
+            <p className="mt-0.5 text-[11px] text-white/70">Kepatuhan · {RANGE_LABEL[range].toLowerCase()}</p>
           </div>
         </div>
       </header>
@@ -187,7 +191,7 @@ export default async function TeacherDashboard({
               {classes.map((c) => (
                 <Link
                   key={c.id}
-                  href={`/teacher-dashboard?kelas=${c.id}&range=${range}`}
+                  href={href({ kelas: c.id })}
                   className={`rounded-pill border-[1.5px] px-3.5 py-1.5 text-[11px] font-bold transition ${
                     selectedClassId === c.id
                       ? 'border-brand-blue bg-brand-blue text-white'
@@ -210,15 +214,14 @@ export default async function TeacherDashboard({
         )}
 
         {/* Filter rentang waktu */}
-        <div className="mb-4 flex gap-2">
+        <div className="mb-3 grid grid-cols-3 gap-1 rounded-btn bg-white p-1 shadow-row">
           {(['today', 'week', 'month'] as Range[]).map((r) => (
             <Link
               key={r}
-              href={`/teacher-dashboard?range=${r}${selectedClassId ? `&kelas=${selectedClassId}` : ''}`}
-              className={`rounded-pill border-[1.5px] px-3.5 py-1.5 text-[11px] font-bold transition ${
-                range === r
-                  ? 'border-brand-blue bg-brand-blue text-white'
-                  : 'border-line bg-white text-ink-2'
+              href={href({ range: r, mundur: 0 })}
+              scroll={false}
+              className={`rounded-[10px] py-2.5 text-center text-sm font-bold transition-colors ${
+                range === r ? 'bg-brand-blue text-white' : 'text-ink-2'
               }`}
             >
               {RANGE_LABEL[r]}
@@ -226,9 +229,14 @@ export default async function TeacherDashboard({
           ))}
         </div>
 
-        {/* Rekap per siswa */}
-        <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
-          Rekap Per Siswa
+        <PeriodNav
+          label={period.label}
+          prevHref={href({ mundur: offset + 1 })}
+          nextHref={offset > 0 ? href({ mundur: offset - 1 }) : null}
+        >
+        <div key={`${range}-${offset}`} className="page-enter">
+        <p className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-ink-2">
+          Rekap Per Siswa{range !== 'today' && ` · ${period.days} hari`}
         </p>
 
         {!students || students.length === 0 ? (
@@ -239,35 +247,48 @@ export default async function TeacherDashboard({
           <ul className="stagger flex flex-col gap-2">
             {students.map((s) => {
               const doneSet = studentHabits[s.id] ?? new Set<string>()
-              const done = doneSet.size
+              const filled = daysFilled[s.id] ?? 0
+              const pct = Math.round((filled / period.days) * 100)
               return (
                 <li key={s.id}>
                   <Link
                     href={`/siswa/${s.id}`}
-                    className="flex items-center gap-3 rounded-[12px] bg-white px-3.5 py-2.5 shadow-row"
+                    className="pressable flex items-center gap-3 rounded-[12px] bg-white px-3.5 py-3 shadow-row"
                   >
-                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue text-[11px] font-bold text-white">
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue text-xs font-bold text-white">
                       {initials(s.name)}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-display text-[13px] font-extrabold text-ink">
-                        {s.name}
-                      </p>
-                      <p className="text-[10px] text-ink-3">
-                        {done}/{habitTotal} kebiasaan ✓
-                      </p>
+                      <p className="truncate font-display text-sm font-extrabold text-ink">{s.name}</p>
+                      {range === 'today' ? (
+                        <p className={`text-xs ${filled ? 'text-ink-3' : 'font-semibold text-amber-700'}`}>
+                          {filled ? `${doneSet.size}/${habitTotal} kebiasaan ✓` : 'Belum mengisi'}
+                        </p>
+                      ) : (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
+                            <span
+                              className={`bar-grow block h-full rounded-full ${pct >= 80 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-400'}`}
+                              style={{ width: `${Math.min(100, pct)}%` }}
+                            />
+                          </span>
+                          <span className="text-xs font-semibold text-ink-3">
+                            {filled}/{period.days} hari
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-1">
-                      {(habits ?? []).map((h: any) => (
-                        <span
-                          key={h.id}
-                          className="h-2 w-2 rounded-full"
-                          style={{
-                            background: doneSet.has(h.id) ? habitColor(h.slug) : '#E5E7EB',
-                          }}
-                        />
-                      ))}
-                    </div>
+                    {range === 'today' && (
+                      <div className="flex gap-1">
+                        {(habits ?? []).map((h: any) => (
+                          <span
+                            key={h.id}
+                            className="h-2 w-2 rounded-full"
+                            style={{ background: doneSet.has(h.id) ? habitColor(h.slug) : '#E5E7EB' }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </Link>
                 </li>
               )
@@ -279,7 +300,7 @@ export default async function TeacherDashboard({
         {submittedJournals > 0 && (
           <>
             <p className="mb-3 mt-6 font-display text-xs font-bold uppercase tracking-wide text-ink-2">
-              Kepatuhan Per Kebiasaan · {RANGE_LABEL[range]}
+              Per Kebiasaan · {period.label}
             </p>
             <div className="flex flex-col gap-2.5 rounded-card bg-white p-4 shadow-soft">
               {(habits ?? []).map((h: any) => {
@@ -303,6 +324,8 @@ export default async function TeacherDashboard({
             </div>
           </>
         )}
+        </div>
+        </PeriodNav>
       </div>
     </div>
   )

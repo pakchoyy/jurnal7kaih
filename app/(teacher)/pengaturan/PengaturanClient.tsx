@@ -133,7 +133,7 @@ export default function PengaturanClient({
       </div>
 
       {/* Nomor WhatsApp */}
-      <div className="mb-4 rounded-card bg-white p-5 shadow-soft">
+      <div id="wa" className={`mb-4 scroll-mt-24 rounded-card bg-white p-5 shadow-soft ${wa ? '' : 'ring-2 ring-emerald-400'}`}>
         <p className="mb-1 font-display text-sm font-extrabold text-ink">Nomor WhatsApp Guru</p>
         <p className="mb-3 text-sm text-ink-3">
           Ditampilkan ke orang tua siswa di halaman beranda mereka.

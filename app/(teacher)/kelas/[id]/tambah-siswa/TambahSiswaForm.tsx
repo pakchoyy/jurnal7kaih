@@ -41,7 +41,7 @@ export default function TambahSiswaForm({ classId }: { classId: string }) {
           className={inputCls}
         />
         <p className="mt-1 text-xs text-ink-3">
-          Orang tua login pakai NIS ini. Password awal juga NIS ini.
+          Orang tua login cukup dengan NIS ini.
         </p>
       </div>
 

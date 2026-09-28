@@ -38,7 +38,7 @@ function LoginForm() {
     if (signInError || !data.user) {
       setError(
         tab === 'parent'
-          ? 'NIS atau password salah. Password awal = NIS anak.'
+          ? 'Gagal masuk. Cek NIS atau hubungi wali kelas.'
           : 'Email atau password salah.',
       )
       return
@@ -53,7 +53,7 @@ function LoginForm() {
     setError(null)
     const form = new FormData(e.currentTarget)
     const password = String(form.get('password') ?? '')
-    if (!password) return setError('Password wajib diisi')
+    if (tab === 'teacher' && !password) return setError('Password wajib diisi')
 
     setLoading(true)
     try {
@@ -64,19 +64,20 @@ function LoginForm() {
         return
       }
 
+      // Password ortu dikunci = NIS, jadi ortu cukup mengetik NIS.
+      const nis = String(form.get('nis') ?? '').trim()
+      if (!nis) return setError('NIS wajib diisi')
       const picked = String(form.get('school') ?? '')
       if (picked) {
-        await signIn(picked, password)
+        await signIn(picked, nis)
         return
       }
 
-      const nis = String(form.get('nis') ?? '').trim()
-      if (!nis) return setError('NIS wajib diisi')
       const options = await cariAkunOrtu(nis)
       if (options.length === 0) {
         setError('NIS tidak ditemukan. Cek lagi atau tanyakan ke wali kelas.')
       } else if (options.length === 1) {
-        await signIn(options[0].email, password)
+        await signIn(options[0].email, nis)
       } else {
         setSchoolOptions(options)
         setError(null)
@@ -100,7 +101,7 @@ function LoginForm() {
           </p>
         ) : (
           <p className="text-sm leading-relaxed text-ink-2">
-            Lupa NIS atau password?
+            Lupa NIS?
             <br />
             Tanyakan ke wali kelas lewat WhatsApp.
           </p>
@@ -188,12 +189,13 @@ function LoginForm() {
           </div>
         )}
 
+        {tab === 'teacher' && (
         <div className="flex flex-col gap-1.5">
           <Input
             name="password"
             type={showPassword ? 'text' : 'password'}
             label="Password"
-            placeholder={tab === 'parent' ? 'Password awal = NIS' : '••••••'}
+            placeholder="••••••"
             autoComplete="current-password"
             required
             className="py-3 text-base"
@@ -203,6 +205,7 @@ function LoginForm() {
             Tampilkan password
           </label>
         </div>
+        )}
 
         {error && (
           <p role="alert" className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-600">

@@ -16,7 +16,7 @@ export default async function BerandaPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, password_changed')
+    .select('name')
     .eq('id', user!.id)
     .single()
 
@@ -120,18 +120,6 @@ export default async function BerandaPage() {
       </header>
 
       <div className="px-5 py-5">
-        {profile && !profile.password_changed && (
-          <Link
-            href="/profil/ganti-password"
-            className="mb-4 flex items-center gap-3 rounded-card border border-amber-200 bg-amber-50 p-4"
-          >
-            <span className="text-2xl">🔑</span>
-            <span className="flex-1 text-sm text-amber-900">
-              <b>Password Anda masih NIS anak.</b> Ketuk di sini untuk menggantinya.
-            </span>
-          </Link>
-        )}
-
         {children.length === 0 ? (
           <div className="rounded-card bg-white p-6 text-center shadow-soft">
             <p className="text-base text-ink-2">Akun belum terhubung ke data anak.</p>
@@ -197,6 +185,11 @@ export default async function BerandaPage() {
             </ul>
 
             {/* Kontak Wali Kelas */}
+            {!teacherWA && active && (
+              <div className="mt-5 rounded-[12px] border border-dashed border-line bg-white p-4 text-sm text-ink-3">
+                💬 Wali kelas {teacherName ? `(${teacherName}) ` : ''}belum mencantumkan nomor WhatsApp di aplikasi.
+              </div>
+            )}
             {teacherWA && (
               <div className="mt-5 rounded-[12px] border border-line bg-white p-4 shadow-row">
                 <p className="mb-0.5 text-xs font-bold uppercase tracking-wide text-ink-3">Wali Kelas</p>

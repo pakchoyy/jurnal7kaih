@@ -40,7 +40,7 @@ export default async function KartuLoginPage({ params }: { params: { id: string 
         </div>
       </div>
       <p className="no-print mb-4 text-sm text-ink-2">
-        Cetak lalu gunting, bagikan ke orang tua. Password awal = NIS, orang tua diminta menggantinya setelah login.
+        Cetak lalu gunting, bagikan ke orang tua. Orang tua cukup memasukkan NIS, tanpa password.
       </p>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 print:grid-cols-2">
@@ -59,9 +59,6 @@ export default async function KartuLoginPage({ params }: { params: { id: string 
               </p>
               <p>
                 NIS: <b className="font-mono text-base">{s.student_number}</b>
-              </p>
-              <p>
-                Password awal: <b className="font-mono text-base">{s.student_number}</b>
               </p>
             </div>
           </div>

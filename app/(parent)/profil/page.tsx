@@ -101,14 +101,6 @@ export default async function ProfilPage() {
           <InstallCard />
         </div>
 
-        <Link
-          href="/profil/ganti-password"
-          className="mt-4 flex items-center justify-between rounded-card bg-white p-4 text-base font-semibold text-ink shadow-soft"
-        >
-          🔑 Ganti Password
-          <span className="text-ink-3">›</span>
-        </Link>
-
         <div className="mt-4">
           <LogoutButton />
         </div>
