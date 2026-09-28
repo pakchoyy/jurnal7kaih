@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import { calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
+import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
+import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ProgressRing } from '@/components/ui/ProgressRing'
 
 export default async function BerandaPage() {
@@ -33,6 +34,7 @@ export default async function BerandaPage() {
 
   const firstChild = children[0]?.id
   let streak = 0
+  let best = 0
   let todayDone = false
   let doneCount = 0
 
@@ -56,6 +58,7 @@ export default async function BerandaPage() {
 
     const dates = ((journals ?? []) as Array<{ journal_date: string }>).map((j) => j.journal_date)
     streak = calculateStreak(dates)
+    best = bestStreak(dates)
     todayDone = dates.includes(todayISO())
 
     // Ambil jurnal hari ini + entry untuk progress
@@ -157,6 +160,10 @@ export default async function BerandaPage() {
               </div>
               <span className="text-2xl">{todayDone ? '✅' : '📝'}</span>
             </Link>
+
+            <div className="mb-5">
+              <BadgeShelf best={best} current={streak} compact />
+            </div>
 
             {/* Preview kebiasaan hari ini */}
             <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ink-2">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { simpanWhatsapp, pakaiLicenseKey } from './actions'
+import Link from 'next/link'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
 
 const PLAN_LABEL: Record<string, string> = {
@@ -93,6 +94,18 @@ export default function PengaturanClient({
           <p className="mt-0.5 text-xs text-ink-3">Aktif hingga {formatDate(activeUntil)}</p>
         )}
       </div>
+
+      <Link
+        href="/pengaturan/kebiasaan"
+        className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
+      >
+        <span className="text-2xl">📝</span>
+        <span className="flex-1">
+          <span className="block text-base font-bold text-ink">Isi Poin Kebiasaan</span>
+          <span className="block text-sm text-ink-3">Atur pilihan tiap kebiasaan, mis. Beribadah → Sholat, Doa</span>
+        </span>
+        <span className="text-ink-3">›</span>
+      </Link>
 
       <div className="mb-4">
         <InstallCard />

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
-import { parseHabitNote } from '@/lib/schemas/habits'
+import { describeHabitNote } from '@/lib/schemas/habits'
 import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
 
 export default async function JurnalDetailPage({ params }: { params: { id: string } }) {
@@ -46,7 +46,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
         </Link>
         <div>
           <h1 className="text-base font-black text-brand-blue">{studentName}</h1>
-          <p className="text-[11px] text-ink-3">{formatDateID(journal.journal_date)}</p>
+          <p className="text-sm text-ink-3">{formatDateID(journal.journal_date)}</p>
         </div>
       </header>
 
@@ -66,17 +66,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
               icon: string
               color: string
             } | null
-            let noteText = ''
-            if (habit && e.note) {
-              try {
-                const parsed = parseHabitNote(habit.slug, e.note) as Record<string, unknown>
-                noteText = Object.entries(parsed)
-                  .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-                  .join(' · ')
-              } catch {
-                noteText = e.note
-              }
-            }
+            const info = describeHabitNote(habit?.slug ?? '', e.note)
             const color = habitColor(habit?.slug ?? '')
             const done = e.status === 'done'
             return (
@@ -86,7 +76,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
                 style={{ borderLeft: `4px solid ${color}` }}
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-display text-sm font-extrabold text-ink">
+                  <span className="flex items-center gap-2 font-display text-base font-extrabold text-ink">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg text-base"
                       style={{ background: habitLight(habit?.slug ?? '') }}>
                       {habit?.icon ?? '•'}
@@ -94,7 +84,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
                     {habit?.name}
                   </span>
                   <span
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-bold"
+                    className="rounded-full px-2.5 py-1 text-xs font-bold"
                     style={{
                       background: done ? habitLight(habit?.slug ?? '') : '#F3F4F6',
                       color: done ? color : '#9CA3AF',
@@ -103,7 +93,24 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
                     {done ? 'Selesai' : 'Belum'}
                   </span>
                 </div>
-                {noteText && <p className="mt-2 break-words text-xs text-ink-2">{noteText}</p>}
+                {info.items.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {info.items.map((it) => (
+                      <span
+                        key={it}
+                        className="rounded-pill px-2.5 py-1 text-xs font-semibold"
+                        style={{ background: habitLight(habit?.slug ?? ''), color }}
+                      >
+                        ✓ {it}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {info.details.map(([label, value]) => (
+                  <p key={label} className="mt-1.5 break-words text-sm text-ink-2">
+                    <span className="font-semibold text-ink">{label}:</span> {value}
+                  </p>
+                ))}
               </li>
             )
           })}

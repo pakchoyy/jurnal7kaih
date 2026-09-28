@@ -41,6 +41,16 @@ export async function saveJournal(input: SaveJournalInput): Promise<SaveJournalR
 
   const journalDate = todayISO()
 
+  const notes: Array<string | null> = []
+  for (const e of input.entries) {
+    try {
+      notes.push(e.note != null ? validateHabitNote(e.slug, e.note) : null)
+    } catch (err) {
+      return { ok: false, error: `Isian "${e.slug.replace('-', ' ')}" belum benar: ${(err as Error).message}` }
+    }
+    if (e.status !== 'done' && e.status !== 'not_done') return { ok: false, error: 'Status tidak valid' }
+  }
+
   const { data: journal, error: jErr } = await supabase
     .from('journals')
     .upsert(
@@ -49,7 +59,7 @@ export async function saveJournal(input: SaveJournalInput): Promise<SaveJournalR
         student_id: input.studentId,
         journal_date: journalDate,
         created_by: user.id,
-        parent_note: input.parentNote ?? null,
+        parent_note: input.parentNote?.trim().slice(0, 1000) || null,
         status: input.submit ? 'submitted' : 'draft',
         submitted_at: input.submit ? new Date().toISOString() : null,
       },
@@ -59,23 +69,12 @@ export async function saveJournal(input: SaveJournalInput): Promise<SaveJournalR
     .single()
   if (jErr || !journal) return { ok: false, error: jErr?.message ?? 'Gagal simpan jurnal' }
 
-  const rows = []
-  for (const e of input.entries) {
-    let noteStr: string | null = null
-    if (e.status === 'done' && e.note != null) {
-      try {
-        noteStr = validateHabitNote(e.slug, e.note)
-      } catch (err) {
-        return { ok: false, error: `Data "${e.slug}" tidak valid: ${(err as Error).message}` }
-      }
-    }
-    rows.push({
-      journal_id: journal.id,
-      habit_id: e.habitId,
-      status: e.status,
-      note: noteStr,
-    })
-  }
+  const rows = input.entries.map((e, i) => ({
+    journal_id: journal.id,
+    habit_id: e.habitId,
+    status: e.status,
+    note: notes[i],
+  }))
 
   const { error: eErr } = await supabase
     .from('journal_entries')

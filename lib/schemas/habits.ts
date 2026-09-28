@@ -2,74 +2,89 @@ import { z } from 'zod'
 
 /**
  * Validasi `journal_entries.note` (JSON string) per kebiasaan.
- * Key WAJIB snake_case persis sesuai CONTEXT-7KAIH.md.
+ * Semua detail opsional: ortu boleh cukup mencentang kebiasaan / pilihan.
  */
 
-const timeRe = /^([01]\d|2[0-3]):[0-5]\d$/ // HH:mm 24 jam
+const timeOrEmpty = z
+  .string()
+  .regex(/^(([01]\d|2[0-3]):[0-5]\d)?$/, 'Format jam harus JJ:MM')
+  .optional()
+const text = (max = 200) => z.string().trim().max(max, `Maksimal ${max} karakter`).optional()
 
-// A. Bangun Pagi
-export const bangunPagiSchema = z.object({
-  wake_time: z.string().regex(timeRe, 'Format jam harus HH:mm'),
+const base = z.object({
+  items: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
+  catatan: text(300),
 })
 
-// B. Beribadah
-export const beribadahSchema = z.object({
-  activities: z.array(z.string().min(1)).min(1, 'Pilih minimal satu kegiatan'),
-})
-
-// C. Berolahraga
-export const berolahragaSchema = z.object({
-  activity: z.string().min(1, 'Olahraga apa?'),
-  feeling: z.string().optional(),
-})
-
-// D. Makan Sehat
-export const makanSehatSchema = z.object({
-  breakfast: z.string().optional(),
-  lunch: z.string().optional(),
-  dinner: z.string().optional(),
-})
-
-// E. Gemar Belajar
-export const gemarBelajarSchema = z.object({
-  subject: z.string().min(1, 'Belajar apa?'),
-  duration: z.string().min(1, 'Berapa lama?'),
-})
-
-// F. Bermasyarakat
-export const bermasyarakatSchema = z.object({
-  activity: z.string().min(1, 'Kegiatan bermasyarakat apa?'),
-})
-
-// G. Tidur Cepat
-export const tidurCepatSchema = z.object({
-  sleep_time: z.string().regex(timeRe, 'Format jam harus HH:mm'),
-})
-
-/** Map slug habit -> schema */
 export const habitNoteSchemas = {
-  'bangun-pagi': bangunPagiSchema,
-  beribadah: beribadahSchema,
-  berolahraga: berolahragaSchema,
-  'makan-sehat': makanSehatSchema,
-  'gemar-belajar': gemarBelajarSchema,
-  bermasyarakat: bermasyarakatSchema,
-  'tidur-cepat': tidurCepatSchema,
+  'bangun-pagi': base.extend({ wake_time: timeOrEmpty }),
+  beribadah: base.extend({ activities: z.array(z.string().max(60)).max(30).optional() }),
+  berolahraga: base.extend({ activity: text(), feeling: text() }),
+  'makan-sehat': base.extend({ breakfast: text(), lunch: text(), dinner: text() }),
+  'gemar-belajar': base.extend({ subject: text(), duration: text(60) }),
+  bermasyarakat: base.extend({ activity: text() }),
+  'tidur-cepat': base.extend({ sleep_time: timeOrEmpty }),
 } as const
 
 export type HabitSlug = keyof typeof habitNoteSchemas
 
-/** Validasi + stringify note untuk sebuah habit. Throw bila invalid. */
-export function validateHabitNote(slug: string, note: unknown): string {
-  const schema = habitNoteSchemas[slug as HabitSlug]
-  if (!schema) throw new Error(`Habit tidak dikenal: ${slug}`)
-  return JSON.stringify(schema.parse(note))
+const FIELD_LABELS: Record<string, string> = {
+  wake_time: 'Jam bangun',
+  sleep_time: 'Jam tidur',
+  activity: 'Kegiatan',
+  feeling: 'Perasaan',
+  breakfast: 'Sarapan',
+  lunch: 'Makan siang',
+  dinner: 'Makan malam',
+  subject: 'Belajar',
+  duration: 'Lama',
+  catatan: 'Catatan',
 }
 
-/** Parse note JSON string yang tersimpan. */
-export function parseHabitNote(slug: string, raw: string | null): unknown {
-  if (!raw) return null
+function stripEmpty(obj: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => (Array.isArray(v) ? v.length > 0 : v !== '' && v != null)),
+  )
+}
+
+/** Validasi + stringify note. Kembalikan null bila kosong. Throw bila invalid. */
+export function validateHabitNote(slug: string, note: unknown): string | null {
   const schema = habitNoteSchemas[slug as HabitSlug]
-  const parsed = JSON.parse(raw)
-  return schema ? schema.parse(parsed) : parsed
+  if (!schema) throw new Error(`Kebiasaan tidak dikenal: ${slug}`)
+  const result = schema.safeParse(note ?? {})
+  if (!result.success) throw new Error(result.error.errors[0]?.message ?? 'Data tidak valid')
+  const clean = stripEmpty(result.data as Record<string, unknown>)
+  return Object.keys(clean).length ? JSON.stringify(clean) : null
+}
+
+/** Parse note JSON yang tersimpan (toleran terhadap data lama). */
+export function parseHabitNote(slug: string, raw: string | null): Record<string, unknown> {
+  if (!raw) return {}
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    return { catatan: raw }
+  }
+  const schema = habitNoteSchemas[slug as HabitSlug]
+  const result = schema?.safeParse(parsed)
+  const data = (result?.success ? result.data : parsed) as Record<string, unknown>
+  // Data lama Beribadah menyimpan pilihan di `activities`.
+  if (Array.isArray(data.activities) && !data.items) {
+    return { ...data, items: data.activities, activities: undefined }
+  }
+  return data ?? {}
+}
+
+/** Ubah note jadi tampilan: daftar pilihan + detail berlabel. */
+export function describeHabitNote(
+  slug: string,
+  raw: string | null,
+): { items: string[]; details: Array<[string, string]> } {
+  const data = parseHabitNote(slug, raw)
+  const items = Array.isArray(data.items) ? (data.items as string[]) : []
+  const details = Object.entries(data)
+    .filter(([k, v]) => k !== 'items' && k !== 'activities' && typeof v === 'string' && v)
+    .map(([k, v]) => [FIELD_LABELS[k] ?? k, String(v)] as [string, string])
+  return { items, details }
 }
