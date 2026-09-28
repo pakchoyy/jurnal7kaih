@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Role = 'super_admin' | 'school_admin' | 'teacher' | 'parent'
+export type Role = 'super_admin' | 'teacher' | 'principal' | 'parent'
 
 export type LicensePlan = 'trial' | 'semester' | 'annual' | 'lifetime'
 

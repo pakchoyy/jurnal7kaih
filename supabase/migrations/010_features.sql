@@ -42,3 +42,44 @@ CREATE POLICY "journal_photos_select" ON journal_photos FOR SELECT USING (
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES ('journal-photos', 'journal-photos', FALSE, 2097152, ARRAY['image/jpeg', 'image/webp', 'image/png'])
 ON CONFLICT (id) DO NOTHING;
+
+-- Peran kepala sekolah
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check
+  CHECK (role IN ('super_admin', 'school_admin', 'teacher', 'principal', 'parent'));
+
+-- Rekap untuk kepala sekolah (agregat, dibatasi ke sekolahnya sendiri)
+CREATE OR REPLACE FUNCTION principal_class_stats(p_today DATE)
+RETURNS TABLE (class_id UUID, class_name TEXT, grade INT, teacher_name TEXT,
+               total_students BIGINT, today_count BIGINT, week_count BIGINT)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT c.id, c.name, c.grade, u.name,
+    (SELECT COUNT(*) FROM students s WHERE s.class_id = c.id AND s.status = 'active'),
+    (SELECT COUNT(*) FROM journals j JOIN students s ON s.id = j.student_id
+      WHERE s.class_id = c.id AND j.status <> 'draft' AND j.journal_date = p_today),
+    (SELECT COUNT(*) FROM journals j JOIN students s ON s.id = j.student_id
+      WHERE s.class_id = c.id AND j.status <> 'draft' AND j.journal_date BETWEEN p_today - 6 AND p_today)
+  FROM classes c
+  JOIN academic_years ay ON ay.id = c.academic_year_id AND ay.is_active
+  LEFT JOIN users u ON u.id = c.homeroom_teacher_id
+  WHERE c.school_id = auth_school_id() AND auth_role() = 'principal'
+  ORDER BY c.grade, c.name;
+$$;
+
+CREATE OR REPLACE FUNCTION principal_habit_stats(p_from DATE)
+RETURNS TABLE (habit_id UUID, done_count BIGINT, journal_count BIGINT)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  WITH js AS (
+    SELECT id FROM journals
+    WHERE school_id = auth_school_id() AND status <> 'draft' AND journal_date >= p_from
+      AND auth_role() = 'principal'
+  )
+  SELECT h.id,
+    (SELECT COUNT(*) FROM journal_entries e WHERE e.habit_id = h.id AND e.status = 'done'
+      AND e.journal_id IN (SELECT id FROM js)),
+    (SELECT COUNT(*) FROM js)
+  FROM habits h WHERE h.is_active ORDER BY h.sort_order;
+$$;
+
+GRANT EXECUTE ON FUNCTION principal_class_stats(DATE) TO authenticated;
+GRANT EXECUTE ON FUNCTION principal_habit_stats(DATE) TO authenticated;

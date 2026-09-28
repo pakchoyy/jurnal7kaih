@@ -117,7 +117,7 @@ function LoginForm() {
         {(
           [
             ['parent', 'Orang Tua'],
-            ['teacher', 'Guru'],
+            ['teacher', 'Guru / Kepsek'],
           ] as const
         ).map(([key, label]) => (
           <button
