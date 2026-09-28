@@ -43,18 +43,10 @@ export default function TambahAnakPage() {
         ) : (
           <form action={action} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft">
             <p className="text-sm text-ink-2">
-              Punya anak lain di sekolah yang sama? Masukkan NIS dan password akun anak tersebut (password awal = NIS).
-              Setelah itu cukup login dengan satu akun.
+              Punya anak lain di sekolah yang sama? Masukkan NIS-nya. Setelah itu cukup login dengan satu akun dan
+              ganti anak lewat tombol nama di Beranda.
             </p>
             <Input name="nis" label="NIS Kakak / Adik" inputMode="numeric" autoComplete="off" required className="py-3 text-base" />
-            <Input
-              name="password"
-              type="password"
-              label="Password akun anak tersebut"
-              autoComplete="off"
-              required
-              className="py-3 text-base"
-            />
             {state?.error && (
               <p role="alert" className="rounded-btn bg-red-50 p-3 text-sm font-semibold text-red-600">
                 {state.error}

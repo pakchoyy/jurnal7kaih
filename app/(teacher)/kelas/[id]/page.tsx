@@ -123,7 +123,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
 
       {students && students.length > 0 && (
         <div className="mt-4 rounded-[12px] border border-amber-200 bg-amber-50 p-3.5 text-sm text-amber-900">
-          💡 Orang tua login di tab <b>Orang Tua</b> pakai NIS anak. Password awal = NIS. Kirimkan info ini lewat WA.
+          💡 Orang tua login di tab <b>Orang Tua</b> cukup dengan NIS anak (tanpa password). Kirimkan info ini lewat WA.
         </div>
       )}
     </div>

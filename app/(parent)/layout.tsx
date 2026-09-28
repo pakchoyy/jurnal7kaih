@@ -41,7 +41,6 @@ export default async function ParentLayout({ children }: { children: React.React
           { href: '/jurnal', label: 'Daftar Jurnal', icon: 'list' },
           { href: '/riwayat', label: 'Progres & Lencana', icon: 'badge' },
           { href: '/profil/tambah-anak', label: 'Tambah Kakak / Adik', icon: 'family' },
-          { href: '/profil/ganti-password', label: 'Ganti Password', icon: 'key' },
           { href: '/profil', label: 'Profil & Pengaturan', icon: 'settings' },
         ]}
       />

@@ -2,12 +2,10 @@
 
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ACTIVE_CHILD_COOKIE } from '@/lib/activeChild'
-import { parentEmail } from '@/lib/parentAccount'
-import { isValidNIS, toAuthPassword } from '@/lib/utils'
+import { isValidNIS } from '@/lib/utils'
 
 function setActive(studentId: string) {
   cookies().set(ACTIVE_CHILD_COOKIE, studentId, {
@@ -40,9 +38,7 @@ export type LinkState = { error?: string; ok?: string } | null
 
 export async function hubungkanAnak(_prev: LinkState, formData: FormData): Promise<LinkState> {
   const nis = String(formData.get('nis') ?? '').trim()
-  const password = String(formData.get('password') ?? '')
   if (!isValidNIS(nis)) return { error: 'NIS tidak valid' }
-  if (!password) return { error: 'Password wajib diisi' }
 
   const supabase = createServerClient()
   const {
@@ -67,17 +63,6 @@ export async function hubungkanAnak(_prev: LinkState, formData: FormData): Promi
     .eq('status', 'active')
     .maybeSingle()
   if (!sibling) return { error: 'NIS tidak ditemukan di sekolah ini' }
-
-  // Bukti kepemilikan: password akun ortu anak tersebut harus benar.
-  const probe = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-  const { error: authErr } = await probe.auth.signInWithPassword({
-    email: parentEmail(nis, schoolCode),
-    password: toAuthPassword(password),
-  })
-  if (authErr) return { error: 'NIS atau password anak tersebut salah' }
-  await probe.auth.signOut({ scope: 'local' })
 
   const { error } = await admin
     .from('student_parents')

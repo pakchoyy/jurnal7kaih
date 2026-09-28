@@ -62,7 +62,7 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
       <div className="mb-5 rounded-[12px] bg-amber-50 p-4 text-[12px] text-amber-700">
         <p className="mb-1 font-bold">Format kolom Excel:</p>
         <p>Baris pertama = judul kolom: <b>Nama</b>, <b>NIS</b>, <b>NISN</b> (boleh kosong), <b>Jenis Kelamin</b> (L/P).</p>
-        <p className="mt-1">Akun orang tua otomatis dibuat. Login pakai NIS, password awal = NIS.</p>
+        <p className="mt-1">Akun orang tua otomatis dibuat. Ortu login cukup dengan NIS anak.</p>
         <a
           href={`/api/export-siswa?classId=${params.id}`}
           className="mt-2 inline-block font-semibold underline"

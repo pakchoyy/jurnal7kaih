@@ -20,7 +20,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
 
   const { data: profile } = await supabase
     .from('users')
-    .select('role, name, schools(name, plan, active_until, logo_url, theme_color)')
+    .select('role, name, whatsapp, schools(name, plan, active_until, logo_url, theme_color)')
     .eq('id', user.id)
     .single()
   if (profile?.role !== 'teacher') redirect('/login')
@@ -66,6 +66,19 @@ export default async function TeacherLayout({ children }: { children: React.Reac
             Upgrade ke Pro →
           </Link>
         </div>
+      )}
+
+      {!profile?.whatsapp && (
+        <Link
+          href="/pengaturan#wa"
+          className="flex items-center gap-3 bg-emerald-50 px-5 py-3 text-sm text-emerald-900"
+        >
+          <span className="float-y text-xl">💬</span>
+          <span className="flex-1">
+            <b>Nomor WA Anda belum diisi.</b> Isi sekarang agar orang tua bisa langsung menghubungi Anda dari aplikasi.
+          </span>
+          <span className="font-bold">Isi →</span>
+        </Link>
       )}
 
       <div className="mx-auto max-w-3xl">

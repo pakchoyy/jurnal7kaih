@@ -23,7 +23,7 @@ export async function simpanWhatsapp(formData: FormData) {
     .eq('id', user.id)
   if (error) return { error: error.message }
 
-  revalidatePath('/pengaturan')
+  revalidatePath('/', 'layout')
   return { ok: true }
 }
 
