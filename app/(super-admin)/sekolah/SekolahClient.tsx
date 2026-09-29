@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createSchoolManual, extendSchoolLicense } from './actions'
+import { adjustSchoolLicense, createSchoolManual, extendSchoolLicense, type LicenseAdjust } from './actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { daysUntil, formatDateID } from '@/lib/utils'
@@ -52,6 +52,24 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
       return
     }
     setShowAddModal(false)
+    router.refresh()
+  }
+
+  async function handleAdjust(schoolId: string, name: string, mode: LicenseAdjust) {
+    const label: Record<LicenseAdjust, string> = {
+      minus1: 'kurangi 1 bulan',
+      minus6: 'kurangi 6 bulan',
+      trial: 'reset ke trial 14 hari dari sekarang',
+      expire: 'nonaktifkan sekarang (masa aktif habis)',
+    }
+    if (!confirm(`${name}: ${label[mode]}?`)) return
+    setLoading(schoolId)
+    const res = await adjustSchoolLicense(schoolId, mode)
+    setLoading(null)
+    if (!res.ok) {
+      alert(res.error ?? 'Gagal')
+      return
+    }
     router.refresh()
   }
 
@@ -209,6 +227,26 @@ export function SekolahClient({ schools }: { schools: SchoolItem[] }) {
                   >
                     +1 Tahun
                   </button>
+                </div>
+                <div className="mt-2 grid grid-cols-4 gap-1.5">
+                  {(
+                    [
+                      ['minus1', '−1 Bln', 'text-amber-700 border-amber-200 bg-amber-50'],
+                      ['minus6', '−6 Bln', 'text-amber-700 border-amber-200 bg-amber-50'],
+                      ['trial', 'Reset Trial', 'text-sky-700 border-sky-200 bg-sky-50'],
+                      ['expire', 'Nonaktif', 'text-red-600 border-red-200 bg-red-50'],
+                    ] as const
+                  ).map(([mode, label, cls]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      disabled={loading === s.id}
+                      onClick={() => handleAdjust(s.id, s.name, mode)}
+                      className={`rounded-btn border-[1.5px] px-1 py-1.5 text-[11px] font-bold disabled:opacity-50 ${cls}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </li>
             )
