@@ -74,3 +74,43 @@ export async function extendSchoolLicense(
   if (error) return { ok: false, error: error.message }
   return { ok: true }
 }
+
+export type LicenseAdjust = 'minus1' | 'minus6' | 'trial' | 'expire'
+
+/**
+ * Super Admin: kurangi masa aktif, reset ke trial 14 hari, atau nonaktifkan sekarang.
+ */
+export async function adjustSchoolLicense(schoolId: string, mode: LicenseAdjust): Promise<ExtendResult> {
+  const supabase = createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Belum login' }
+
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'super_admin') return { ok: false, error: 'Bukan Super Admin' }
+
+  const { data: school } = await supabase.from('schools').select('active_until, plan').eq('id', schoolId).single()
+  if (!school) return { ok: false, error: 'Sekolah tidak ditemukan' }
+
+  const now = new Date()
+  let until: Date
+  let plan = school.plan as string
+  if (mode === 'trial') {
+    until = new Date(now)
+    until.setDate(until.getDate() + 14)
+    plan = 'trial'
+  } else if (mode === 'expire') {
+    until = new Date(now.getTime() - 60_000)
+  } else {
+    until = school.active_until ? new Date(school.active_until) : new Date(now)
+    until.setMonth(until.getMonth() - (mode === 'minus6' ? 6 : 1))
+  }
+
+  const { error } = await supabase
+    .from('schools')
+    .update({ active_until: until.toISOString(), plan })
+    .eq('id', schoolId)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
