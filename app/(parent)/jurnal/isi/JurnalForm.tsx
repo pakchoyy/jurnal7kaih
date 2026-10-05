@@ -66,6 +66,14 @@ export function JurnalForm({
     if (d < minDate || d > today || d === journalDate) return
     router.push(d === today ? '/jurnal/isi' : `/jurnal/isi?tanggal=${d}`)
   }
+  function dateUrl(d: string) {
+    return d === today ? '/jurnal/isi' : `/jurnal/isi?tanggal=${d}`
+  }
+  // Prefetch diam-diam agar pindah hari terasa instan.
+  function warmDates() {
+    if (canPrev) router.prefetch(dateUrl(shiftISO(journalDate, -1)))
+    if (canNext) router.prefetch(dateUrl(shiftISO(journalDate, 1)))
+  }
 
   const initial = useMemo(() => {
     const map: Record<string, EntryState> = {}
@@ -179,6 +187,8 @@ export function JurnalForm({
             aria-label="Hari sebelumnya"
             disabled={!canPrev}
             onClick={() => goDate(shiftISO(journalDate, -1))}
+            onMouseEnter={warmDates}
+            onTouchStart={warmDates}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
           >
             ‹
@@ -197,6 +207,8 @@ export function JurnalForm({
             aria-label="Hari berikutnya"
             disabled={!canNext}
             onClick={() => goDate(shiftISO(journalDate, 1))}
+            onMouseEnter={warmDates}
+            onTouchStart={warmDates}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
           >
             ›
