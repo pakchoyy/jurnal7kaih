@@ -189,7 +189,7 @@ export function JurnalForm({
             onClick={() => goDate(shiftISO(journalDate, -1))}
             onMouseEnter={warmDates}
             onTouchStart={warmDates}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
+            className="flex h-10 w-10 touch-manipulation select-none items-center justify-center rounded-full bg-white/20 text-xl font-black transition active:scale-90 disabled:opacity-30"
           >
             ‹
           </button>
@@ -209,7 +209,7 @@ export function JurnalForm({
             onClick={() => goDate(shiftISO(journalDate, 1))}
             onMouseEnter={warmDates}
             onTouchStart={warmDates}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
+            className="flex h-10 w-10 touch-manipulation select-none items-center justify-center rounded-full bg-white/20 text-xl font-black transition active:scale-90 disabled:opacity-30"
           >
             ›
           </button>
