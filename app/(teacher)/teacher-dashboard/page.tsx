@@ -32,15 +32,17 @@ export default async function TeacherDashboard({
     .select('name, school_id')
     .eq('id', user!.id)
     .single()
-  const cal = await getSchoolCalendar(supabase, profile?.school_id ?? '')
 
-  // Semua kelas milik guru ini
-  const { data: allClasses } = await supabase
-    .from('classes')
-    .select('id, name, grade, academic_years(is_active)')
-    .eq('homeroom_teacher_id', user!.id)
-    .order('grade')
-    .order('name')
+  // Profil + kalender + daftar kelas: tidak saling bergantung → paralel.
+  const [{ data: allClasses }, cal] = await Promise.all([
+    supabase
+      .from('classes')
+      .select('id, name, grade, academic_years(is_active)')
+      .eq('homeroom_teacher_id', user!.id)
+      .order('grade')
+      .order('name'),
+    getSchoolCalendar(supabase, profile?.school_id ?? ''),
+  ])
 
   const activeYear = (allClasses ?? []).filter(
     (c) => (c.academic_years as unknown as { is_active: boolean } | null)?.is_active,
@@ -53,14 +55,21 @@ export default async function TeacherDashboard({
 
   const classIds = selectedClassId ? [selectedClassId] : []
 
-  const { data: students } = classIds.length
-    ? await supabase
-        .from('students')
-        .select('id, name')
-        .in('class_id', classIds)
-        .eq('status', 'active')
-        .order('name')
-    : { data: [] }
+  // Siswa kelas terpilih + daftar kebiasaan: paralel.
+  const [{ data: students }, { data: habits }] = classIds.length
+    ? await Promise.all([
+        supabase
+          .from('students')
+          .select('id, name')
+          .in('class_id', classIds)
+          .eq('status', 'active')
+          .order('name'),
+        supabase.from('habits').select('id, slug, name, icon').eq('is_active', true).order('sort_order'),
+      ])
+    : [
+        { data: [] as { id: string; name: string }[] },
+        { data: [] as { id: string; slug: string; name: string; icon: string }[] },
+      ]
 
   const studentIds = (students ?? []).map((s) => s.id)
   const offset = Math.min(520, Math.max(0, parseInt(searchParams.mundur ?? '0', 10) || 0))
@@ -79,33 +88,41 @@ export default async function TeacherDashboard({
     return `/teacher-dashboard?${q}`
   }
 
-  const { data: journals } = studentIds.length
-    ? await supabase
-        .from('journals')
-        .select('id, student_id, journal_date, status')
-        .in('student_id', studentIds)
-        .gte('journal_date', period.start)
-        .lte('journal_date', period.end)
-        .neq('status', 'draft')
-    : { data: [] }
-
+  // Jurnal periode + pengingat hari ini: paralel. Bila periode = hari ini,
+  // pengingat dihitung dari hasil yang sama (hemat 1 round-trip).
   const todayStr = todayISO()
-  const { data: todayJournals } = studentIds.length
-    ? await supabase
-        .from('journals')
-        .select('student_id')
-        .in('student_id', studentIds)
-        .eq('journal_date', todayStr)
-        .neq('status', 'draft')
-    : { data: [] as { student_id: string }[] }
-  const filledToday = new Set((todayJournals ?? []).map((j) => j.student_id))
+  const needToday = range !== 'today'
+  const [{ data: journals }, { data: todayJournals }] = studentIds.length
+    ? await Promise.all([
+        supabase
+          .from('journals')
+          .select('id, student_id, journal_date, status')
+          .in('student_id', studentIds)
+          .gte('journal_date', period.start)
+          .lte('journal_date', period.end)
+          .neq('status', 'draft'),
+        needToday
+          ? supabase
+              .from('journals')
+              .select('student_id')
+              .in('student_id', studentIds)
+              .eq('journal_date', todayStr)
+              .neq('status', 'draft')
+          : Promise.resolve({ data: [] as { student_id: string }[] }),
+      ])
+    : [{ data: [] }, { data: [] as { student_id: string }[] }]
+
+  const filledToday = new Set(
+    (needToday ? todayJournals : journals)?.map((j) => j.student_id) ?? [],
+  )
   const notFilledToday = (students ?? []).filter((s) => !filledToday.has(s.id)).map((s) => s.name)
 
   const journalIds = (journals ?? []).map((j) => j.id)
+  // Tanpa join habits: nama/ikon diambil dari query habits tersendiri (payload jauh kecil).
   const { data: entries } = journalIds.length
     ? await supabase
         .from('journal_entries')
-        .select('journal_id, habit_id, status, habits(slug, name, icon)')
+        .select('journal_id, habit_id, status')
         .in('journal_id', journalIds)
     : { data: [] }
 
@@ -121,12 +138,6 @@ export default async function TeacherDashboard({
       studentHabits[sid].add(e.habit_id)
     }
   }
-
-  const { data: habits } = await supabase
-    .from('habits')
-    .select('id, slug, name, icon')
-    .eq('is_active', true)
-    .order('sort_order')
 
   const habitCount: Record<string, number> = {}
   for (const e of entries ?? []) {
