@@ -178,7 +178,7 @@ BEGIN
              THEN v_parent_notes[1 + floor(random() * array_length(v_parent_notes, 1))::int]
              ELSE NULL END,
         v_parent,
-        v_d::timestamptz + make_interval(hours => 6 + random() * 13, mins => floor(random() * 60))
+        v_d::timestamptz + make_interval(hours => (6 + random() * 13)::int, mins => floor(random() * 60)::int)
       )
       RETURNING id INTO v_journal_id;
       v_n_jurnal := v_n_jurnal + 1;
