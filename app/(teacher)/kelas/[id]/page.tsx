@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { initials } from '@/lib/utils'
 import { notFound } from 'next/navigation'
+import HapusKelasButton from './HapusKelasButton'
 
 export default async function DetailKelasPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
@@ -34,6 +35,19 @@ export default async function DetailKelasPage({ params }: { params: { id: string
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Kelas {kelas.name}</h1>
       <p className="mb-4 text-sm text-ink-3">Tingkat {kelas.grade} · Tahun ajaran {academicYearName}</p>
+
+      <div className="mb-2 grid grid-cols-2 gap-2">
+        <Link
+          href={`/kelas/${params.id}/edit`}
+          className="rounded-btn border border-line bg-white px-2 py-2.5 text-center text-sm font-bold text-ink-2"
+        >
+          ✏️ Ubah Kelas
+        </Link>
+        <HapusKelasButton
+          classId={params.id}
+          className="rounded-btn border border-red-200 bg-white px-2 py-2.5 text-center text-sm font-bold text-red-600 disabled:opacity-50"
+        />
+      </div>
 
       <div className="mb-2 grid grid-cols-3 gap-2">
         <Link
