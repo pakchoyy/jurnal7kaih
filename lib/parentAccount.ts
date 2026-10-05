@@ -1,5 +1,6 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { BILLING_ENABLED } from '@/lib/billing'
 import { toAuthPassword } from '@/lib/utils'
 
 // NIS hanya unik per sekolah, jadi kode sekolah wajib ikut di email login.
@@ -50,6 +51,8 @@ export async function ensureParentAccount(
 }
 
 export async function isSchoolActive(supabase: SupabaseClient, schoolId: string): Promise<boolean> {
+  // Mode lomba/demo: gate langganan nonaktif, semua sekolah dianggap aktif.
+  if (!BILLING_ENABLED) return true
   const { data } = await supabase.from('schools').select('active_until').eq('id', schoolId).single()
   return !!data?.active_until && new Date(data.active_until).getTime() > Date.now()
 }

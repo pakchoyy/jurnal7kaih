@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { AppHeader } from '@/components/ui/AppHeader'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { ExpiredGate } from '@/components/ui/ExpiredGate'
+import { BILLING_ENABLED } from '@/lib/billing'
 import { themeVars } from '@/lib/theme'
 
 function daysLeft(until: string | null): number | null {
@@ -34,10 +35,10 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   } | null
 
   const days = daysLeft(school?.active_until ?? null)
-  const isExpired = days !== null && days <= 0
-  const isTrial = school?.plan === 'trial'
-  const showBanner = isExpired || (isTrial && days !== null && days <= 3)
-  const badge = isExpired ? 'Habis' : isTrial ? `Trial ${days} hari` : 'PRO'
+  const isExpired = BILLING_ENABLED && days !== null && days <= 0
+  const isTrial = BILLING_ENABLED && school?.plan === 'trial'
+  const showBanner = BILLING_ENABLED && (isExpired || (isTrial && days !== null && days <= 3))
+  const badge = !BILLING_ENABLED ? undefined : isExpired ? 'Habis' : isTrial ? `Trial ${days} hari` : 'PRO'
 
   return (
     <div className="min-h-dvh bg-bg pb-24" style={themeVars(school?.theme_color)}>
@@ -56,7 +57,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
           { href: '/pengaturan/kebiasaan', label: 'Isi Poin Kebiasaan', icon: 'list' },
           { href: '/pengaturan/kalender', label: 'Hari Sekolah & Libur', icon: 'journal' },
           { href: '/pengaturan/tim', label: 'Guru & Kepala Sekolah', icon: 'family' },
-          { href: '/pengaturan', label: 'Pengaturan & Lisensi', icon: 'settings' },
+          { href: '/pengaturan', label: 'Pengaturan', icon: 'settings' },
         ]}
       />
 

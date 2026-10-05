@@ -137,6 +137,18 @@ html.big-text body {
 /* Batang progres tumbuh dari kiri */
 .bar-grow { transform-origin: left; animation: bar-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
+/* Konten periode: masuk dari kiri (mundur) / kanan (maju) */
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+.slide-from-left { animation: slide-from-left 0.24s ease-out both; }
+.slide-from-right { animation: slide-from-right 0.24s ease-out both; }
+
 /* Efek tekan pada kartu & tombol */
 .pressable { transition: transform 0.12s ease; }
 .pressable:active { transform: scale(0.97); }
@@ -150,7 +162,7 @@ html.big-text body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter, .stagger > *, .nav-pop, .bar-grow, .skeleton { animation: none; }
+  .page-enter, .stagger > *, .nav-pop, .bar-grow, .skeleton, .slide-from-left, .slide-from-right { animation: none; }
   .pressable:active { transform: none; }
 }
 

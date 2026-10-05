@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { BILLING_ENABLED } from '@/lib/billing'
 import { normalizeWA } from '@/lib/utils'
 
 export async function simpanWhatsapp(formData: FormData) {
@@ -28,6 +29,7 @@ export async function simpanWhatsapp(formData: FormData) {
 }
 
 export async function pakaiLicenseKey(formData: FormData) {
+  if (!BILLING_ENABLED) return { error: 'Fitur lisensi sedang nonaktif.' }
   const supabase = createServerClient()
   const {
     data: { user },

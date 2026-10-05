@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { getRoleRedirect, toAuthPassword } from '@/lib/utils'
+import { BILLING_ENABLED } from '@/lib/billing'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthShell } from '@/components/ui/AuthShell'
@@ -93,12 +94,16 @@ function LoginForm() {
       subtitle="Aplikasi Jurnal Digital 7 Kebiasaan Anak Indonesia Hebat"
       footer={
         tab === 'teacher' ? (
-          <p className="text-sm text-ink-2">
-            Guru belum punya akun?{' '}
-            <Link href="/daftar-trial" className="font-bold text-brand-teal underline">
-              Coba Gratis 14 Hari
-            </Link>
-          </p>
+          BILLING_ENABLED ? (
+            <p className="text-sm text-ink-2">
+              Guru belum punya akun?{' '}
+              <Link href="/daftar-trial" className="font-bold text-brand-teal underline">
+                Coba Gratis 14 Hari
+              </Link>
+            </p>
+          ) : (
+            <p className="text-sm text-ink-2">Akun guru dibuat oleh admin sekolah.</p>
+          )
         ) : (
           <p className="text-sm leading-relaxed text-ink-2">
             Lupa NIS?

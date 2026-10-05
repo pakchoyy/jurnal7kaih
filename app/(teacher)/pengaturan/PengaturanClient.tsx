@@ -5,6 +5,7 @@ import { simpanWhatsapp, pakaiLicenseKey } from './actions'
 import Link from 'next/link'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
 import { BigTextToggle } from '@/components/ui/BigTextToggle'
+import { BILLING_ENABLED } from '@/lib/billing'
 
 const PLAN_LABEL: Record<string, string> = {
   trial: 'Trial',
@@ -79,7 +80,8 @@ export default function PengaturanClient({
     <div className="px-5 py-5">
       <h1 className="mb-5 font-display text-lg font-black text-ink">Pengaturan</h1>
 
-      {/* Status plan */}
+      {/* Status plan — disembunyikan saat mode lomba (BILLING_ENABLED=false) */}
+      {BILLING_ENABLED && (
       <div className="mb-4 rounded-card bg-white p-4 shadow-soft">
         <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-3">Status Langganan</p>
         <div className="flex items-center justify-between">
@@ -97,6 +99,7 @@ export default function PengaturanClient({
           <p className="mt-0.5 text-xs text-ink-3">Aktif hingga {formatDate(activeUntil)}</p>
         )}
       </div>
+      )}
 
       <Link
         href="/pengaturan/kebiasaan"
@@ -175,7 +178,8 @@ export default function PengaturanClient({
         )}
       </div>
 
-      {/* License Key */}
+      {/* License Key — disembunyikan saat mode lomba */}
+      {BILLING_ENABLED && (
       <div className="rounded-card bg-white p-5 shadow-soft">
         <p className="mb-1 font-display text-sm font-extrabold text-ink">Aktifkan Lisensi Pro</p>
         <p className="mb-4 text-sm text-ink-3">
@@ -219,6 +223,7 @@ export default function PengaturanClient({
           </p>
         )}
       </div>
+      )}
     </div>
   )
 }

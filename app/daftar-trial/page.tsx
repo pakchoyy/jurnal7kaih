@@ -7,12 +7,33 @@ import { registerSchoolSelf } from './actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { AuthShell } from '@/components/ui/AuthShell'
+import { BILLING_ENABLED } from '@/lib/billing'
 
 export default function DaftarTrialPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  if (!BILLING_ENABLED) {
+    return (
+      <AuthShell
+        title="Pendaftaran Ditutup"
+        subtitle="Pendaftaran akun mandiri sedang tidak dibuka."
+        footer={
+          <p className="text-sm text-ink-2">
+            Sudah punya akun?{' '}
+            <Link href="/login" className="font-semibold text-brand-blue">
+              Masuk di sini
+            </Link>
+          </p>
+        }
+      >
+        <p className="rounded-card bg-white p-5 text-center text-sm text-ink-2 shadow-soft">
+          Silakan hubungi admin sekolah untuk dibuatkan akun.
+        </p>
+      </AuthShell>
+    )
+  }
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)

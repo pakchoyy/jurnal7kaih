@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
@@ -18,6 +18,8 @@ export function PeriodNav({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  /** Arah pindah: -1 = mundur (konten masuk dari kiri), +1 = maju (dari kanan). */
+  const [dir, setDir] = useState<0 | -1 | 1>(0)
   const startX = useRef<number | null>(null)
   const startY = useRef(0)
 
@@ -27,10 +29,11 @@ export function PeriodNav({
     if (nextHref) router.prefetch(nextHref)
   }, [router, prevHref, nextHref])
 
-  function go(href: string | null) {
+  function go(href: string | null, direction: -1 | 1) {
     if (!href) return
     // Tombol TIDAK pernah di-disable: ketuk ulang selalu direspons,
     // navigasi terbaru yang dipakai.
+    setDir(direction)
     startTransition(() => {
       router.push(href, { scroll: false })
     })
@@ -50,15 +53,15 @@ export function PeriodNav({
         startX.current = null
         // Geser mendatar yang jelas saja, supaya scroll ke bawah tidak ikut memicu.
         if (Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6) return
-        if (dx > 0) go(prevHref)
-        else go(nextHref)
+        if (dx > 0) go(prevHref, -1)
+        else go(nextHref, 1)
       }}
     >
       <div className="mb-1.5 flex items-stretch gap-2 rounded-card bg-white p-1.5 shadow-soft">
         <button
           type="button"
           aria-label="Periode sebelumnya"
-          onClick={() => go(prevHref)}
+          onClick={() => go(prevHref, -1)}
           className="flex h-12 flex-1 touch-manipulation select-none items-center justify-center gap-1 rounded-btn border border-line px-3 text-sm font-bold text-ink-2 transition active:scale-95 active:bg-line/60"
         >
           <Icon name="chevron-left" className="h-5 w-5 shrink-0" />
@@ -77,7 +80,7 @@ export function PeriodNav({
           <button
             type="button"
             aria-label="Periode berikutnya"
-            onClick={() => go(nextHref)}
+            onClick={() => go(nextHref, 1)}
             className="flex h-12 flex-1 touch-manipulation select-none items-center justify-center gap-1 rounded-btn border border-line px-3 text-sm font-bold text-ink-2 transition active:scale-95 active:bg-line/60"
           >
             Maju
@@ -90,7 +93,15 @@ export function PeriodNav({
       <p className="mb-4 text-center text-xs text-ink-3">
         Ketuk <b>Mundur</b>/<b>Maju</b> atau geser layar ke kiri/kanan untuk pindah periode
       </p>
-      <div className={cn('transition-opacity', isPending && 'opacity-60')} aria-busy={isPending}>
+      <div
+        key={`${label}-${dir}`}
+        className={cn(
+          'transition-opacity',
+          isPending && 'opacity-60',
+          dir === 0 ? undefined : dir < 0 ? 'slide-from-left' : 'slide-from-right',
+        )}
+        aria-busy={isPending}
+      >
         {children}
       </div>
     </div>
