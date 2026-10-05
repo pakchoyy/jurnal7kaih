@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
+import { isDateFillable } from '@/lib/journalWindow'
 import { JournalThread } from '@/components/journal/JournalThread'
 import { JournalPhotos } from '@/components/journal/JournalPhotos'
 import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
@@ -43,6 +44,17 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
   const doneCount = (entries ?? []).filter((e: any) => e.status === 'done').length
   const total = (entries ?? []).length
 
+  // Tombol ubah hanya untuk ortu terhubung & tanggal masih dalam jendela isi.
+  const { data: link } = user
+    ? await supabase
+        .from('student_parents')
+        .select('student_id')
+        .eq('user_id', user.id)
+        .eq('student_id', journal.student_id)
+        .maybeSingle()
+    : { data: null }
+  const canEdit = !!link && isDateFillable(journal.journal_date).ok
+
   return (
     <div>
       <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
@@ -62,6 +74,15 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
             {doneCount}/{total}
           </span>
         </div>
+
+        {canEdit && (
+          <Link
+            href={`/jurnal/isi?tanggal=${journal.journal_date}`}
+            className="pressable mb-4 flex items-center justify-center gap-2 rounded-btn bg-brand-green px-4 py-3 font-display text-sm font-extrabold text-white shadow-soft"
+          >
+            ✏️ Ubah jurnal ini
+          </Link>
+        )}
 
         <ul className="stagger flex flex-col gap-3">
           {(entries ?? []).map((e: any) => {

@@ -43,6 +43,10 @@ export default async function RiwayatPage() {
   ])
 
   const submitted = (journals ?? []).filter((j) => j.status !== 'draft').map((j) => j.journal_date)
+  const journalIdByDate: Record<string, string> = {}
+  for (const j of journals ?? []) {
+    if (j.status !== 'draft' && !journalIdByDate[j.journal_date]) journalIdByDate[j.journal_date] = j.id
+  }
   const streak = calculateStreak(submitted, new Date(), schoolDay)
   const best = bestStreak(submitted, schoolDay)
 
@@ -123,13 +127,28 @@ export default async function RiwayatPage() {
         <div className="rounded-card bg-white p-4 shadow-soft">
           <p className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-ink-2">Kalender 30 Hari</p>
           <div className="grid grid-cols-10 gap-1.5">
-            {days.map((d) => (
-              <div
-                key={d.date}
-                title={`${formatDateID(d.date)}${d.holiday ? ` · ${d.holiday}` : d.off ? ' · libur' : ''}`}
-                className={`aspect-square rounded-md ${d.done ? 'bg-brand-green' : d.off ? 'bg-sky-100' : 'bg-line'} ${d.date === today ? 'ring-2 ring-brand-blue ring-offset-1' : ''}`}
-              />
-            ))}
+            {days.map((d) => {
+              const title = `${formatDateID(d.date)}${d.holiday ? ` · ${d.holiday}` : d.off ? ' · libur' : ''}`
+              const cell = `aspect-square rounded-md ${d.done ? 'bg-brand-green' : d.off ? 'bg-sky-100' : 'bg-line'} ${d.date === today ? 'ring-2 ring-brand-blue ring-offset-1' : ''}`
+              const journalId = journalIdByDate[d.date]
+              // Terisi → lihat detail; kosong & hari sekolah → isi; libur → statis.
+              if (journalId) {
+                return (
+                  <Link key={d.date} href={`/jurnal/${journalId}`} title={title} className={cell} />
+                )
+              }
+              if (!d.off) {
+                return (
+                  <Link
+                    key={d.date}
+                    href={`/jurnal/isi?tanggal=${d.date}`}
+                    title={`${title} · ketuk untuk mengisi`}
+                    className={cell}
+                  />
+                )
+              }
+              return <div key={d.date} title={title} className={cell} />
+            })}
           </div>
           <div className="mt-3 flex items-center gap-4 text-sm text-ink-3">
             <span className="flex items-center gap-1.5">

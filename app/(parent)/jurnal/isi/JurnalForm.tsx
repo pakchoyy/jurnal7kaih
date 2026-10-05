@@ -11,7 +11,8 @@ import { Celebration } from '@/components/ui/Celebration'
 import { FloatingHabits } from '@/components/ui/FloatingHabits'
 import { habitFormComponents } from '@/components/habits'
 import { parseHabitNote } from '@/lib/schemas/habits'
-import { cn, habitColor, habitLight, todayISO, formatDateID } from '@/lib/utils'
+import { cn, habitColor, habitLight, todayISO, shiftISO, formatDateID } from '@/lib/utils'
+import { minFillableDate } from '@/lib/journalWindow'
 
 export interface HabitRow {
   id: string
@@ -30,6 +31,8 @@ export interface ExistingEntry {
 interface Props {
   studentId: string
   studentName: string
+  journalDate: string
+  journalStatus: 'draft' | 'submitted' | 'reviewed' | null
   habits: HabitRow[]
   habitItems: Record<string, string[]>
   existingEntries: ExistingEntry[]
@@ -45,6 +48,8 @@ interface EntryState {
 export function JurnalForm({
   studentId,
   studentName,
+  journalDate,
+  journalStatus,
   habits,
   habitItems,
   existingEntries,
@@ -52,6 +57,15 @@ export function JurnalForm({
   existingPhotoCount,
 }: Props) {
   const router = useRouter()
+
+  const today = todayISO()
+  const minDate = minFillableDate(today)
+  const canPrev = journalDate > minDate
+  const canNext = journalDate < today
+  function goDate(d: string) {
+    if (d < minDate || d > today || d === journalDate) return
+    router.push(d === today ? '/jurnal/isi' : `/jurnal/isi?tanggal=${d}`)
+  }
 
   const initial = useMemo(() => {
     const map: Record<string, EntryState> = {}
@@ -114,6 +128,7 @@ export function JurnalForm({
     setLoading(true)
     const result = await saveJournal({
       studentId,
+      journalDate,
       parentNote,
       submit,
       entries: habits.map((h) => ({
@@ -158,7 +173,41 @@ export function JurnalForm({
         <FloatingHabits opacity="opacity-20" />
         <p className="text-sm font-medium opacity-90">Jurnal {studentName}</p>
         <h1 className="font-display text-2xl font-black">Isi 7 Kebiasaan</h1>
-        <p className="mt-0.5 text-sm opacity-85">{formatDateID(todayISO())}</p>
+        <div className="mt-1.5 flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Hari sebelumnya"
+            disabled={!canPrev}
+            onClick={() => goDate(shiftISO(journalDate, -1))}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
+          >
+            ‹
+          </button>
+          <input
+            type="date"
+            aria-label="Tanggal jurnal"
+            value={journalDate}
+            min={minDate}
+            max={today}
+            onChange={(e) => e.target.value && goDate(e.target.value)}
+            className="rounded-btn bg-white/20 px-2.5 py-1.5 text-sm font-bold text-white outline-none [color-scheme:dark]"
+          />
+          <button
+            type="button"
+            aria-label="Hari berikutnya"
+            disabled={!canNext}
+            onClick={() => goDate(shiftISO(journalDate, 1))}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-lg font-black disabled:opacity-30"
+          >
+            ›
+          </button>
+          <span className="text-sm opacity-85">{formatDateID(journalDate)}</span>
+        </div>
+        {journalStatus === 'reviewed' && (
+          <p className="mt-2 rounded-btn bg-white/20 px-3 py-2 text-sm font-semibold">
+            ✓ Sudah dicek guru. Mengubah akan mengirim ulang untuk dicek lagi.
+          </p>
+        )}
 
         <div className="mt-4 flex items-center gap-3">
           <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/25">

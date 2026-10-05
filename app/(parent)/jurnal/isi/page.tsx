@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { todayISO } from '@/lib/utils'
+import { isDateFillable } from '@/lib/journalWindow'
 import { itemsForHabit } from '@/lib/habitItems'
 import { getChildren } from '@/lib/activeChild'
 import { JurnalForm, type HabitRow, type ExistingEntry } from './JurnalForm'
 
-export default async function IsiJurnalPage() {
+export default async function IsiJurnalPage({ searchParams }: { searchParams: { tanggal?: string } }) {
   const supabase = createServerClient()
   const {
     data: { user },
@@ -22,6 +23,10 @@ export default async function IsiJurnalPage() {
     )
   }
 
+  // Tanggal boleh diisi mundur maksimal 30 hari. Nilai tak valid → hari ini.
+  const rawDate = searchParams.tanggal ?? ''
+  const journalDate = isDateFillable(rawDate).ok ? rawDate : todayISO()
+
   const studentId = active.id
   const { data: me } = await supabase.from('users').select('school_id').eq('id', user.id).single()
 
@@ -33,9 +38,9 @@ export default async function IsiJurnalPage() {
       .eq('school_id', me?.school_id ?? ''),
     supabase
       .from('journals')
-      .select('id, parent_note')
+      .select('id, parent_note, status')
       .eq('student_id', studentId)
-      .eq('journal_date', todayISO())
+      .eq('journal_date', journalDate)
       .maybeSingle(),
   ])
 
@@ -63,6 +68,8 @@ export default async function IsiJurnalPage() {
     <JurnalForm
       studentId={studentId}
       studentName={active.name}
+      journalDate={journalDate}
+      journalStatus={(journal?.status as 'draft' | 'submitted' | 'reviewed' | undefined) ?? null}
       habits={habitRows}
       habitItems={habitItems}
       existingEntries={entries}
