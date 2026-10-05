@@ -2,12 +2,13 @@
 -- seed_jurnal_suhai.sql — Isi jurnal acak untuk demo klien
 --
 -- CARA PAKAI (Supabase Dashboard -> SQL Editor):
---   1. Sesuaikan KONFIGURASI di blok DO bawah bila perlu.
+--   1. Sesuaikan KONFIGURASI di blok DO bawah bila perlu
+--      (email pemilik kelas & rentang tanggal).
 --   2. Jalankan SELURUH file sekaligus.
 --   3. Lihat hasil SELECT verifikasi di tengah & akhir output.
---   4. Bila error "ketemu lebih dari 1 user", persempit v_name_pattern
---      (mis. '%suhai b%') lalu jalankan ulang. Aman diulang: data
---      rentang target dihapus dulu sebelum diisi (idempoten).
+--   4. Bila error email tidak ketemu, cek Bagian 1a lalu sesuaikan
+--      v_user_email. Aman diulang: data rentang target dihapus dulu
+--      sebelum diisi (idempoten).
 --
 -- ISI SKRIP:
 --   Bagian 1 : verifikasi user suhai / sekolah / kelas / siswa
@@ -17,16 +18,16 @@
 
 
 -- ==================== BAGIAN 1: VERIFIKASI ====================
--- 1a. User suhai (harus tepat 1 baris)
-SELECT id, name, role, school_id
+-- 1a. User pemilik kelas (harus tepat 1 baris)
+SELECT id, name, email, role, school_id
 FROM users
-WHERE name ILIKE '%suhai%';
+WHERE email = 'srifathan683@gmail.com';
 
 -- 1b. Kelas grade 1-6 + jumlah siswa aktif (tahun ajaran aktif bila ada)
 SELECT c.grade, c.name AS kelas, COUNT(s.id) AS jumlah_siswa
 FROM classes c
 LEFT JOIN students s ON s.class_id = c.id AND s.status = 'active'
-WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMIT 1)
+WHERE c.school_id = (SELECT school_id FROM users WHERE email = 'srifathan683@gmail.com' LIMIT 1)
   AND c.grade BETWEEN 1 AND 6
 GROUP BY c.grade, c.name
 ORDER BY c.grade, c.name;
@@ -39,7 +40,7 @@ SELECT
 FROM journals j
 JOIN students s ON s.id = j.student_id
 JOIN classes c ON c.id = s.class_id
-WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMIT 1)
+WHERE c.school_id = (SELECT school_id FROM users WHERE email = 'srifathan683@gmail.com' LIMIT 1)
   AND c.grade BETWEEN 1 AND 6;
 
 
@@ -47,7 +48,7 @@ WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMI
 DO $$
 DECLARE
   -- ---------- KONFIGURASI (ubah di sini bila perlu) ----------
-  v_name_pattern TEXT := '%suhai%';
+  v_user_email TEXT := 'srifathan683@gmail.com';
   v_grades       INT[] := ARRAY[1,2,3,4,5,6];
   v_start        DATE  := DATE '2026-07-20';
   v_end          DATE  := DATE '2026-10-01';
@@ -90,17 +91,14 @@ DECLARE
     'Belajar kelompok dengan teman'
   ];
 BEGIN
-  -- --- 1. Resolve user suhai -> sekolah (harus tepat 1) ---
+  -- --- 1. Resolve user -> sekolah (harus tepat 1) ---
   SELECT id, school_id INTO v_suhai_id, v_school_id
-  FROM users WHERE name ILIKE v_name_pattern;
+  FROM users WHERE email = v_user_email;
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'User pola "%" tidak ketemu. Periksa Bagian 1a.', v_name_pattern;
-  END IF;
-  IF (SELECT COUNT(*) FROM users WHERE name ILIKE v_name_pattern) > 1 THEN
-    RAISE EXCEPTION 'Pola "%" ketemu lebih dari 1 user. Persempit polanya.', v_name_pattern;
+    RAISE EXCEPTION 'User email "%" tidak ketemu. Periksa Bagian 1a.', v_user_email;
   END IF;
   IF v_school_id IS NULL THEN
-    RAISE EXCEPTION 'User suhai belum terhubung ke sekolah (school_id NULL).';
+    RAISE EXCEPTION 'User % belum terhubung ke sekolah (school_id NULL).', v_user_email;
   END IF;
 
   -- --- 2. Hari sekolah dari pengaturan (1-5 = Sen-Jum, 1-6 = Sen-Sab) ---
@@ -121,7 +119,7 @@ BEGIN
       AND c.grade = ANY (v_grades)
       AND (v_year_id IS NULL OR c.academic_year_id = v_year_id)
   ) THEN
-    RAISE EXCEPTION 'Tidak ada siswa aktif grade 1-6 di sekolah suhai.';
+    RAISE EXCEPTION 'Tidak ada siswa aktif grade 1-6 di sekolah user %.', v_user_email;
   END IF;
 
   -- --- 4. Bersihkan: sebelum 20 Juli HARUS kosong; rentang target di-reset ---
@@ -267,7 +265,7 @@ SELECT COUNT(*) AS jurnal_sebelum_20_juli_harus_nol
 FROM journals j
 JOIN students s ON s.id = j.student_id
 JOIN classes c ON c.id = s.class_id
-WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMIT 1)
+WHERE c.school_id = (SELECT school_id FROM users WHERE email = 'srifathan683@gmail.com' LIMIT 1)
   AND c.grade BETWEEN 1 AND 6
   AND j.journal_date < DATE '2026-07-20';
 
@@ -277,7 +275,7 @@ FROM classes c
 JOIN students s ON s.class_id = c.id AND s.status = 'active'
 LEFT JOIN journals j ON j.student_id = s.id
   AND j.journal_date BETWEEN DATE '2026-07-20' AND DATE '2026-10-01'
-WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMIT 1)
+WHERE c.school_id = (SELECT school_id FROM users WHERE email = 'srifathan683@gmail.com' LIMIT 1)
   AND c.grade BETWEEN 1 AND 6
 GROUP BY c.grade, c.name
 ORDER BY c.grade, c.name;
@@ -290,7 +288,7 @@ FROM journals j
 JOIN journal_entries je ON je.journal_id = j.id
 WHERE j.student_id = (
   SELECT s.id FROM students s JOIN classes c ON c.id = s.class_id
-  WHERE c.school_id = (SELECT school_id FROM users WHERE name ILIKE '%suhai%' LIMIT 1)
+  WHERE c.school_id = (SELECT school_id FROM users WHERE email = 'srifathan683@gmail.com' LIMIT 1)
     AND c.grade BETWEEN 1 AND 6 AND s.status = 'active'
   ORDER BY s.name LIMIT 1
 )
