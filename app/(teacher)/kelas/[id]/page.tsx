@@ -28,6 +28,18 @@ export default async function DetailKelasPage({ params }: { params: { id: string
   const academicYearName =
     (kelas.academic_years as unknown as { name: string } | null)?.name ?? '-'
 
+  const studentIds = (students ?? []).map((s) => s.id)
+  const { count: journalCount } = studentIds.length
+    ? await supabase
+        .from('journals')
+        .select('id', { count: 'exact', head: true })
+        .in('student_id', studentIds)
+    : { count: 0 }
+  const deleteInfo =
+    studentIds.length > 0
+      ? `${studentIds.length} siswa${(journalCount ?? 0) > 0 ? `, ${journalCount} jurnal` : ''}`
+      : ''
+
   return (
     <div className="px-5 py-5">
       <Link href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
@@ -45,6 +57,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
         </Link>
         <HapusKelasButton
           classId={params.id}
+          info={deleteInfo}
           className="rounded-btn border border-red-200 bg-white px-2 py-2.5 text-center text-sm font-bold text-red-600 disabled:opacity-50"
         />
       </div>

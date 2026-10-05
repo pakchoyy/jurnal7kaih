@@ -7,15 +7,23 @@ import { hapusKelas } from './actions'
 export default function HapusKelasButton({
   classId,
   className,
+  info,
 }: {
   classId: string
   className: string
+  /** Ringkasan isi kelas untuk peringatan, mis. "3 siswa, 51 jurnal". */
+  info: string
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   async function onDelete() {
-    if (!confirm('Hapus kelas ini permanen? Hanya bisa bila kelas sudah kosong (tanpa siswa).')) return
+    if (
+      !confirm(
+        `Hapus kelas ini PERMANEN?${info ? `\n${info} ikut terhapus dan tidak bisa dikembalikan.` : ''}`,
+      )
+    )
+      return
     setLoading(true)
     const res = await hapusKelas(classId)
     setLoading(false)
@@ -23,6 +31,7 @@ export default function HapusKelasButton({
       alert(res.error ?? 'Gagal menghapus kelas')
       return
     }
+    alert(`Kelas dihapus (${res.students ?? 0} siswa, ${res.journals ?? 0} jurnal).`)
     router.push('/kelas')
     router.refresh()
   }
