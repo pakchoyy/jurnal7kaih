@@ -139,12 +139,12 @@ export default async function BerandaPage() {
                   <span className="float-y inline-block">🏖️</span> Hari ini libur
                 </p>
                 <p className="text-sm text-sky-900/80">{offReason} · tidak wajib mengisi jurnal. Streak tetap aman.</p>
-                <Link href="/jurnal/isi" className="mt-2 inline-block text-sm font-bold text-sky-800 underline">
+                <Link prefetch={false} href="/jurnal/isi" className="mt-2 inline-block text-sm font-bold text-sky-800 underline">
                   Tetap isi jurnal (opsional)
                 </Link>
               </div>
             ) : (
-            <Link
+            <Link prefetch={false}
               href="/jurnal/isi"
               className={`pressable mb-5 flex items-center justify-between rounded-card p-4 shadow-soft ${
                 todayDone ? 'bg-brand-green text-white' : 'pulse-ring bg-brand-yellow text-brand-dark'

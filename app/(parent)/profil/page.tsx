@@ -81,7 +81,7 @@ export default async function ProfilPage() {
               })}
             </ul>
           )}
-          <Link
+          <Link prefetch={false}
             href="/profil/tambah-anak"
             className="mt-4 block rounded-btn border-2 border-brand-blue/30 py-3 text-center text-base font-bold text-brand-blue"
           >

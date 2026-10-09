@@ -18,14 +18,14 @@ export default async function KelasPage() {
     <div className="px-5 py-5">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="font-display text-lg font-black text-ink">Kelas Saya</h1>
-        <Link
+        <Link prefetch={false}
           href="/kelas/buat"
           className="rounded-btn bg-brand-blue px-3.5 py-2.5 text-sm font-bold text-white"
         >
           + Buat Kelas
         </Link>
       </div>
-      <Link
+      <Link prefetch={false}
         href="/kelas/import"
         className="pressable mb-4 flex items-center gap-3 rounded-card border-2 border-dashed border-brand-blue/30 bg-white p-4"
       >
@@ -42,10 +42,10 @@ export default async function KelasPage() {
           <p className="text-sm text-ink-2">Belum ada kelas.</p>
           <p className="mt-1 text-xs text-ink-3">Buat kelas pertama untuk mulai input siswa.</p>
           <div className="mt-4 flex flex-col gap-2">
-            <Link href="/kelas/buat" className="rounded-btn bg-brand-blue px-5 py-3 text-base font-bold text-white">
+            <Link prefetch={false} href="/kelas/buat" className="rounded-btn bg-brand-blue px-5 py-3 text-base font-bold text-white">
               Buat Kelas Pertama
             </Link>
-            <Link href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-5 py-3 text-base font-bold text-brand-blue">
+            <Link prefetch={false} href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-5 py-3 text-base font-bold text-brand-blue">
               atau Import dari Excel
             </Link>
           </div>
@@ -65,7 +65,7 @@ export default async function KelasPage() {
             const studentCount = Array.isArray(c.students) ? c.students[0]?.count ?? 0 : 0
             return (
               <li key={c.id}>
-                <Link
+                <Link prefetch={false}
                   href={`/kelas/${c.id}`}
                   className="flex items-center gap-3 pressable rounded-card bg-white p-4 shadow-soft"
                 >

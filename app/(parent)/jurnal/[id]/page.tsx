@@ -22,7 +22,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
     return (
       <div className="px-5 py-8">
         <p className="text-ink-2">Jurnal tidak ditemukan.</p>
-        <Link href="/jurnal" className="text-sm font-semibold text-brand-blue">
+        <Link prefetch={false} href="/jurnal" className="text-sm font-semibold text-brand-blue">
           ← Kembali
         </Link>
       </div>
@@ -58,7 +58,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
   return (
     <div>
       <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
-        <Link href="/jurnal" className="text-xl text-ink-3">
+        <Link prefetch={false} href="/jurnal" className="text-xl text-ink-3">
           ←
         </Link>
         <div>
@@ -76,7 +76,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
         </div>
 
         {canEdit && (
-          <Link
+          <Link prefetch={false}
             href={`/jurnal/isi?tanggal=${journal.journal_date}`}
             className="pressable mb-4 flex items-center justify-center gap-2 rounded-btn bg-brand-green px-4 py-3 font-display text-sm font-extrabold text-white shadow-soft"
           >

@@ -32,7 +32,7 @@ export default async function KartuLoginPage({ params }: { params: { id: string 
   return (
     <div className="px-5 py-5">
       <div className="no-print mb-4 flex flex-wrap items-center gap-3">
-        <Link href={`/kelas/${kelas.id}`} className="py-2 text-sm font-semibold text-brand-blue">
+        <Link prefetch={false} href={`/kelas/${kelas.id}`} className="py-2 text-sm font-semibold text-brand-blue">
           ← Kelas {kelas.name}
         </Link>
         <div className="ml-auto">

@@ -108,11 +108,11 @@ export default async function RaporPage({
   return (
     <div className="mx-auto min-h-dvh max-w-3xl bg-white" style={themeVars(school?.theme_color)}>
       <div className="no-print flex flex-wrap items-center gap-2 border-b border-line bg-bg px-4 py-3">
-        <Link href={backHref} className="py-2 text-sm font-semibold text-brand-blue">
+        <Link prefetch={false} href={backHref} className="py-2 text-sm font-semibold text-brand-blue">
           ← Kembali
         </Link>
         <div className="ml-auto flex items-center gap-1">
-          <Link
+          <Link prefetch={false}
             href={`?bulan=${shiftMonth(month, -1)}`}
             className="rounded-btn border border-line bg-white px-3 py-2 text-sm font-bold"
             aria-label="Bulan sebelumnya"
@@ -123,7 +123,7 @@ export default async function RaporPage({
             {MONTHS[mon - 1]} {year}
           </span>
           {month < thisMonth && (
-            <Link
+            <Link prefetch={false}
               href={`?bulan=${shiftMonth(month, 1)}`}
               className="rounded-btn border border-line bg-white px-3 py-2 text-sm font-bold"
               aria-label="Bulan berikutnya"

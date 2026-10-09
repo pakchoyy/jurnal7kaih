@@ -40,7 +40,7 @@ export default async function SiswaPage() {
         <ul className="stagger flex flex-col gap-2">
           {students.map((s) => (
             <li key={s.id}>
-              <Link
+              <Link prefetch={false}
                 href={`/siswa/${s.id}`}
                 className="flex items-center gap-3 rounded-[12px] bg-white px-3.5 py-3 shadow-row"
               >

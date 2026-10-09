@@ -42,14 +42,14 @@ export default async function DetailKelasPage({ params }: { params: { id: string
 
   return (
     <div className="px-5 py-5">
-      <Link href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+      <Link prefetch={false} href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
         ← Semua Kelas
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Kelas {kelas.name}</h1>
       <p className="mb-4 text-sm text-ink-3">Tingkat {kelas.grade} · Tahun ajaran {academicYearName}</p>
 
       <div className="mb-2 grid grid-cols-2 gap-2">
-        <Link
+        <Link prefetch={false}
           href={`/kelas/${params.id}/edit`}
           className="rounded-btn border border-line bg-white px-2 py-2.5 text-center text-sm font-bold text-ink-2"
         >
@@ -63,13 +63,13 @@ export default async function DetailKelasPage({ params }: { params: { id: string
       </div>
 
       <div className="mb-2 grid grid-cols-3 gap-2">
-        <Link
+        <Link prefetch={false}
           href={`/kelas/${params.id}/tambah-siswa`}
           className="rounded-btn bg-brand-blue px-2 py-3 text-center text-sm font-bold text-white"
         >
           + Siswa
         </Link>
-        <Link
+        <Link prefetch={false}
           href={`/kelas/${params.id}/import-siswa`}
           className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
         >
@@ -83,7 +83,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
         </a>
       </div>
       <div className="mb-5 grid grid-cols-2 gap-2">
-        <Link
+        <Link prefetch={false}
           href={`/kelas/${params.id}/naik-kelas`}
           className="rounded-btn border border-line bg-white px-2 py-3 text-center text-sm font-bold text-ink-2"
         >
@@ -107,7 +107,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
           <p className="mt-1 text-xs text-ink-3">
             NIS siswa dipakai orang tua untuk login.
           </p>
-          <Link
+          <Link prefetch={false}
             href={`/kelas/${params.id}/tambah-siswa`}
             className="mt-4 inline-block rounded-btn bg-brand-blue px-5 py-2.5 text-sm font-bold text-white"
           >

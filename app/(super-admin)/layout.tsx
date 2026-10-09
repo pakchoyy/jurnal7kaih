@@ -27,10 +27,10 @@ export default async function SuperAdminLayout({ children }: { children: React.R
         <LogoutButton compact />
       </header>
       <nav className="flex gap-1 border-b border-line bg-white px-3">
-        <Link href="/sekolah" className="border-b-2 border-brand-blue px-3 py-3 text-sm font-semibold text-brand-blue">
+        <Link prefetch={false} href="/sekolah" className="border-b-2 border-brand-blue px-3 py-3 text-sm font-semibold text-brand-blue">
           Sekolah
         </Link>
-        <Link href="/lisensi" className="border-b-2 border-transparent px-3 py-3 text-sm font-semibold text-ink-3 hover:text-ink-2">
+        <Link prefetch={false} href="/lisensi" className="border-b-2 border-transparent px-3 py-3 text-sm font-semibold text-ink-3 hover:text-ink-2">
           Lisensi
         </Link>
       </nav>

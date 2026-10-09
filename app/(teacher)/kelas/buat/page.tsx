@@ -26,7 +26,7 @@ export default function BuatKelasPage() {
   return (
     <div className="px-5 py-5">
       <div className="mb-5 flex items-center gap-3">
-        <Link href="/kelas" className="py-2 text-sm font-semibold text-brand-blue">← Kembali</Link>
+        <Link prefetch={false} href="/kelas" className="py-2 text-sm font-semibold text-brand-blue">← Kembali</Link>
         <h1 className="font-display text-lg font-black text-ink">Buat Kelas Baru</h1>
       </div>
 

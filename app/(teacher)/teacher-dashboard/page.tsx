@@ -193,10 +193,10 @@ export default async function TeacherDashboard({
           <div className="mb-4 rounded-card bg-white p-5 text-center shadow-soft">
             <p className="text-sm text-ink-2">Belum ada kelas.</p>
             <div className="mt-3 flex flex-col gap-2">
-              <Link href="/kelas/buat" className="rounded-btn bg-brand-blue px-4 py-3 text-base font-bold text-white">
+              <Link prefetch={false} href="/kelas/buat" className="rounded-btn bg-brand-blue px-4 py-3 text-base font-bold text-white">
                 + Buat Kelas Pertama
               </Link>
-              <Link href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-4 py-3 text-base font-bold text-brand-blue">
+              <Link prefetch={false} href="/kelas/import" className="rounded-btn border-2 border-brand-blue/30 px-4 py-3 text-base font-bold text-brand-blue">
                 📥 Import Kelas dari Excel
               </Link>
             </div>
@@ -208,7 +208,7 @@ export default async function TeacherDashboard({
             </p>
             <div className="no-scrollbar flex gap-2 overflow-x-auto">
               {classes.map((c) => (
-                <Link
+                <Link prefetch={false}
                   key={c.id}
                   href={href({ kelas: c.id })}
                   className={`rounded-pill border-[1.5px] px-3.5 py-1.5 text-[11px] font-bold transition ${
@@ -240,7 +240,7 @@ export default async function TeacherDashboard({
         {/* Filter rentang waktu */}
         <div className="mb-3 grid grid-cols-3 gap-1 rounded-btn bg-white p-1 shadow-row">
           {(['today', 'week', 'month'] as Range[]).map((r) => (
-            <Link
+            <Link prefetch={false}
               key={r}
               href={href({ range: r, mundur: 0 })}
               scroll={false}
@@ -280,7 +280,7 @@ export default async function TeacherDashboard({
               const pct = schoolDays ? Math.min(100, Math.round((filled / schoolDays) * 100)) : 0
               return (
                 <li key={s.id}>
-                  <Link
+                  <Link prefetch={false}
                     href={`/siswa/${s.id}`}
                     className="pressable flex items-center gap-3 rounded-[12px] bg-white px-3.5 py-3 shadow-row"
                   >

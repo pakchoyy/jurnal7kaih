@@ -91,7 +91,7 @@ export default async function RiwayatPage() {
 
         <BadgeShelf best={best} current={streak} />
 
-        <Link
+        <Link prefetch={false}
           href={`/rapor/${studentId}`}
           className="flex items-center justify-between rounded-card bg-white p-4 text-base font-bold text-brand-blue shadow-soft"
         >
@@ -134,12 +134,12 @@ export default async function RiwayatPage() {
               // Terisi → lihat detail; kosong & hari sekolah → isi; libur → statis.
               if (journalId) {
                 return (
-                  <Link key={d.date} href={`/jurnal/${journalId}`} title={title} className={cell} />
+                  <Link prefetch={false} key={d.date} href={`/jurnal/${journalId}`} title={title} className={cell} />
                 )
               }
               if (!d.off) {
                 return (
-                  <Link
+                  <Link prefetch={false}
                     key={d.date}
                     href={`/jurnal/isi?tanggal=${d.date}`}
                     title={`${title} · ketuk untuk mengisi`}
@@ -168,7 +168,7 @@ export default async function RiwayatPage() {
           <ul className="stagger flex flex-col gap-2">
             {(journals ?? []).slice(0, 30).map((j) => (
               <li key={j.id}>
-                <Link
+                <Link prefetch={false}
                   href={`/jurnal/${j.id}`}
                   className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
                 >

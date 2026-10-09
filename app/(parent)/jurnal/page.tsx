@@ -29,7 +29,7 @@ export default async function JurnalPage() {
           <h1 className="text-lg font-black text-brand-blue">Jurnal</h1>
           <p className="text-sm text-ink-3">{studentName}</p>
         </div>
-        <Link
+        <Link prefetch={false}
           href="/jurnal/isi"
           className="rounded-btn bg-brand-blue px-4 py-2 font-display text-xs font-extrabold text-white shadow-soft"
         >
@@ -41,7 +41,7 @@ export default async function JurnalPage() {
         {!journals || journals.length === 0 ? (
           <div className="rounded-card bg-white p-6 text-center shadow-soft">
             <p className="text-ink-2">Belum ada jurnal.</p>
-            <Link
+            <Link prefetch={false}
               href="/jurnal/isi"
               className="mt-3 inline-block rounded-btn bg-brand-green px-4 py-2 text-xs font-bold text-white"
             >
@@ -52,7 +52,7 @@ export default async function JurnalPage() {
           <ul className="stagger flex flex-col gap-2">
             {journals.map((j) => (
               <li key={j.id}>
-                <Link
+                <Link prefetch={false}
                   href={`/jurnal/${j.id}`}
                   className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 shadow-row transition active:scale-[.99]"
                 >

@@ -104,7 +104,7 @@ export default function ImportKelasPage() {
 
   return (
     <div className="px-5 py-5">
-      <Link href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+      <Link prefetch={false} href="/kelas" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
         ← Kelas
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Import Kelas dari Excel</h1>
@@ -208,7 +208,7 @@ export default function ImportKelasPage() {
               ))}
             </ul>
           )}
-          <Link href="/kelas" className="mt-4 inline-block rounded-btn bg-brand-blue px-5 py-3 text-base font-bold text-white">
+          <Link prefetch={false} href="/kelas" className="mt-4 inline-block rounded-btn bg-brand-blue px-5 py-3 text-base font-bold text-white">
             Lihat Kelas
           </Link>
         </div>

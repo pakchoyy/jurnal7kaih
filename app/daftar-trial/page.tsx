@@ -22,7 +22,7 @@ export default function DaftarTrialPage() {
         footer={
           <p className="text-sm text-ink-2">
             Sudah punya akun?{' '}
-            <Link href="/login" className="font-semibold text-brand-blue">
+            <Link prefetch={false} href="/login" className="font-semibold text-brand-blue">
               Masuk di sini
             </Link>
           </p>
@@ -69,7 +69,7 @@ export default function DaftarTrialPage() {
       footer={
         <p className="text-sm text-ink-2">
           Sudah punya akun?{' '}
-          <Link href="/login" className="font-semibold text-brand-blue">
+          <Link prefetch={false} href="/login" className="font-semibold text-brand-blue">
             Masuk di sini
           </Link>
         </p>

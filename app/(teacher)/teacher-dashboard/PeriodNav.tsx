@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icon } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
@@ -22,12 +22,6 @@ export function PeriodNav({
   const [dir, setDir] = useState<0 | -1 | 1>(0)
   const startX = useRef<number | null>(null)
   const startY = useRef(0)
-
-  // Prefetch periode sebelah sejak tampil, agar ketuk/geser terasa instan.
-  useEffect(() => {
-    router.prefetch(prevHref)
-    if (nextHref) router.prefetch(nextHref)
-  }, [router, prevHref, nextHref])
 
   function go(href: string | null, direction: -1 | 1) {
     if (!href) return

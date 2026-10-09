@@ -101,7 +101,7 @@ export default function PengaturanClient({
       </div>
       )}
 
-      <Link
+      <Link prefetch={false}
         href="/pengaturan/kebiasaan"
         className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
       >
@@ -115,7 +115,7 @@ export default function PengaturanClient({
 
       {tampilan}
 
-      <Link
+      <Link prefetch={false}
         href="/pengaturan/kalender"
         className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
       >
@@ -127,7 +127,7 @@ export default function PengaturanClient({
         <span className="text-ink-3">›</span>
       </Link>
 
-      <Link
+      <Link prefetch={false}
         href="/pengaturan/tim"
         className="mb-4 flex items-center gap-3 rounded-card bg-white p-4 shadow-soft"
       >

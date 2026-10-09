@@ -66,7 +66,7 @@ export default function EditKelasForm({
       )}
 
       <SubmitButton />
-      <Link
+      <Link prefetch={false}
         href={`/kelas/${classId}`}
         className="py-1 text-center text-sm font-semibold text-ink-3"
       >

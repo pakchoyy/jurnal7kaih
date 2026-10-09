@@ -27,7 +27,7 @@ export function ExpiredGate({
       <h2 className="mt-3 font-display text-lg font-black text-ink">{title}</h2>
       <p className="mx-auto mt-1 max-w-sm text-base text-ink-2">{message}</p>
       {action && (
-        <Link
+        <Link prefetch={false}
           href={action.href}
           className="mt-5 inline-block rounded-btn bg-brand-blue px-6 py-3 text-base font-bold text-white"
         >

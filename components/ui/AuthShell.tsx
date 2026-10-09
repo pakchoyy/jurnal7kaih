@@ -26,7 +26,7 @@ export function AuthShell({
         <div className="pointer-events-none absolute -bottom-12 left-6 h-28 w-28 rounded-full bg-white/[.06]" />
         <FloatingHabits opacity="opacity-30" />
         <div className="relative">
-          <Link href="/" className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight">
+          <Link prefetch={false} href="/" className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icons/icon-192.png" alt="" className="float-y h-10 w-10 rounded-xl shadow-soft" />
             SiHebat

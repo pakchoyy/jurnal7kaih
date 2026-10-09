@@ -64,14 +64,14 @@ export default async function TeacherLayout({ children }: { children: React.Reac
       {showBanner && (
         <div className={`px-5 py-3 text-center text-sm font-semibold ${isExpired ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'}`}>
           {isExpired ? 'Masa aktif sudah habis. ' : `Masa trial tinggal ${days} hari. `}
-          <Link href="/pengaturan" className="font-bold underline">
+          <Link prefetch={false} href="/pengaturan" className="font-bold underline">
             Upgrade ke Pro →
           </Link>
         </div>
       )}
 
       {!profile?.whatsapp && (
-        <Link
+        <Link prefetch={false}
           href="/pengaturan#wa"
           className="flex items-center gap-3 bg-emerald-50 px-5 py-3 text-sm text-emerald-900"
         >

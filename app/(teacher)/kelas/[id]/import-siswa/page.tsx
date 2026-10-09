@@ -54,7 +54,7 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
   return (
     <div className="px-5 py-5">
       <div className="mb-5 flex items-center gap-3">
-        <Link href={`/kelas/${params.id}`} className="py-2 text-sm font-semibold text-brand-blue">← Kembali</Link>
+        <Link prefetch={false} href={`/kelas/${params.id}`} className="py-2 text-sm font-semibold text-brand-blue">← Kembali</Link>
         <h1 className="font-display text-lg font-black text-ink">Import Siswa (Excel)</h1>
       </div>
 
@@ -145,7 +145,7 @@ export default function ImportSiswaPage({ params }: { params: { id: string } }) 
               ))}
             </ul>
           )}
-          <Link
+          <Link prefetch={false}
             href={`/kelas/${params.id}`}
             className="mt-4 inline-block rounded-btn bg-brand-blue px-5 py-2.5 text-sm font-bold text-white"
           >

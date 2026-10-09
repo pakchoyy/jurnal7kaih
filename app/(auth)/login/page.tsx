@@ -97,7 +97,7 @@ function LoginForm() {
           BILLING_ENABLED ? (
             <p className="text-sm text-ink-2">
               Guru belum punya akun?{' '}
-              <Link href="/daftar-trial" className="font-bold text-brand-teal underline">
+              <Link prefetch={false} href="/daftar-trial" className="font-bold text-brand-teal underline">
                 Coba Gratis 14 Hari
               </Link>
             </p>

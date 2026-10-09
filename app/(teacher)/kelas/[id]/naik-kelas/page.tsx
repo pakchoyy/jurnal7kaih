@@ -34,7 +34,7 @@ export default async function NaikKelasPage({ params }: { params: { id: string }
 
   return (
     <div className="px-5 py-5">
-      <Link href={`/kelas/${kelas.id}`} className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+      <Link prefetch={false} href={`/kelas/${kelas.id}`} className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
         ← Kelas {kelas.name}
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Naik Kelas / Pindah / Lulus</h1>

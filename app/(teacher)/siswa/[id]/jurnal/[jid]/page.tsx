@@ -34,7 +34,7 @@ export default async function TeacherJournalDetail({ params }: { params: { id: s
 
   return (
     <div className="px-5 py-5">
-      <Link href={`/siswa/${params.id}`} className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+      <Link prefetch={false} href={`/siswa/${params.id}`} className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
         ← {studentName}
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Jurnal {formatDateID(journal.journal_date)}</h1>

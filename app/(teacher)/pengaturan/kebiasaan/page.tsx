@@ -31,7 +31,7 @@ export default async function AturKebiasaanPage() {
 
   return (
     <div className="px-5 py-5">
-      <Link href="/pengaturan" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
+      <Link prefetch={false} href="/pengaturan" className="mb-2 inline-block py-1 text-sm font-semibold text-brand-blue">
         ← Pengaturan
       </Link>
       <h1 className="font-display text-xl font-black text-ink">Isi Poin Kebiasaan</h1>

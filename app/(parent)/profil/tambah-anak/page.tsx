@@ -24,7 +24,7 @@ export default function TambahAnakPage() {
   return (
     <div>
       <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5 backdrop-blur">
-        <Link href="/profil" aria-label="Kembali" className="px-1 text-2xl text-ink-2">
+        <Link prefetch={false} href="/profil" aria-label="Kembali" className="px-1 text-2xl text-ink-2">
           ←
         </Link>
         <h1 className="text-lg font-black text-brand-blue">Tambah Kakak / Adik</h1>
@@ -36,7 +36,7 @@ export default function TambahAnakPage() {
             <p className="text-3xl">👨‍👩‍👧‍👦</p>
             <p className="mt-2 text-base font-bold text-emerald-700">{state.ok}</p>
             <p className="mt-1 text-sm text-ink-2">Ganti anak lewat tombol nama di Beranda.</p>
-            <Link href="/beranda" className="mt-4 inline-block rounded-btn bg-brand-blue px-6 py-3 text-base font-bold text-white">
+            <Link prefetch={false} href="/beranda" className="mt-4 inline-block rounded-btn bg-brand-blue px-6 py-3 text-base font-bold text-white">
               Ke Beranda
             </Link>
           </div>

@@ -28,7 +28,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
           )
           return (
             <li key={item.href} className="flex-1">
-              <Link
+              <Link prefetch={false}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(

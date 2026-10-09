@@ -23,7 +23,7 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
     return (
       <div className="px-5 py-8">
         <p className="text-ink-2">Siswa tidak ditemukan.</p>
-        <Link href="/teacher-dashboard" className="text-sm font-semibold text-brand-blue">
+        <Link prefetch={false} href="/teacher-dashboard" className="text-sm font-semibold text-brand-blue">
           ← Kembali
         </Link>
       </div>
@@ -57,7 +57,7 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
   return (
     <div>
       <header className="flex items-center gap-3 border-b border-line bg-white/90 px-5 py-3.5">
-        <Link href="/teacher-dashboard" className="text-xl text-ink-3">
+        <Link prefetch={false} href="/teacher-dashboard" className="text-xl text-ink-3">
           ←
         </Link>
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-blue text-xs font-bold text-white">
@@ -72,7 +72,7 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
       </header>
 
       <div className="px-5 py-5">
-        <Link
+        <Link prefetch={false}
           href={`/rapor/${student.id}`}
           className="mb-5 flex items-center justify-between rounded-card bg-white p-4 text-base font-bold text-brand-blue shadow-soft"
         >
@@ -135,7 +135,7 @@ export default async function TeacherStudentDetail({ params }: { params: { id: s
         <ul className="stagger mb-5 flex flex-col gap-2">
           {(journals ?? []).map((j) => (
             <li key={j.id}>
-              <Link
+              <Link prefetch={false}
                 href={`/siswa/${student.id}/jurnal/${j.id}`}
                 className="flex items-center justify-between pressable rounded-[12px] bg-white px-4 py-3.5 text-base shadow-row"
               >
