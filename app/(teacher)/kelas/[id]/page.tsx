@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { initials } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import HapusKelasButton from './HapusKelasButton'
@@ -8,7 +8,7 @@ export default async function DetailKelasPage({ params }: { params: { id: string
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: kelas } = await supabase
     .from('classes')

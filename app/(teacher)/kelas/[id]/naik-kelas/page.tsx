@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import NaikKelasForm from './NaikKelasForm'
 
 export default async function NaikKelasPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: kelas } = await supabase
     .from('classes')

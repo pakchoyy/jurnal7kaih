@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { AppHeader } from '@/components/ui/AppHeader'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { ExpiredGate } from '@/components/ui/ExpiredGate'
@@ -16,7 +16,7 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

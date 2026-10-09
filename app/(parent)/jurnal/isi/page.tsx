@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { todayISO } from '@/lib/utils'
 import { isDateFillable } from '@/lib/journalWindow'
 import { itemsForHabit } from '@/lib/habitItems'
@@ -10,7 +10,7 @@ export default async function IsiJurnalPage({ searchParams }: { searchParams: { 
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const { active } = await getChildren(supabase, user.id)

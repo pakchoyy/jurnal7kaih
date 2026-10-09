@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ChildSwitcher } from '@/components/parent/ChildSwitcher'
@@ -13,7 +13,7 @@ export default async function BerandaPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: profile } = await supabase
     .from('users')

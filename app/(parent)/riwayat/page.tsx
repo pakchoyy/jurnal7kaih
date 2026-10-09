@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, formatDateID, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { getChildren } from '@/lib/activeChild'
@@ -15,7 +15,7 @@ export default async function RiwayatPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { active } = await getChildren(supabase, user!.id)
   const studentId = active?.id

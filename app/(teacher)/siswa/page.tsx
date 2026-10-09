@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { initials } from '@/lib/utils'
 
 export default async function SiswaPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   // Ambil semua kelas guru ini
   const { data: classes } = await supabase

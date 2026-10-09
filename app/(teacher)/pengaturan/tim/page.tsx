@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import TimClient from './TimClient'
 
 export default async function TimPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   const { data: me } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
 
   const { data: members } = await supabase

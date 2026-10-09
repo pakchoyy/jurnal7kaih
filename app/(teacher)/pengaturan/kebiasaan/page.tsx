@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { DEFAULT_HABIT_ITEMS } from '@/lib/habitItems'
 import KebiasaanEditor from './KebiasaanEditor'
 
@@ -7,7 +7,7 @@ export default async function AturKebiasaanPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: profile } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
 

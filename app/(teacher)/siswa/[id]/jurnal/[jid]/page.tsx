@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
 import { formatDateID, habitColor, habitLight } from '@/lib/utils'
 import { JournalThread } from '@/components/journal/JournalThread'
@@ -11,7 +11,7 @@ export default async function TeacherJournalDetail({ params }: { params: { id: s
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: journal } = await supabase
     .from('journals')

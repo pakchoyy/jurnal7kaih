@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { habitColor, initials, todayISO } from '@/lib/utils'
 import { ReminderCard } from './ReminderCard'
 import { FloatingHabits } from '@/components/ui/FloatingHabits'
@@ -25,7 +25,7 @@ export default async function TeacherDashboard({
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: profile } = await supabase
     .from('users')

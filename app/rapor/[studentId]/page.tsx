@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
 import { themeVars } from '@/lib/theme'
 import { bestStreak, habitColor, shiftISO, todayISO } from '@/lib/utils'
@@ -35,7 +35,7 @@ export default async function RaporPage({
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const today = todayISO()

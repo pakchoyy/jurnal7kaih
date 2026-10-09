@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { getSchoolCalendar } from '@/lib/schoolCalendar'
 import { todayISO } from '@/lib/utils'
 import KalenderClient from './KalenderClient'
@@ -8,7 +8,7 @@ export default async function KalenderPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   const { data: me } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
   const cal = await getSchoolCalendar(supabase, me?.school_id ?? '')
 

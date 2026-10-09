@@ -1,5 +1,6 @@
 import { createServerClient as createSSRServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 
 /**
  * Server client (anon key + cookies).
@@ -28,3 +29,10 @@ export function createServerClient() {
     },
   )
 }
+
+/**
+ * auth.getUser() = 1 HTTP ke Supabase Auth. Layout dan page dalam satu render
+ * sama-sama butuh user; cache() React memakai hasil pertama untuk seluruh request.
+ * Hanya untuk Server Component (layout/page), bukan server action.
+ */
+export const getUserCached = cache(() => createServerClient().auth.getUser())

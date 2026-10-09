@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { formatDateID } from '@/lib/utils'
 import { getChildren } from '@/lib/activeChild'
 
@@ -7,7 +7,7 @@ export default async function JurnalPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { active } = await getChildren(supabase, user!.id)
   const studentIds = active ? [active.id] : []

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { AppHeader } from '@/components/ui/AppHeader'
 import { themeVars } from '@/lib/theme'
 
@@ -7,7 +7,7 @@ export default async function PrincipalLayout({ children }: { children: React.Re
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

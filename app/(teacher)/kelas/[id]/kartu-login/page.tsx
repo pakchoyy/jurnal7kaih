@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { PrintButton } from '@/app/rapor/[studentId]/PrintButton'
 
 export default async function KartuLoginPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: kelas } = await supabase
     .from('classes')

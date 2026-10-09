@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PengaturanClient from './PengaturanClient'
 import TampilanSekolah from './TampilanSekolah'
@@ -8,7 +8,7 @@ export default async function PengaturanPage() {
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

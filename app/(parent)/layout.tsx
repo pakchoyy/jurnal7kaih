@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { AppHeader } from '@/components/ui/AppHeader'
 import { ExpiredGate } from '@/components/ui/ExpiredGate'
@@ -10,7 +10,7 @@ export default async function ParentLayout({ children }: { children: React.React
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

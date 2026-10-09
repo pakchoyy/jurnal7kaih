@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { describeHabitNote } from '@/lib/schemas/habits'
 import { isDateFillable } from '@/lib/journalWindow'
 import { JournalThread } from '@/components/journal/JournalThread'
@@ -10,7 +10,7 @@ export default async function JurnalDetailPage({ params }: { params: { id: strin
   const supabase = createServerClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await getUserCached()
 
   const { data: journal } = await supabase
     .from('journals')
