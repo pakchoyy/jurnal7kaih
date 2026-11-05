@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const classId = req.nextUrl.searchParams.get('classId')
   if (!classId) return NextResponse.json({ error: 'classId required' }, { status: 400 })
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

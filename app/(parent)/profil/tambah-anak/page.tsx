@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { Input } from '@/components/ui/Input'
 import { hubungkanAnak, type LinkState } from '../../anakActions'
 
@@ -19,7 +20,7 @@ function Submit() {
 }
 
 export default function TambahAnakPage() {
-  const [state, action] = useFormState<LinkState, FormData>(hubungkanAnak, null)
+  const [state, action] = useActionState<LinkState, FormData>(hubungkanAnak, null)
 
   return (
     <div>

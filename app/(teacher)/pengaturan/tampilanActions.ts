@@ -10,7 +10,7 @@ const MAX_LOGO_BYTES = 1024 * 1024
 const MIME_EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }
 
 async function teacherSchoolId(): Promise<string | null> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

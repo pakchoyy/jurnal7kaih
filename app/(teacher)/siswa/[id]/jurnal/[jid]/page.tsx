@@ -7,8 +7,9 @@ import { JournalThread } from '@/components/journal/JournalThread'
 import { JournalPhotos } from '@/components/journal/JournalPhotos'
 import { tandaiDicek } from './actions'
 
-export default async function TeacherJournalDetail({ params }: { params: { id: string; jid: string } }) {
-  const supabase = createServerClient()
+export default async function TeacherJournalDetail(props: { params: Promise<{ id: string; jid: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

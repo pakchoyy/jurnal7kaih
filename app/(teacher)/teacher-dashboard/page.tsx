@@ -14,15 +14,14 @@ const RANGE_LABEL: Record<Range, string> = {
   month: 'Bulanan',
 }
 
-export default async function TeacherDashboard({
-  searchParams,
-}: {
-  searchParams: { range?: string; kelas?: string; mundur?: string }
+export default async function TeacherDashboard(props: {
+  searchParams: Promise<{ range?: string; kelas?: string; mundur?: string }>
 }) {
+  const searchParams = await props.searchParams
   const range: Range =
     searchParams.range === 'week' || searchParams.range === 'month' ? searchParams.range : 'today'
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

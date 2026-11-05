@@ -12,7 +12,7 @@ export async function addTeacherNote(
   journalId: string | null,
   note: string,
 ): Promise<AddNoteResult> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

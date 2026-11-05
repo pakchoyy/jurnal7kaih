@@ -3,7 +3,7 @@ import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { initials } from '@/lib/utils'
 
 export default async function SiswaPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { SekolahClient } from './SekolahClient'
 
 export default async function SekolahPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   const { data: schools } = await supabase
     .from('schools')

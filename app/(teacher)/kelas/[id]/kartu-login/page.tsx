@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation'
 import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import { PrintButton } from '@/app/rapor/[studentId]/PrintButton'
 
-export default async function KartuLoginPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function KartuLoginPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()
@@ -26,7 +27,7 @@ export default async function KartuLoginPage({ params }: { params: { id: string 
     .order('name')
 
   const schoolName = (kelas.schools as unknown as { name: string } | null)?.name ?? ''
-  const host = headers().get('host') ?? ''
+  const host = (await headers()).get('host') ?? ''
   const appUrl = host ? `${host.startsWith('localhost') ? 'http' : 'https'}://${host}` : ''
 
   return (

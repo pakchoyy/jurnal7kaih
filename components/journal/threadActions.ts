@@ -10,7 +10,7 @@ export async function kirimPesan(journalId: string, _prev: ThreadState, formData
   if (!body) return { error: 'Pesan kosong' }
   if (body.length > 1000) return { error: 'Pesan maksimal 1000 karakter' }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

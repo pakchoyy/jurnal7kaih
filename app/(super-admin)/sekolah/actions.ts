@@ -16,7 +16,7 @@ export async function createSchoolManual(
   input: RegisterSchoolInput,
   plan: SchoolPlan,
 ): Promise<ExtendResult> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -39,7 +39,7 @@ export async function extendSchoolLicense(
   schoolId: string,
   months: number = 6,
 ): Promise<ExtendResult> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -81,7 +81,7 @@ export type LicenseAdjust = 'minus1' | 'minus6' | 'trial' | 'expire'
  * Super Admin: kurangi masa aktif, reset ke trial 14 hari, atau nonaktifkan sekarang.
  */
 export async function adjustSchoolLicense(schoolId: string, mode: LicenseAdjust): Promise<ExtendResult> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

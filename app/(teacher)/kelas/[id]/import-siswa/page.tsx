@@ -1,11 +1,12 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { use, useRef, useState } from 'react'
 import Link from 'next/link'
 import * as XLSX from 'xlsx'
 import { importSiswa, type ImportResult } from './actions'
 
-export default function ImportSiswaPage({ params }: { params: { id: string } }) {
+export default function ImportSiswaPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params)
   const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<{ name: string; nis: string; nisn?: string; gender?: string }[]>([])
   const [loading, setLoading] = useState(false)

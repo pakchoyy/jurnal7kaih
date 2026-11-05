@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 export type FormState = { error?: string } | null
 
 export async function ubahKelas(_prev: FormState, formData: FormData): Promise<FormState> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { ubahKelas, type FormState } from './actions'
 
 const inputCls =
@@ -29,7 +30,7 @@ export default function EditKelasForm({
   initialName: string
   initialGrade: number
 }) {
-  const [state, action] = useFormState<FormState, FormData>(ubahKelas, null)
+  const [state, action] = useActionState<FormState, FormData>(ubahKelas, null)
 
   return (
     <form action={action} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft">

@@ -7,7 +7,7 @@ import { BigTextToggle } from '@/components/ui/BigTextToggle'
 import { PushToggle } from '@/components/push/PushToggle'
 
 export default async function ProfilPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

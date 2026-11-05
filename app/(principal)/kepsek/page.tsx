@@ -4,7 +4,7 @@ import { InstallCard } from '@/components/pwa/InstallPrompt'
 import { countSchoolDays, getSchoolCalendar } from '@/lib/schoolCalendar'
 
 export default async function KepsekDashboard() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

@@ -4,7 +4,7 @@ import { formatDateID } from '@/lib/utils'
 import { getChildren } from '@/lib/activeChild'
 
 export default async function JurnalPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

@@ -10,7 +10,7 @@ import { ProgressRing } from '@/components/ui/ProgressRing'
 import { dayOffReason, getSchoolCalendar, isSchoolDay } from '@/lib/schoolCalendar'
 
 export default async function BerandaPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

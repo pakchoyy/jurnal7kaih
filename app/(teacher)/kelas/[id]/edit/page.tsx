@@ -3,8 +3,9 @@ import { notFound, redirect } from 'next/navigation'
 import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import EditKelasForm from './EditKelasForm'
 
-export default async function EditKelasPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function EditKelasPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

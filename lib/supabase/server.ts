@@ -5,8 +5,8 @@ import { cache } from 'react'
 /**
  * Server client (anon key + cookies).
  */
-export function createServerClient() {
-  const cookieStore = cookies()
+export async function createServerClient() {
+  const cookieStore = await cookies()
 
   return createSSRServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +35,7 @@ export function createServerClient() {
  * sama-sama butuh user; cache() React memakai hasil pertama untuk seluruh request.
  * Hanya untuk Server Component (layout/page), bukan server action.
  */
-export const getUserCached = cache(() => createServerClient().auth.getUser())
+export const getUserCached = cache(async () => (await createServerClient()).auth.getUser())
 
 export interface Profile {
   id: string
@@ -65,6 +65,6 @@ export const getProfileCached = cache(async (): Promise<Profile | null> => {
     data: { user },
   } = await getUserCached()
   if (!user) return null
-  const { data } = await createServerClient().from('users').select(PROFILE_SELECT).eq('id', user.id).single()
+  const { data } = await (await createServerClient()).from('users').select(PROFILE_SELECT).eq('id', user.id).single()
   return (data as unknown as Profile | null) ?? null
 })

@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation'
 import { createServerClient, getUserCached } from '@/lib/supabase/server'
 import NaikKelasForm from './NaikKelasForm'
 
-export default async function NaikKelasPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function NaikKelasPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

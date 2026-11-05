@@ -12,7 +12,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default async function RiwayatPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

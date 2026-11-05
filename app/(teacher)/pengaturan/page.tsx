@@ -5,7 +5,7 @@ import TampilanSekolah from './TampilanSekolah'
 import TahunAjaranCard from './TahunAjaranCard'
 
 export default async function PengaturanPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

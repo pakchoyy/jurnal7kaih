@@ -7,7 +7,7 @@ import { BILLING_ENABLED } from '@/lib/billing'
 import { normalizeWA } from '@/lib/utils'
 
 export async function simpanWhatsapp(formData: FormData) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -30,7 +30,7 @@ export async function simpanWhatsapp(formData: FormData) {
 
 export async function pakaiLicenseKey(formData: FormData) {
   if (!BILLING_ENABLED) return { error: 'Fitur lisensi sedang nonaktif.' }
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

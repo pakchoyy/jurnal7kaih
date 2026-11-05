@@ -6,8 +6,9 @@ import { JournalThread } from '@/components/journal/JournalThread'
 import { JournalPhotos } from '@/components/journal/JournalPhotos'
 import { habitColor, habitLight, formatDateID, initials } from '@/lib/utils'
 
-export default async function JurnalDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function JurnalDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

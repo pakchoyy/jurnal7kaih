@@ -20,7 +20,7 @@ function guessGrade(name: string, tingkat?: string): number {
 export async function importKelas(rows: ClassRow[]): Promise<ImportKelasResult> {
   const fail = (msg: string): ImportKelasResult => ({ success: 0, skipped: 0, errors: [msg], classesCreated: 0 })
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

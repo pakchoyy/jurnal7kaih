@@ -9,7 +9,7 @@ const MAX_BYTES = 2 * 1024 * 1024
 const MIME_EXT: Record<string, string> = { 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/png': 'png' }
 
 async function ownJournal(journalId: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -57,7 +57,7 @@ export async function uploadFoto(journalId: string, formData: FormData) {
 }
 
 export async function hapusFoto(photoId: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
