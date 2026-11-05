@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { todayISO } from '@/lib/utils'
 import { isDateFillable } from '@/lib/journalWindow'
 import { itemsForHabit } from '@/lib/habitItems'
@@ -28,7 +28,7 @@ export default async function IsiJurnalPage({ searchParams }: { searchParams: { 
   const journalDate = isDateFillable(rawDate).ok ? rawDate : todayISO()
 
   const studentId = active.id
-  const { data: me } = await supabase.from('users').select('school_id').eq('id', user.id).single()
+  const me = await getProfileCached()
 
   const [{ data: habits }, { data: schoolItems }, { data: journal }] = await Promise.all([
     supabase.from('habits').select('id, slug, name, icon, color').eq('is_active', true).order('sort_order'),

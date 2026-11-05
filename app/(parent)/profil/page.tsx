@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import LogoutButton from '@/components/ui/LogoutButton'
 import { initials } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
@@ -12,11 +12,7 @@ export default async function ProfilPage() {
     data: { user },
   } = await getUserCached()
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('name, role, schools(name)')
-    .eq('id', user!.id)
-    .single()
+  const profile = await getProfileCached()
 
   const { data: links } = await supabase
     .from('student_parents')

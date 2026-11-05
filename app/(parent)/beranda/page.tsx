@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, todayISO, habitColor, habitLight, normalizeWA } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { ChildSwitcher } from '@/components/parent/ChildSwitcher'
@@ -15,11 +15,7 @@ export default async function BerandaPage() {
     data: { user },
   } = await getUserCached()
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('name, school_id')
-    .eq('id', user!.id)
-    .single()
+  const profile = await getProfileCached()
 
   const cal = await getSchoolCalendar(supabase, profile?.school_id ?? '')
   const offReason = dayOffReason(todayISO(), cal)

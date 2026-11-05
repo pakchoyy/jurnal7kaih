@@ -1,4 +1,4 @@
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PengaturanClient from './PengaturanClient'
 import TampilanSekolah from './TampilanSekolah'
@@ -11,11 +11,7 @@ export default async function PengaturanPage() {
   } = await getUserCached()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('name, whatsapp, school_id, schools(name, plan, active_until, logo_url, theme_color)')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfileCached()
 
   const school = profile?.schools as unknown as {
     name: string

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { AppHeader } from '@/components/ui/AppHeader'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { ExpiredGate } from '@/components/ui/ExpiredGate'
@@ -13,17 +13,12 @@ function daysLeft(until: string | null): number | null {
 }
 
 export default async function TeacherLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createServerClient()
   const {
     data: { user },
   } = await getUserCached()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, name, whatsapp, schools(name, plan, active_until, logo_url, theme_color)')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfileCached()
   if (profile?.role !== 'teacher') redirect('/login')
 
   const school = profile?.schools as unknown as {

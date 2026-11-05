@@ -1,20 +1,15 @@
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import LisensiClient from './LisensiClient'
 
 export default async function LisensiPage() {
-  const supabase = createServerClient()
   const {
     data: { user },
   } = await getUserCached()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfileCached()
   if (profile?.role !== 'super_admin') redirect('/login')
 
   const admin = createAdminClient()

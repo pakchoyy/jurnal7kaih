@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { bestStreak, calculateStreak, formatDateID, habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { BadgeShelf } from '@/components/parent/BadgeShelf'
 import { getChildren } from '@/lib/activeChild'
@@ -27,7 +27,7 @@ export default async function RiwayatPage() {
 
   const today = todayISO()
   const from30 = shiftISO(today, -29)
-  const { data: me } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
+  const me = await getProfileCached()
   const cal = await getSchoolCalendar(supabase, me?.school_id ?? '')
   const schoolDay = (iso: string) => isSchoolDay(iso, cal)
   const schoolDays30 = Math.max(1, countSchoolDays(from30, today, cal))

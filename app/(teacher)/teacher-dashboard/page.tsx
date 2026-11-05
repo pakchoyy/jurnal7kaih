@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { habitColor, initials, todayISO } from '@/lib/utils'
 import { ReminderCard } from './ReminderCard'
 import { FloatingHabits } from '@/components/ui/FloatingHabits'
@@ -27,11 +27,7 @@ export default async function TeacherDashboard({
     data: { user },
   } = await getUserCached()
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('name, school_id')
-    .eq('id', user!.id)
-    .single()
+  const profile = await getProfileCached()
 
   // Profil + kalender + daftar kelas: tidak saling bergantung → paralel.
   const [{ data: allClasses }, cal] = await Promise.all([

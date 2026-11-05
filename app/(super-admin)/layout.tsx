@@ -1,20 +1,15 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { getProfileCached, getUserCached } from '@/lib/supabase/server'
 import LogoutButton from '@/components/ui/LogoutButton'
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createServerClient()
   const {
     data: { user },
   } = await getUserCached()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, name')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfileCached()
   if (profile?.role !== 'super_admin') redirect('/login')
 
   return (

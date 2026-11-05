@@ -1,4 +1,4 @@
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import { habitColor, shiftISO, todayISO } from '@/lib/utils'
 import { InstallCard } from '@/components/pwa/InstallPrompt'
 import { countSchoolDays, getSchoolCalendar } from '@/lib/schoolCalendar'
@@ -8,7 +8,7 @@ export default async function KepsekDashboard() {
   const {
     data: { user },
   } = await getUserCached()
-  const { data: me } = await supabase.from('users').select('name, school_id').eq('id', user!.id).single()
+  const me = await getProfileCached()
 
   const today = todayISO()
   const cal = await getSchoolCalendar(supabase, me?.school_id ?? '')

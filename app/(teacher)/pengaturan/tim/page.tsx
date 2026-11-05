@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createServerClient, getUserCached } from '@/lib/supabase/server'
+import { createServerClient, getProfileCached, getUserCached } from '@/lib/supabase/server'
 import TimClient from './TimClient'
 
 export default async function TimPage() {
@@ -7,7 +7,7 @@ export default async function TimPage() {
   const {
     data: { user },
   } = await getUserCached()
-  const { data: me } = await supabase.from('users').select('school_id').eq('id', user!.id).single()
+  const me = await getProfileCached()
 
   const { data: members } = await supabase
     .from('users')

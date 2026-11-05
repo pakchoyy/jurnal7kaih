@@ -36,3 +36,35 @@ export function createServerClient() {
  * Hanya untuk Server Component (layout/page), bukan server action.
  */
 export const getUserCached = cache(() => createServerClient().auth.getUser())
+
+export interface Profile {
+  id: string
+  role: string
+  name: string | null
+  whatsapp: string | null
+  school_id: string | null
+  schools: {
+    name: string
+    plan: string
+    active_until: string | null
+    logo_url: string | null
+    theme_color: string | null
+  } | null
+}
+
+const PROFILE_SELECT =
+  'id, role, name, whatsapp, school_id, schools(name, plan, active_until, logo_url, theme_color)'
+
+/**
+ * Profil user yang sedang login (baris `users` + sekolahnya), satu query per request.
+ * Layout dan page sebelumnya masing-masing query tabel `users` sendiri.
+ * Hanya untuk Server Component (layout/page), bukan server action.
+ */
+export const getProfileCached = cache(async (): Promise<Profile | null> => {
+  const {
+    data: { user },
+  } = await getUserCached()
+  if (!user) return null
+  const { data } = await createServerClient().from('users').select(PROFILE_SELECT).eq('id', user.id).single()
+  return (data as unknown as Profile | null) ?? null
+})
