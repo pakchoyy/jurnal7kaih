@@ -17,6 +17,22 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   // Cron dipanggil Vercel tanpa sesi; diamankan dengan CRON_SECRET di route-nya.
   if (pathname.startsWith('/api/cron/')) return NextResponse.next()
+
+  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/daftar-trial')
+
+  // Tanpa cookie sesi Supabase tidak ada user yang perlu diverifikasi, jadi hasilnya
+  // pasti "belum login". Putuskan langsung tanpa panggilan jaringan ke Supabase Auth
+  // (bot/scanner, kunjungan pertama, sesi yang sudah dihapus).
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token') && !c.name.endsWith('-code-verifier'))
+  if (!hasSessionCookie) {
+    if (isAuthRoute) return NextResponse.next({ request })
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
   let response = NextResponse.next({ request })
 
   try {
@@ -38,8 +54,6 @@ export async function middleware(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
-
-    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/daftar-trial')
 
     if (!user && !isAuthRoute) {
       const url = request.nextUrl.clone()
