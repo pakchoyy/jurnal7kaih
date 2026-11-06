@@ -29,21 +29,15 @@ menyalakan notifikasi lagi.
 `worker/entry.ts` menjalankan `/api/cron/pengingat` lewat `scheduled()`.
 Jadwal `0 12 * * *` (19.00 WIB) ada di `cloudflare.config.ts`.
 
-## Deploy otomatis (GitHub Actions)
+## Cara deploy sehari-hari
 
-`.github/workflows/deploy-cloudflare.yml`: push ke `main` = typecheck lalu deploy ke
-https://sihebat.web.id. Bisa dijalankan manual dari tab Actions (Run workflow).
+Deploy dijalankan manual (oleh Claude dari sesi yang punya token Cloudflare, atau dari
+komputer sendiri dengan perintah di bagian "Deploy" di atas). Tidak ada deploy otomatis
+dari push GitHub.
 
-Di GitHub: Settings -> Secrets and variables -> Actions
-
-| Jenis | Nama | Isi |
-|---|---|---|
-| Secret | `CLOUDFLARE_API_TOKEN` | token khusus CI: izin **Workers Scripts: Edit** saja, tanpa DNS |
-| Secret | `CLOUDFLARE_ACCOUNT_ID` | ID akun Cloudflare |
-| Variable | `NEXT_PUBLIC_SUPABASE_URL` | URL proyek Supabase |
-| Variable | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | publishable key |
-| Variable | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | pasangan dari `VAPID_PRIVATE_KEY` di Worker |
-| Variable | `NEXT_PUBLIC_ADMIN_WA` | nomor WA admin (publik) |
-
-Secret runtime (service role, VAPID private, CRON_SECRET) tetap hanya di Worker,
-tidak pernah masuk GitHub.
+Workflow GitHub Actions untuk deploy otomatis pernah dibuat di commit `b0d0eb3`
+(`.github/workflows/deploy-cloudflare.yml`). Untuk mengaktifkannya lagi: ambil file itu
+dari riwayat git, lalu isi secret `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` dan
+variable `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `NEXT_PUBLIC_ADMIN_WA` di GitHub (Settings -> Secrets and
+variables -> Actions). Gunakan token khusus CI dengan izin Workers Scripts: Edit saja.
