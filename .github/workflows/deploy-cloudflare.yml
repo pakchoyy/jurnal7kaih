@@ -1,0 +1,57 @@
+name: Deploy ke Cloudflare
+
+# Push ke main = deploy ke https://sihebat.web.id (Worker "sihebat").
+# Bisa juga dijalankan manual dari tab Actions untuk branch apa pun (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Satu deploy pada satu waktu; deploy yang sedang jalan tidak dibatalkan.
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Gerbang: tipe harus lolos sebelum ada yang dikirim ke production.
+      - run: npx tsc --noEmit
+
+      # `deploy:vinext` membangun ulang aplikasi. Variabel NEXT_PUBLIC_* ikut tertanam
+      # saat build, jadi harus tersedia di langkah ini (nilainya publik -> Variables).
+      - name: Build dan deploy
+        run: npm run deploy:vinext
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+          NEXT_PUBLIC_ADMIN_WA: ${{ vars.NEXT_PUBLIC_ADMIN_WA }}
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Cek hasil deploy
+        run: |
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://sihebat.web.id/login || true)
+            echo "percobaan $i: /login -> $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          echo "::error::sihebat.web.id/login tidak menjawab 200 setelah deploy"
+          exit 1
