@@ -6,8 +6,9 @@ import { itemsForHabit } from '@/lib/habitItems'
 import { getChildren } from '@/lib/activeChild'
 import { JurnalForm, type HabitRow, type ExistingEntry } from './JurnalForm'
 
-export default async function IsiJurnalPage({ searchParams }: { searchParams: { tanggal?: string } }) {
-  const supabase = createServerClient()
+export default async function IsiJurnalPage(props: { searchParams: Promise<{ tanggal?: string }> }) {
+  const searchParams = await props.searchParams
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

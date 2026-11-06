@@ -3,7 +3,7 @@ import { createServerClient, getProfileCached, getUserCached } from '@/lib/supab
 import TimClient from './TimClient'
 
 export default async function TimPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

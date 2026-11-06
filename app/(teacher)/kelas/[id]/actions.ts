@@ -18,7 +18,7 @@ export interface HapusKelasResult {
  * (diurus ON DELETE CASCADE). Akun login ortu TIDAK dihapus.
  */
 export async function hapusKelas(classId: string): Promise<HapusKelasResult> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

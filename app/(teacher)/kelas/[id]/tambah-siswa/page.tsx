@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import TambahSiswaForm from './TambahSiswaForm'
 
-export default function TambahSiswaPage({ params }: { params: { id: string } }) {
+export default async function TambahSiswaPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   return (
     <div className="px-5 py-5">
       <div className="mb-5 flex items-center gap-3">

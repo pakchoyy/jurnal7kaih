@@ -16,7 +16,7 @@ const DURATION: Record<string, number> = {
 }
 
 export async function buatLicenseKey(formData: FormData) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

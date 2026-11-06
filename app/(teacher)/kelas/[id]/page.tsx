@@ -4,8 +4,9 @@ import { initials } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import HapusKelasButton from './HapusKelasButton'
 
-export default async function DetailKelasPage({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function DetailKelasPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

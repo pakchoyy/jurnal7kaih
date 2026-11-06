@@ -7,7 +7,7 @@ import { createServerClient } from '@/lib/supabase/server'
 export type MoveState = { error?: string } | null
 
 export async function pindahkanSiswa(fromClassId: string, _prev: MoveState, formData: FormData): Promise<MoveState> {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

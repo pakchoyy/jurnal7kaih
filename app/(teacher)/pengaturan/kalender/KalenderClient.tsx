@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useFormStatus } from 'react-dom'
 import { formatDateID } from '@/lib/utils'
 import type { Holiday } from '@/lib/schoolCalendar'
 import { hapusLibur, simpanHariSekolah, tambahLibur, type HolidayState } from './actions'
@@ -28,7 +28,7 @@ export default function KalenderClient({
   const router = useRouter()
   const [current, setCurrent] = useState(days)
   const [pending, start] = useTransition()
-  const [state, action] = useFormState<HolidayState, FormData>(tambahLibur, null)
+  const [state, action] = useActionState<HolidayState, FormData>(tambahLibur, null)
   const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {

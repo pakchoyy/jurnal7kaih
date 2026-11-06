@@ -4,7 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function simpanLangganan(sub: { endpoint: string; keys: { p256dh: string; auth: string } }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -22,7 +22,7 @@ export async function simpanLangganan(sub: { endpoint: string; keys: { p256dh: s
 }
 
 export async function hapusLangganan(endpoint: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

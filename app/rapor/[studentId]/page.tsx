@@ -25,14 +25,12 @@ function shiftMonth(ym: string, delta: number) {
   return d.toISOString().slice(0, 7)
 }
 
-export default async function RaporPage({
-  params,
-  searchParams,
-}: {
-  params: { studentId: string }
-  searchParams: { bulan?: string }
+export default async function RaporPage(props: {
+  params: Promise<{ studentId: string }>
+  searchParams: Promise<{ bulan?: string }>
 }) {
-  const supabase = createServerClient()
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams])
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

@@ -36,7 +36,7 @@ export async function getChildren(supabase: SupabaseClient, userId: string) {
     }
   })
 
-  const wanted = cookies().get(ACTIVE_CHILD_COOKIE)?.value
+  const wanted = (await cookies()).get(ACTIVE_CHILD_COOKIE)?.value
   const active = children.find((c) => c.id === wanted) ?? children[0] ?? null
   return { children, active }
 }

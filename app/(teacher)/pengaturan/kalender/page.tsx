@@ -5,7 +5,7 @@ import { todayISO } from '@/lib/utils'
 import KalenderClient from './KalenderClient'
 
 export default async function KalenderPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

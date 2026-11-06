@@ -1,6 +1,7 @@
 'use client'
 
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { tambahSiswa, type FormState } from './actions'
 
 const inputCls =
@@ -20,7 +21,7 @@ function SubmitButton() {
 }
 
 export default function TambahSiswaForm({ classId }: { classId: string }) {
-  const [state, action] = useFormState<FormState, FormData>(tambahSiswa.bind(null, classId), null)
+  const [state, action] = useActionState<FormState, FormData>(tambahSiswa.bind(null, classId), null)
 
   return (
     <form action={action} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft">

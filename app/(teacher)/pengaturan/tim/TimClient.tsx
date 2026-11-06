@@ -1,8 +1,8 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useActionState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useFormStatus } from 'react-dom'
 import { Input } from '@/components/ui/Input'
 import { tambahAnggota, ubahStatusAnggota, type TeamState } from './actions'
 
@@ -25,7 +25,7 @@ function Submit() {
 
 export default function TimClient({ members, myId }: { members: Member[]; myId: string }) {
   const router = useRouter()
-  const [state, action] = useFormState<TeamState, FormData>(tambahAnggota, null)
+  const [state, action] = useActionState<TeamState, FormData>(tambahAnggota, null)
   const [pending, start] = useTransition()
 
   return (

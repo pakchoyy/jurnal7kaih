@@ -7,8 +7,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ACTIVE_CHILD_COOKIE } from '@/lib/activeChild'
 import { isValidNIS } from '@/lib/utils'
 
-function setActive(studentId: string) {
-  cookies().set(ACTIVE_CHILD_COOKIE, studentId, {
+async function setActive(studentId: string) {
+  (await cookies()).set(ACTIVE_CHILD_COOKIE, studentId, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -18,7 +18,7 @@ function setActive(studentId: string) {
 }
 
 export async function pilihAnak(studentId: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -30,7 +30,7 @@ export async function pilihAnak(studentId: string) {
     .eq('student_id', studentId)
     .maybeSingle()
   if (!data) return
-  setActive(studentId)
+  await setActive(studentId)
   revalidatePath('/', 'layout')
 }
 
@@ -40,7 +40,7 @@ export async function hubungkanAnak(_prev: LinkState, formData: FormData): Promi
   const nis = String(formData.get('nis') ?? '').trim()
   if (!isValidNIS(nis)) return { error: 'NIS tidak valid' }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -72,7 +72,7 @@ export async function hubungkanAnak(_prev: LinkState, formData: FormData): Promi
     )
   if (error) return { error: error.message }
 
-  setActive(sibling.id)
+  await setActive(sibling.id)
   revalidatePath('/', 'layout')
   return { ok: `${sibling.name} berhasil ditambahkan` }
 }

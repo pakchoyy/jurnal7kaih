@@ -8,7 +8,7 @@ import { normalizeWA } from '@/lib/utils'
 export type TeamState = { error?: string; ok?: string } | null
 
 async function currentTeacher() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

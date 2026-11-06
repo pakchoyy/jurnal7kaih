@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { getRoleRedirect } from '@/lib/utils'
 
 export default async function Home() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

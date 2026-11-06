@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState, useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { pindahkanSiswa, type MoveState } from './actions'
 
 function Submit({ label }: { label: string }) {
@@ -28,7 +28,7 @@ export default function NaikKelasForm({
   students: { id: string; name: string; student_number: string | null }[]
   targets: { id: string; label: string; active: boolean }[]
 }) {
-  const [state, action] = useFormState<MoveState, FormData>(pindahkanSiswa.bind(null, classId), null)
+  const [state, action] = useActionState<MoveState, FormData>(pindahkanSiswa.bind(null, classId), null)
   const [target, setTarget] = useState('baru')
   const [checked, setChecked] = useState<Set<string>>(new Set(students.map((s) => s.id)))
 

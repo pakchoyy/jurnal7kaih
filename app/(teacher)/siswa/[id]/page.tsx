@@ -10,8 +10,9 @@ const STATUS_LABEL: Record<string, string> = {
   reviewed: 'Sudah dicek',
 }
 
-export default async function TeacherStudentDetail({ params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+export default async function TeacherStudentDetail(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
+  const supabase = await createServerClient()
 
   const { data: student } = await supabase
     .from('students')

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState, useEffect, useRef } from 'react'
+import { useFormStatus } from 'react-dom'
 import { kirimPesan, type ThreadState } from './threadActions'
 
 function Send() {
@@ -18,7 +18,7 @@ function Send() {
 }
 
 export function ThreadForm({ journalId, placeholder }: { journalId: string; placeholder: string }) {
-  const [state, action] = useFormState<ThreadState, FormData>(kirimPesan.bind(null, journalId), null)
+  const [state, action] = useActionState<ThreadState, FormData>(kirimPesan.bind(null, journalId), null)
   const ref = useRef<HTMLFormElement>(null)
 
   useEffect(() => {

@@ -13,7 +13,7 @@ const MAX_ROWS = 60
 export async function importSiswa(classId: string, rows: StudentRow[]): Promise<ImportResult> {
   const fail = (msg: string): ImportResult => ({ success: 0, skipped: 0, errors: [msg] })
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

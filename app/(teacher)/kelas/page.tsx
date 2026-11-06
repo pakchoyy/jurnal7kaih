@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { createServerClient, getUserCached } from '@/lib/supabase/server'
 
 export default async function KelasPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

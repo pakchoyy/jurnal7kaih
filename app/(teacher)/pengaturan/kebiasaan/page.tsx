@@ -4,7 +4,7 @@ import { DEFAULT_HABIT_ITEMS } from '@/lib/habitItems'
 import KebiasaanEditor from './KebiasaanEditor'
 
 export default async function AturKebiasaanPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await getUserCached()

@@ -5,7 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { MAX_ITEMS_PER_HABIT, MAX_ITEM_LENGTH } from '@/lib/habitItems'
 
 export async function simpanItemKebiasaan(habitId: string, labels: string[]) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
