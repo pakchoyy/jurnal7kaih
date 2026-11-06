@@ -19,8 +19,18 @@ async function runPengingat(env: Env, ctx: ExecutionContext) {
   console.log(`[cron] pengingat: ${res.status} ${await res.text()}`);
 }
 
+// Satu alamat resmi: www dialihkan ke apex supaya aplikasi terpasang dan langganan
+// notifikasi tidak terpecah di dua origin (sama seperti pengalihan di Vercel).
+function redirectWww(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (url.hostname !== "www.sihebat.web.id") return null;
+  url.hostname = "sihebat.web.id";
+  return Response.redirect(url.toString(), 308);
+}
+
 export default {
   fetch: (request: Request, env: Env, ctx: ExecutionContext) =>
+    redirectWww(request) ??
     (vinextHandler as { fetch: (r: Request, e: Env, c: ExecutionContext) => Promise<Response> }).fetch(request, env, ctx),
   scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(runPengingat(env, ctx));
